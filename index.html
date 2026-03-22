@@ -1,0 +1,5277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multiway Double-Slit — Wolfram Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #06060e;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #e8e8f0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── LAYOUT: 3 panels ─── */
+  #app {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    grid-template-rows: 1fr;
+    width: 100%; height: 100%;
+    gap: 0;
+  }
+
+  .panel {
+    padding: 20px 22px;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+  .panel:last-child { border-right: none; border-left: 1px solid rgba(255,255,255,0.06); }
+
+  #center {
+    position: relative;
+    overflow: hidden;
+    background: #08080f;
+  }
+  #center canvas { display: block; width: 100%; height: 100%; }
+
+  /* ─── TYPOGRAPHY ─── */
+  .section-title {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .subsection {
+    margin-bottom: 20px;
+  }
+  .subsection h3 {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+  .subsection p, .subsection .desc {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.55;
+  }
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  .rule-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: rgba(120,200,255,0.8);
+    background: rgba(120,200,255,0.06);
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(120,200,255,0.1);
+  }
+
+  /* ─── RULE EDITOR ─── */
+  .rule-editor { margin-bottom: 14px; }
+  .rule-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 5px;
+  }
+  .rule-row input {
+    width: 60px;
+    padding: 4px 6px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(120,200,255,0.15);
+    border-radius: 3px;
+    color: rgba(120,200,255,0.9);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .rule-row input:focus {
+    border-color: rgba(120,200,255,0.4);
+    background: rgba(120,200,255,0.08);
+  }
+  .rule-arrow {
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    flex-shrink: 0;
+  }
+  .rule-remove {
+    width: 18px; height: 18px;
+    border: none;
+    background: rgba(255,80,80,0.1);
+    color: rgba(255,80,80,0.5);
+    font-size: 11px;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .rule-remove:hover {
+    background: rgba(255,80,80,0.2);
+    color: rgba(255,80,80,0.8);
+  }
+  .rule-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font-size: 9px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(120,200,255,0.5);
+    background: transparent;
+    border: 1px dashed rgba(120,200,255,0.15);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .rule-add:hover {
+    border-color: rgba(120,200,255,0.35);
+    color: rgba(120,200,255,0.8);
+  }
+  .init-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(120,200,255,0.15);
+    border-radius: 4px;
+    color: rgba(120,200,255,0.9);
+    outline: none;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+  .init-input:focus {
+    border-color: rgba(120,200,255,0.4);
+    background: rgba(120,200,255,0.06);
+  }
+
+  /* ─── PRESET GALLERY ─── */
+  .preset-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .preset-chip {
+    padding: 3px 7px;
+    font-size: 8.5px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .preset-chip:hover {
+    background: rgba(120,200,255,0.08);
+    border-color: rgba(120,200,255,0.2);
+    color: rgba(120,200,255,0.7);
+  }
+  .preset-chip.active {
+    background: rgba(120,200,255,0.12);
+    border-color: rgba(120,200,255,0.3);
+    color: rgba(120,200,255,0.9);
+  }
+  .preset-category {
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  .preset-category:first-child { margin-top: 0; }
+  .safety-warning {
+    font-size: 9px;
+    color: rgba(255,180,80,0.6);
+    font-style: italic;
+    margin-bottom: 8px;
+    padding: 4px 6px;
+    background: rgba(255,180,80,0.05);
+    border-radius: 3px;
+    border-left: 2px solid rgba(255,180,80,0.2);
+    display: none;
+  }
+
+  /* ─── CONTROLS ─── */
+  .ctrl-group { margin-bottom: 12px; }
+  .ctrl-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  .ctrl-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+    min-width: 40px;
+    text-align: right;
+  }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.1);
+    outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: rgba(120,200,255,0.8);
+    border: 1px solid rgba(120,200,255,0.4);
+    cursor: pointer;
+  }
+  select {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    color: rgba(255,255,255,0.7);
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  button.action-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 0;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(120,200,255,0.8);
+    background: rgba(120,200,255,0.08);
+    border: 1px solid rgba(120,200,255,0.2);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+    margin-bottom: 8px;
+  }
+  button.action-btn:hover {
+    background: rgba(120,200,255,0.15);
+    border-color: rgba(120,200,255,0.35);
+  }
+
+  /* ─── INTENSITY PLOT ─── */
+  #intensity-canvas {
+    width: 100%;
+    height: 140px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-bottom: 12px;
+    background: rgba(0,0,0,0.3);
+  }
+  #branchial-canvas {
+    width: 100%;
+    height: 200px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-bottom: 12px;
+    background: rgba(0,0,0,0.3);
+    cursor: pointer;
+  }
+
+  /* ─── STATS ─── */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .stat-row .stat-label { color: rgba(255,255,255,0.35); }
+  .stat-row .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* ─── VIEW TABS ─── */
+  .view-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 5px;
+    padding: 2px;
+  }
+  .view-tab {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 9px;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+  .view-tab.active {
+    background: rgba(120,200,255,0.12);
+    color: rgba(120,200,255,0.9);
+  }
+
+  /* ─── COMPLETION LOG ─── */
+  #completion-log {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.6;
+    max-height: 160px;
+    overflow-y: auto;
+    padding: 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .log-constructive { color: rgba(80,220,140,0.7); }
+  .log-destructive { color: rgba(255,100,80,0.7); }
+  .log-neutral { color: rgba(255,255,255,0.3); }
+
+  #status-bar {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(255,255,255,0.25);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  footer {
+    position: fixed;
+    bottom: 4px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+  }
+  footer a {
+    font-size: 9px;
+    color: rgba(255,255,255,0.12);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ─── MODE TOGGLE TABS ─── */
+  .mode-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 5px;
+    padding: 2px;
+  }
+  .mode-tab {
+    flex: 1;
+    padding: 5px 4px;
+    font-size: 9px;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+  .mode-tab.active {
+    background: rgba(120,200,255,0.12);
+    color: rgba(120,200,255,0.9);
+  }
+
+  /* ─── STEP CONTROLS ─── */
+  #interactive-controls { display: none; }
+  #batch-controls { display: block; }
+
+  .step-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+  .step-counter .step-num {
+    color: rgba(120,200,255,0.9);
+    font-weight: 500;
+  }
+
+  .step-buttons {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .step-btn {
+    flex: 1;
+    padding: 6px 2px;
+    font-size: 9px;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(120,200,255,0.7);
+    background: rgba(120,200,255,0.06);
+    border: 1px solid rgba(120,200,255,0.15);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+  .step-btn:hover {
+    background: rgba(120,200,255,0.12);
+    border-color: rgba(120,200,255,0.3);
+    color: rgba(120,200,255,0.9);
+  }
+  .step-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .step-btn.playing {
+    background: rgba(80,220,140,0.1);
+    border-color: rgba(80,220,140,0.3);
+    color: rgba(80,220,140,0.8);
+  }
+
+  /* ─── OBSERVER SECTION ─── */
+  .observer-section {
+    margin-bottom: 16px;
+  }
+  .observer-desc {
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .observer-state {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(204,255,0,0.8);
+    background: rgba(204,255,0,0.06);
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(204,255,0,0.15);
+    margin-bottom: 6px;
+    word-break: break-all;
+    display: none;
+  }
+  .observer-clear {
+    display: none;
+    padding: 4px 8px;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+  .observer-clear:hover {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* ─── OBSERVER ANALYSIS ─── */
+  .observer-analysis {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(204,255,0,0.02);
+    border: 1px solid rgba(204,255,0,0.08);
+    border-radius: 5px;
+  }
+  .observer-analysis .oa-title {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(204,255,0,0.5);
+    margin-bottom: 8px;
+  }
+  .observer-analysis .oa-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 2px 0;
+  }
+  .observer-analysis .oa-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    font-weight: 400;
+  }
+  .observer-analysis .oa-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(204,255,0,0.7);
+    text-align: right;
+  }
+  .observer-analysis .oa-divider {
+    height: 1px;
+    background: rgba(204,255,0,0.06);
+    margin: 6px 0;
+  }
+  .observer-analysis .oa-narrative {
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    line-height: 1.55;
+    margin-top: 4px;
+  }
+  .observer-analysis .oa-narrative strong {
+    color: rgba(204,255,0,0.6);
+    font-weight: 500;
+  }
+  .observer-analysis .oa-section {
+    margin-top: 8px;
+  }
+  .observer-analysis .oa-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0;
+  }
+  .observer-analysis .oa-bar-label {
+    font-size: 8px;
+    color: rgba(255,255,255,0.3);
+    width: 60px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .observer-analysis .oa-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .observer-analysis .oa-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .observer-analysis .oa-bar-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: rgba(255,255,255,0.3);
+    width: 30px;
+    flex-shrink: 0;
+  }
+
+  /* ─── TOOLTIP ─── */
+  #tooltip {
+    background: rgba(6,6,14,0.92);
+    border: 1px solid rgba(120,200,255,0.2);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font: 10px 'JetBrains Mono', monospace;
+    color: rgba(255,255,255,0.7);
+    pointer-events: none;
+    z-index: 100;
+    position: fixed;
+    display: none;
+    max-width: 300px;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  #tooltip .tt-label {
+    color: rgba(255,255,255,0.35);
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  #tooltip .tt-state {
+    color: rgba(120,200,255,0.9);
+  }
+  #tooltip .tt-weight {
+    color: rgba(80,220,140,0.8);
+  }
+
+
+  /* ─── TOOLS PANEL (new feature controls) ─── */
+  .tool-section {
+    margin-bottom: 16px;
+    padding: 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 5px;
+  }
+  .tool-section .tool-title {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tool-toggle {
+    position: relative;
+    width: 28px;
+    height: 14px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .tool-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: all 0.2s;
+  }
+  .tool-toggle.active {
+    background: rgba(0,240,255,0.25);
+  }
+  .tool-toggle.active::after {
+    left: 16px;
+    background: rgba(0,240,255,0.9);
+  }
+  .tool-desc {
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .tool-btn {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(120,200,255,0.7);
+    background: rgba(120,200,255,0.06);
+    border: 1px solid rgba(120,200,255,0.15);
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+  .tool-btn:hover {
+    background: rgba(120,200,255,0.12);
+    border-color: rgba(120,200,255,0.3);
+    color: rgba(120,200,255,0.9);
+  }
+  .tool-btn.active {
+    background: rgba(0,240,255,0.12);
+    border-color: rgba(0,240,255,0.3);
+    color: rgba(0,240,255,0.9);
+  }
+  .tool-btn.warn {
+    color: rgba(255,180,80,0.7);
+    background: rgba(255,180,80,0.06);
+    border-color: rgba(255,180,80,0.15);
+  }
+  .tool-btn.warn:hover {
+    background: rgba(255,180,80,0.12);
+    border-color: rgba(255,180,80,0.3);
+    color: rgba(255,180,80,0.9);
+  }
+  .tool-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.5;
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.04);
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  .tool-result .ci-confluent { color: rgba(80,220,140,0.8); }
+  .tool-result .ci-divergent { color: rgba(255,100,80,0.8); }
+  .tool-result .ci-score { color: rgba(0,240,255,0.8); font-weight: 500; }
+
+  /* ─── GEODESIC PATH ─── */
+  .geodesic-mode .tool-desc { color: rgba(255,180,80,0.5); }
+
+  /* ─── SPEED CHART ─── */
+  #speed-canvas {
+    width: 100%;
+    height: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  #persistence-canvas {
+    width: 100%;
+    height: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+
+  /* ─── REFERENCE FRAME CHIPS ─── */
+  .frame-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  /* ─── TOKEN VIEW ─── */
+  .token-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 6px;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  .token-char {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 1px 3px;
+    border-radius: 2px;
+    line-height: 1.3;
+  }
+  .token-char.changed {
+    background: rgba(0,240,255,0.15);
+    color: rgba(0,240,255,0.9);
+    border: 1px solid rgba(0,240,255,0.3);
+  }
+  .token-char.unchanged {
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.3);
+    border: 1px solid transparent;
+  }
+
+  @media (max-width: 960px) {
+    #app { grid-template-columns: 1fr; grid-template-rows: auto 50vh auto; }
+    .panel { max-height: 40vh; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- LEFT PANEL: Physics & Controls -->
+  <div class="panel" id="left-panel">
+    <div class="section-title">Rewriting Rules</div>
+
+    <div class="rule-editor" id="rule-editor"></div>
+    <button class="rule-add" id="btn-add-rule">+ Add Rule</button>
+
+    <div class="section-title" style="margin-top: 14px;">Initial State</div>
+    <input type="text" class="init-input" id="init-state" value="oooooooooXoooXooooooooo" spellcheck="false">
+    <div class="safety-warning" id="safety-warning">Growth rules active — state length capped at 256 characters to keep things tractable.</div>
+
+    <div class="section-title" style="margin-top: 10px;">Presets</div>
+    <div id="preset-gallery" class="preset-gallery"></div>
+
+    <div class="section-title" style="margin-top: 14px;">Configuration</div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Evolution Steps <span class="ctrl-val" id="v-steps">10</span></div>
+      <input type="range" id="sl-steps" min="4" max="14" step="1" value="10">
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Max States <span class="ctrl-val" id="v-maxstates">5000</span></div>
+      <input type="range" id="sl-maxstates" min="500" max="20000" step="500" value="5000">
+    </div>
+
+    <!-- MODE TOGGLE -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="batch">Batch</button>
+      <button class="mode-tab" data-mode="interactive">Interactive</button>
+    </div>
+
+    <!-- BATCH MODE CONTROLS -->
+    <div id="batch-controls">
+      <button class="action-btn" id="btn-run">Evolve Multiway System</button>
+    </div>
+
+    <!-- INTERACTIVE MODE CONTROLS -->
+    <div id="interactive-controls">
+      <div class="step-counter">Step <span class="step-num" id="step-current">0</span> / <span id="step-total">10</span></div>
+      <div class="step-buttons">
+        <button class="step-btn" id="btn-step-back">&#9664; Back</button>
+        <button class="step-btn" id="btn-step-fwd">&#9654; Step</button>
+        <button class="step-btn" id="btn-step-play">&#9654;&#9654; Play</button>
+        <button class="step-btn" id="btn-step-reset">&#8634; Reset</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 18px;">Visualization</div>
+
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="multiway">Multiway</button>
+      <button class="view-tab" data-view="causal">Causal</button>
+      <button class="view-tab" data-view="branchial">Branchial</button>
+      <button class="view-tab" data-view="both">Both</button>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Step Spacing <span class="ctrl-val" id="v-spacing">3.0</span></div>
+      <input type="range" id="sl-spacing" min="1" max="6" step="0.5" value="3.0">
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Node Size <span class="ctrl-val" id="v-nsize">1.0</span></div>
+      <input type="range" id="sl-nsize" min="0.3" max="2" step="0.1" value="1.0">
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-label">Bloom <span class="ctrl-val" id="v-bloom">0.4</span></div>
+      <input type="range" id="sl-bloom" min="0" max="1.5" step="0.05" value="0.4">
+    </div>
+
+    <div class="section-title" style="margin-top: 18px;">How It Works</div>
+    <div class="subsection">
+      <h3>Path Weights → Amplitudes</h3>
+      <p class="desc">Each state at step N is weighted by the number of distinct evolution paths leading to it. Normalized weights correspond to |ψ|² — the squared magnitudes of quantum amplitudes. The interference pattern <em>emerges</em> from the branching structure.</p>
+    </div>
+    <div class="subsection">
+      <h3>Branchial Space = Hilbert Space</h3>
+      <p class="desc">States at a given step, connected by shared ancestry, form the branchial graph. Its geometry maps onto the projective Hilbert space of the system. Single-slit → 1D, double-slit → 2D, triple-slit → 3D.</p>
+    </div>
+    <div class="subsection">
+      <h3>Completion → Interference</h3>
+      <p class="desc">A Knuth-Bendix completion forces causal invariance. Spacelike-separated paths (isomorphic, phase ≈ 0) merge constructively — weights add. Branchlike-separated paths (non-intersecting, phase ≈ π) interfere destructively — weights cancel.</p>
+    </div>
+  </div>
+
+  <!-- CENTER: 3D Visualization -->
+  <div id="center">
+    <div id="status-bar"></div>
+  </div>
+
+  <!-- RIGHT PANEL: Results -->
+  <div class="panel" id="right-panel">
+    <div class="section-title">Observer</div>
+    <div class="observer-section">
+      <div class="observer-desc">Click any node in the 3D graph or branchial ring to highlight its full causal history.</div>
+      <div class="observer-state" id="observer-state"></div>
+      <button class="observer-clear" id="observer-clear">Clear Selection</button>
+      <div class="observer-analysis" id="observer-analysis"></div>
+    </div>
+
+    <div class="section-title">Emergent Intensity Pattern</div>
+    <canvas id="intensity-canvas"></canvas>
+    <div class="subsection">
+      <p class="desc">Spatial intensity derived purely from multiway path weights. Solid bars: weights from the rewriting system. For sorting presets, a dashed Fresnel overlay is shown for comparison (not used as input).</p>
+    </div>
+
+    <div class="section-title">Branchial Graph</div>
+    <canvas id="branchial-canvas"></canvas>
+    <div class="subsection">
+      <p class="desc">States at the final evolution step, connected by shared ancestry one step back. Dimensionality reveals the number of interacting quantum subsystems.</p>
+    </div>
+
+    <div class="section-title">Completion Analysis</div>
+    <div id="completion-log">
+      <span class="log-neutral">Run the evolution to see completion analysis...</span>
+    </div>
+
+
+    <div class="section-title" style="margin-top: 16px;">Physics Tools</div>
+
+    <!-- 1. BRANCHIAL DISTANCE HEATMAP -->
+    <div class="tool-section">
+      <div class="tool-title">Branchial Distance Heatmap <button class="tool-toggle" id="toggle-heatmap" title="Color nodes by branchial distance from selected observer"></button></div>
+      <div class="tool-desc">Color all nodes by branchial distance from the selected observer. Near = warm, far = cool.</div>
+    </div>
+
+    <!-- 2. GEODESIC TRACER -->
+    <div class="tool-section geodesic-mode">
+      <div class="tool-title">Geodesic Tracer <button class="tool-toggle" id="toggle-geodesic" title="Click two nodes to draw shortest causal path"></button></div>
+      <div class="tool-desc">Activate then click two nodes to visualize the shortest causal path between them. The geodesic length = proper time in Wolfram's framework.</div>
+      <div id="geodesic-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- 3. REFERENCE FRAME SELECTOR -->
+    <div class="tool-section">
+      <div class="tool-title">Reference Frame</div>
+      <div class="tool-desc">Choose a foliation ordering (simultaneity slices). Different frames = different observers' "now."</div>
+      <div class="frame-chips">
+        <button class="tool-btn active" data-frame="default">Default</button>
+        <button class="tool-btn" data-frame="weight">By Weight</button>
+        <button class="tool-btn" data-frame="alpha">Alphabetical</button>
+        <button class="tool-btn" data-frame="reverse">Reverse</button>
+      </div>
+    </div>
+
+    <!-- 4. MULTIWAY TOKEN VIEW -->
+    <div class="tool-section">
+      <div class="tool-title">Token Rewrite View</div>
+      <div class="tool-desc">When a node is selected, see character-level diffs between parent and child states.</div>
+      <div id="token-view" class="token-container" style="display:none"></div>
+    </div>
+
+    <!-- 5. BRANCHIAL 3D EMBEDDING -->
+    <div class="tool-section">
+      <div class="tool-title">Branchial 3D Embedding <button class="tool-toggle" id="toggle-branchial3d" title="Spectral layout of branchial graph"></button></div>
+      <div class="tool-desc">Embed the branchial graph in 3D using graph Laplacian eigenvectors. Reveals the Hilbert space geometry.</div>
+    </div>
+
+    <!-- 6. CAUSAL INVARIANCE VERIFIER -->
+    <div class="tool-section">
+      <div class="tool-title">Causal Invariance Verifier</div>
+      <div class="tool-desc">Check event pair commutativity. Confluent pairs (green) preserve spacetime; divergent pairs (red) break it.</div>
+      <button class="tool-btn" id="btn-verify-ci">Verify</button>
+      <button class="tool-btn" id="btn-highlight-ci">Highlight on Graph</button>
+      <div id="ci-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- 7. ENERGY-MOMENTUM DENSITY -->
+    <div class="tool-section">
+      <div class="tool-title">Energy-Momentum Density <button class="tool-toggle" id="toggle-energy" title="Heat overlay of causal edge density"></button></div>
+      <div class="tool-desc">Heat map of causal edge density per branchial volume. High density = high energy-momentum tensor component.</div>
+    </div>
+
+    <!-- 8. RULIAL EXPLORATION MODE -->
+    <div class="tool-section">
+      <div class="tool-title">Rulial Exploration</div>
+      <div class="tool-desc">Modify rules mid-evolution. Each rule change moves you through rulial space — the space of all possible physics.</div>
+      <button class="tool-btn warn" id="btn-rulial-mutate">Mutate Rule</button>
+      <button class="tool-btn warn" id="btn-rulial-extend">Add Random Rule</button>
+      <button class="tool-btn" id="btn-rulial-reset">Reset to Preset</button>
+    </div>
+
+    <!-- 9. ENTANGLEMENT SPEED -->
+    <div class="tool-section">
+      <div class="tool-title">Entanglement Speed</div>
+      <div class="tool-desc">Measure how fast branchial correlations propagate across steps. The ratio of branchial to causal graph growth = entanglement velocity.</div>
+      <button class="tool-btn" id="btn-measure-speed">Measure</button>
+      <canvas id="speed-canvas"></canvas>
+      <div id="speed-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- 10. OBSERVER PERSISTENCE TRACKER -->
+    <div class="tool-section">
+      <div class="tool-title">Observer Persistence</div>
+      <div class="tool-desc">Track how a selected observer's causal cone self-overlap decays over time. Fast decay = quantum decoherence.</div>
+      <button class="tool-btn" id="btn-measure-persistence">Measure</button>
+      <canvas id="persistence-canvas"></canvas>
+      <div id="persistence-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <div class="section-title" style="margin-top: 16px;">Statistics</div>
+    <div id="stats-container"></div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip">
+  <div class="tt-label">State</div>
+  <div class="tt-state" id="tt-state"></div>
+  <div class="tt-label" style="margin-top:3px;">Weight</div>
+  <div class="tt-weight" id="tt-weight"></div>
+</div>
+
+<footer>
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+</footer>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+// ═══════════════════════════════════════════════════════════════
+// PART 1: MULTIWAY STRING REWRITING ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+class MultiwaySystem {
+  constructor(rules) {
+    this.rules = rules || [
+      { from: 'Xo', to: 'oX' },
+      { from: 'oX', to: 'Xo' }
+    ];
+    this.hasGrowthRules = this.rules.some(r => r.to.length > r.from.length);
+    this.hasShrinkRules = this.rules.some(r => r.to.length < r.from.length);
+    this.maxStateLength = 256;
+    this.maxTotalStates = 5000;
+    this.truncated = false;
+    this.nodes = [];
+    this.edges = [];
+    this.stateMap = new Map();
+    this.stepStates = [];
+    this.branchialEdges = [];
+    this._currentStep = 0;
+    this._initialState = '';
+
+    // Causal graph: events and their causal relationships
+    this.causalEvents = [];  // { id, parentNodeId, childNodeId, ruleIdx, position, inputRange, outputRange, step }
+    this.causalEdges = [];   // { from: eventId, to: eventId }
+  }
+
+  applyRules(state) {
+    const results = [];
+    for (let ri = 0; ri < this.rules.length; ri++) {
+      const rule = this.rules[ri];
+      let pos = 0;
+      while (true) {
+        const idx = state.indexOf(rule.from, pos);
+        if (idx === -1) break;
+        const newState = state.substring(0, idx) + rule.to + state.substring(idx + rule.from.length);
+        results.push({ result: newState, ruleIdx: ri, position: idx });
+        pos = idx + 1;
+      }
+    }
+    return results;
+  }
+
+  getOrCreateNode(state, step) {
+    if (!this.stateMap.has(step)) {
+      this.stateMap.set(step, new Map());
+      this.stepStates[step] = [];
+    }
+    const stepMap = this.stateMap.get(step);
+    if (stepMap.has(state)) {
+      return stepMap.get(state);
+    }
+    const id = this.nodes.length;
+    const node = { id, state, step, weight: 0, x: 0, y: 0 };
+    this.nodes.push(node);
+    stepMap.set(state, id);
+    this.stepStates[step].push(id);
+    return id;
+  }
+
+  evolve(initialState, maxSteps) {
+    this.nodes = [];
+    this.edges = [];
+    this.stateMap = new Map();
+    this.stepStates = [];
+    this.branchialEdges = [];
+    this.causalEvents = [];
+    this.causalEdges = [];
+    this.truncated = false;
+    this._currentStep = 0;
+    this._adjCacheVersion = -1; // invalidate adjacency cache
+    this._initialState = initialState;
+
+    const rootId = this.getOrCreateNode(initialState, 0);
+    this.nodes[rootId].weight = 1;
+
+    for (let step = 0; step < maxSteps; step++) {
+      const currentStepMap = this.stateMap.get(step);
+      if (!currentStepMap) break;
+
+      if (this.nodes.length >= this.maxTotalStates) {
+        this.truncated = true;
+        break;
+      }
+
+      for (const [state, nodeId] of currentStepMap) {
+        const parentWeight = this.nodes[nodeId].weight;
+        const results = this.applyRules(state);
+
+        for (const r of results) {
+          if (r.result.length > this.maxStateLength) continue;
+          if (this.nodes.length >= this.maxTotalStates) {
+            this.truncated = true;
+            break;
+          }
+          const childId = this.getOrCreateNode(r.result, step + 1);
+          this.edges.push({ from: nodeId, to: childId });
+          this.nodes[childId].weight += parentWeight;
+
+          // Record causal event
+          const eventId = this.causalEvents.length;
+          this.causalEvents.push({
+            id: eventId,
+            parentNodeId: nodeId,
+            childNodeId: childId,
+            ruleIdx: r.ruleIdx,
+            position: r.position,
+            inputRange: [r.position, r.position + this.rules[r.ruleIdx].from.length - 1],
+            outputRange: [r.position, r.position + this.rules[r.ruleIdx].to.length - 1],
+            step: step
+          });
+        }
+        if (this.truncated) break;
+      }
+      if (this.truncated) break;
+    }
+
+    this._buildCausalEdges();
+    this._currentStep = this.stepStates.length - 1;
+
+    const actualFinalStep = this.stepStates.length - 1;
+    this._buildBranchialGraph(actualFinalStep);
+    this._computeLayout();
+
+    return this;
+  }
+
+  /**
+   * Initialize for interactive mode — sets up step 0 only.
+   */
+  initInteractive(initialState) {
+    this.nodes = [];
+    this.edges = [];
+    this.stateMap = new Map();
+    this.stepStates = [];
+    this.branchialEdges = [];
+    this.causalEvents = [];
+    this.causalEdges = [];
+    this.truncated = false;
+    this._currentStep = 0;
+    this._initialState = initialState;
+
+    const rootId = this.getOrCreateNode(initialState, 0);
+    this.nodes[rootId].weight = 1;
+
+    this._buildBranchialGraph(0);
+    this._computeLayout();
+    return this;
+  }
+
+  /**
+   * Evolve one step forward from the current frontier.
+   * Returns true if new states were generated.
+   */
+  evolveOneStep() {
+    const step = this._currentStep;
+    const currentStepMap = this.stateMap.get(step);
+    if (!currentStepMap) return false;
+
+    if (this.nodes.length >= this.maxTotalStates) {
+      this.truncated = true;
+      return false;
+    }
+
+    let generated = false;
+    for (const [state, nodeId] of currentStepMap) {
+      const parentWeight = this.nodes[nodeId].weight;
+      const results = this.applyRules(state);
+
+      for (const r of results) {
+        if (r.result.length > this.maxStateLength) continue;
+        if (this.nodes.length >= this.maxTotalStates) {
+          this.truncated = true;
+          break;
+        }
+        const childId = this.getOrCreateNode(r.result, step + 1);
+        this.edges.push({ from: nodeId, to: childId });
+        this.nodes[childId].weight += parentWeight;
+        generated = true;
+
+        // Record causal event
+        const eventId = this.causalEvents.length;
+        this.causalEvents.push({
+          id: eventId,
+          parentNodeId: nodeId,
+          childNodeId: childId,
+          ruleIdx: r.ruleIdx,
+          position: r.position,
+          inputRange: [r.position, r.position + this.rules[r.ruleIdx].from.length - 1],
+          outputRange: [r.position, r.position + this.rules[r.ruleIdx].to.length - 1],
+          step: step
+        });
+      }
+      if (this.truncated) break;
+    }
+
+    if (generated || this.stepStates[step + 1]) {
+      this._buildCausalEdges();
+      this._currentStep = step + 1;
+      this._buildBranchialGraph(this._currentStep);
+      this._computeLayout();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Remove the latest step (pop nodes and edges).
+   * Returns true if step was successfully removed.
+   */
+  removeLastStep() {
+    if (this._currentStep <= 0) return false;
+
+    const step = this._currentStep;
+    const stepIds = this.stepStates[step];
+    if (!stepIds) return false;
+
+    // Remove edges that point to nodes at this step
+    const stepIdSet = new Set(stepIds);
+    this.edges = this.edges.filter(e => !stepIdSet.has(e.to));
+
+    // Remove nodes at this step
+    // We need to be careful: reset weights of any node at this step
+    // and remove from stateMap
+    const stepMap = this.stateMap.get(step);
+    if (stepMap) {
+      this.stateMap.delete(step);
+    }
+
+    // Remove from stepStates
+    this.stepStates.length = step;
+
+    // Remove nodes from end (they were added last)
+    // We need to remove all nodes with step === current step
+    // Since nodes are added in order, all step-N nodes are at the end
+    this.nodes = this.nodes.filter(n => n.step !== step);
+
+    // Re-index: since we only remove end nodes, IDs are still valid for earlier nodes
+    // But we need to reassign IDs to be contiguous
+    // Actually, the simpler approach: since nodes at later steps are appended,
+    // and we only remove the last step, we can just truncate
+    // Let's rebuild IDs properly
+    const oldToNew = new Map();
+    const newNodes = [];
+    for (let i = 0; i < this.nodes.length; i++) {
+      oldToNew.set(this.nodes[i].id, i);
+      this.nodes[i].id = i;
+      newNodes.push(this.nodes[i]);
+    }
+    this.nodes = newNodes;
+
+    // Remap edges
+    this.edges = this.edges.map(e => ({
+      from: oldToNew.get(e.from),
+      to: oldToNew.get(e.to)
+    })).filter(e => e.from !== undefined && e.to !== undefined);
+
+    // Rebuild stateMap references
+    this.stateMap = new Map();
+    this.stepStates = [];
+    for (const node of this.nodes) {
+      if (!this.stateMap.has(node.step)) {
+        this.stateMap.set(node.step, new Map());
+        this.stepStates[node.step] = [];
+      }
+      this.stateMap.get(node.step).set(node.state, node.id);
+      this.stepStates[node.step].push(node.id);
+    }
+
+    this._currentStep = step - 1;
+
+    // Remove causal events whose child node was at the removed step
+    // Events are recorded with step = parent step, so ev.step === step-1
+    // for the transition that created nodes at `step`. Filter by child node membership.
+    this.causalEvents = this.causalEvents.filter(ev => !stepIdSet.has(ev.childNodeId));
+    for (let i = 0; i < this.causalEvents.length; i++) {
+      this.causalEvents[i].id = i;
+      // Remap node references to match re-indexed node IDs
+      const newParent = oldToNew.get(this.causalEvents[i].parentNodeId);
+      const newChild = oldToNew.get(this.causalEvents[i].childNodeId);
+      if (newParent !== undefined) this.causalEvents[i].parentNodeId = newParent;
+      if (newChild !== undefined) this.causalEvents[i].childNodeId = newChild;
+    }
+    this._buildCausalEdges();
+
+    this._buildBranchialGraph(this._currentStep);
+    this._computeLayout();
+    return true;
+  }
+
+  /**
+   * Build/cache adjacency maps for fast BFS traversal.
+   * Called lazily on first use, invalidated when graph changes.
+   */
+  _ensureAdjacencyMaps() {
+    if (this._adjCacheVersion === this.edges.length) return;
+    this._childToParents = new Map();
+    this._parentToChildren = new Map();
+    for (const e of this.edges) {
+      if (!this._childToParents.has(e.to)) this._childToParents.set(e.to, []);
+      this._childToParents.get(e.to).push(e.from);
+      if (!this._parentToChildren.has(e.from)) this._parentToChildren.set(e.from, []);
+      this._parentToChildren.get(e.from).push(e.to);
+    }
+    this._adjCacheVersion = this.edges.length;
+  }
+
+  /**
+   * Trace ancestry backward from a node — returns set of all ancestor node IDs.
+   */
+  traceAncestry(nodeId) {
+    this._ensureAdjacencyMaps();
+    const ancestors = new Set();
+    ancestors.add(nodeId);
+
+    // BFS backward
+    const queue = [nodeId];
+    while (queue.length > 0) {
+      const current = queue.shift();
+      const parents = this._childToParents.get(current) || [];
+      for (const p of parents) {
+        if (!ancestors.has(p)) {
+          ancestors.add(p);
+          queue.push(p);
+        }
+      }
+    }
+    return ancestors;
+  }
+
+  /**
+   * Trace descendants forward from a node — returns set of all descendant node IDs.
+   */
+  traceDescendants(nodeId) {
+    this._ensureAdjacencyMaps();
+    const descendants = new Set();
+    descendants.add(nodeId);
+
+    const queue = [nodeId];
+    while (queue.length > 0) {
+      const current = queue.shift();
+      const children = this._parentToChildren.get(current) || [];
+      for (const c of children) {
+        if (!descendants.has(c)) {
+          descendants.add(c);
+          queue.push(c);
+        }
+      }
+    }
+    return descendants;
+  }
+
+  /**
+   * Full causal history: ancestors + descendants from a node.
+   */
+  traceCausalHistory(nodeId) {
+    const ancestors = this.traceAncestry(nodeId);
+    const descendants = this.traceDescendants(nodeId);
+    const full = new Set([...ancestors, ...descendants]);
+    return { full, ancestors, descendants };
+  }
+
+  /**
+   * Get edges within a node set (edges where both endpoints are in the set).
+   */
+  getAncestryEdges(nodeSet) {
+    return this.edges.filter(e => nodeSet.has(e.from) && nodeSet.has(e.to));
+  }
+
+  /**
+   * Build causal edges between events.
+   * Event A causally precedes event B when:
+   *   - A's output state (childNodeId) is B's input state (parentNodeId)
+   *   - A's output character range overlaps B's input character range
+   * This captures: "the characters A produced were consumed by B."
+   */
+  _buildCausalEdges() {
+    this.causalEdges = [];
+    if (this.causalEvents.length === 0) return;
+
+    // Group events by their parent node (the state they read from)
+    const eventsByParentNode = new Map();
+    for (const ev of this.causalEvents) {
+      if (!eventsByParentNode.has(ev.parentNodeId)) eventsByParentNode.set(ev.parentNodeId, []);
+      eventsByParentNode.get(ev.parentNodeId).push(ev);
+    }
+
+    // For each event A, find events B where B reads from A's output node
+    // and B's input range overlaps A's output range
+    for (const evA of this.causalEvents) {
+      const childNode = evA.childNodeId;
+      const consumers = eventsByParentNode.get(childNode) || [];
+      for (const evB of consumers) {
+        // Check character range overlap
+        const aOut = evA.outputRange;
+        const bIn = evB.inputRange;
+        if (aOut[0] <= bIn[1] && bIn[0] <= aOut[1]) {
+          this.causalEdges.push({ from: evA.id, to: evB.id });
+        }
+      }
+    }
+  }
+
+  /**
+   * Trace causal ancestors/descendants in the EVENT graph (not state graph).
+   */
+  traceCausalEventCone(eventId) {
+    // Build adjacency
+    const childToParents = new Map();
+    const parentToChildren = new Map();
+    for (const e of this.causalEdges) {
+      if (!childToParents.has(e.to)) childToParents.set(e.to, []);
+      childToParents.get(e.to).push(e.from);
+      if (!parentToChildren.has(e.from)) parentToChildren.set(e.from, []);
+      parentToChildren.get(e.from).push(e.to);
+    }
+
+    // BFS backward (past light cone)
+    const pastCone = new Set([eventId]);
+    let queue = [eventId];
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      for (const p of (childToParents.get(cur) || [])) {
+        if (!pastCone.has(p)) { pastCone.add(p); queue.push(p); }
+      }
+    }
+
+    // BFS forward (future light cone)
+    const futureCone = new Set([eventId]);
+    queue = [eventId];
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      for (const c of (parentToChildren.get(cur) || [])) {
+        if (!futureCone.has(c)) { futureCone.add(c); queue.push(c); }
+      }
+    }
+
+    const fullCone = new Set([...pastCone, ...futureCone]);
+    return { pastCone, futureCone, fullCone };
+  }
+
+  /**
+   * Get the causal events that touch a given state node (as input or output).
+   */
+  getEventsForNode(nodeId) {
+    return this.causalEvents.filter(ev => ev.parentNodeId === nodeId || ev.childNodeId === nodeId);
+  }
+
+  /**
+   * Check causal invariance: do all paths between the same pair of events
+   * produce equivalent results? (Simplified: check if the causal graph is a DAG
+   * with confluence — merging branches produce identical states.)
+   */
+  checkCausalInvariance() {
+    // For each pair of events at the same step that share a parent state,
+    // check if they eventually converge to the same child state
+    let confluent = 0, divergent = 0;
+    const eventsByStep = new Map();
+    for (const ev of this.causalEvents) {
+      if (!eventsByStep.has(ev.step)) eventsByStep.set(ev.step, []);
+      eventsByStep.get(ev.step).push(ev);
+    }
+
+    for (const [step, events] of eventsByStep) {
+      // Group by parent node
+      const byParent = new Map();
+      for (const ev of events) {
+        if (!byParent.has(ev.parentNodeId)) byParent.set(ev.parentNodeId, []);
+        byParent.get(ev.parentNodeId).push(ev);
+      }
+      for (const [parentId, evs] of byParent) {
+        if (evs.length <= 1) continue;
+        // Check pairs: do any two events from the same parent produce
+        // children that eventually merge?
+        for (let i = 0; i < evs.length; i++) {
+          for (let j = i + 1; j < evs.length; j++) {
+            // Check if ranges overlap (potential conflict)
+            const aIn = evs[i].inputRange;
+            const bIn = evs[j].inputRange;
+            if (aIn[0] <= bIn[1] && bIn[0] <= aIn[1]) {
+              divergent++; // overlapping input ranges = non-commuting events
+            } else {
+              confluent++; // non-overlapping = commuting events (causal invariant)
+            }
+          }
+        }
+      }
+    }
+    return { confluent, divergent, total: confluent + divergent,
+             invariance: (confluent + divergent) > 0 ? confluent / (confluent + divergent) : 1.0 };
+  }
+
+  _buildBranchialGraph(maxSteps) {
+    this.branchialEdges = [];
+    const finalStep = maxSteps;
+    const finalMap = this.stateMap.get(finalStep);
+    if (!finalMap) return;
+
+    const parentMap = new Map();
+    for (const edge of this.edges) {
+      const child = this.nodes[edge.to];
+      if (child && child.step === finalStep) {
+        if (!parentMap.has(edge.to)) parentMap.set(edge.to, new Set());
+        parentMap.get(edge.to).add(edge.from);
+      }
+    }
+
+    const finalIds = this.stepStates[finalStep] || [];
+    for (let i = 0; i < finalIds.length; i++) {
+      for (let j = i + 1; j < finalIds.length; j++) {
+        const pi = parentMap.get(finalIds[i]);
+        const pj = parentMap.get(finalIds[j]);
+        if (pi && pj) {
+          for (const p of pi) {
+            if (pj.has(p)) {
+              this.branchialEdges.push({ from: finalIds[i], to: finalIds[j] });
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  _computeLayout() {
+    for (let step = 0; step <= this.stepStates.length; step++) {
+      const ids = this.stepStates[step];
+      if (!ids) continue;
+
+      ids.sort((a, b) => this.nodes[a].state.localeCompare(this.nodes[b].state));
+
+      const count = ids.length;
+      for (let i = 0; i < count; i++) {
+        const node = this.nodes[ids[i]];
+        node.x = count === 1 ? 0 : (i / (count - 1) - 0.5);
+        node.y = -step;
+      }
+    }
+  }
+
+  getIntensityPattern(filterNodeIds) {
+    let finalStep = 0;
+    for (let s = this.stepStates.length - 1; s >= 0; s--) {
+      if (this.stepStates[s] && this.stepStates[s].length > 0) {
+        finalStep = s;
+        break;
+      }
+    }
+
+    const finalIds = this.stepStates[finalStep] || [];
+    if (finalIds.length === 0) return { positions: [], weights: [], normalized: [] };
+
+    // If filterNodeIds is provided, only include those final states
+    const filterSet = filterNodeIds ? new Set(filterNodeIds) : null;
+
+    const statesAndWeights = finalIds.map(id => ({
+      state: this.nodes[id].state,
+      weight: (filterSet && !filterSet.has(id)) ? 0 : this.nodes[id].weight
+    }));
+    statesAndWeights.sort((a, b) => a.state.localeCompare(b.state));
+
+    const rawWeights = statesAndWeights.map(sw => sw.weight);
+
+    const halfIdx = Math.ceil(rawWeights.length / 2);
+    const rightHalf = rawWeights.slice(halfIdx);
+    const leftHalf = [...rightHalf].reverse();
+
+    const fullPattern = [...leftHalf, ...rightHalf];
+
+    const maxW = Math.max(...fullPattern, 1);
+    const normalized = fullPattern.map(w => w / maxW);
+
+    const positions = fullPattern.map((_, i) =>
+      fullPattern.length === 1 ? 0 : (i / (fullPattern.length - 1)) * 2 - 1
+    );
+
+    return { positions, weights: fullPattern, normalized, totalStates: finalIds.length, finalStep };
+  }
+
+  analyzeCompletion() {
+    const pattern = this.getIntensityPattern();
+    const log = [];
+
+    let totalWeight = 0;
+    let finalStep = 0;
+    for (let s = this.stepStates.length - 1; s >= 0; s--) {
+      if (this.stepStates[s] && this.stepStates[s].length > 0) {
+        finalStep = s;
+        break;
+      }
+    }
+    const finalIds = this.stepStates[finalStep] || [];
+
+    for (const id of finalIds) totalWeight += this.nodes[id].weight;
+
+    log.push({ type: 'neutral', text: `Step ${finalStep}: ${finalIds.length} distinct states, ${totalWeight} total paths` });
+    log.push({ type: 'neutral', text: `─────────────────────────` });
+
+    if (pattern.normalized.length > 2) {
+      const n = pattern.normalized;
+      let maxima = [], minima = [];
+
+      for (let i = 1; i < n.length - 1; i++) {
+        if (n[i] > n[i-1] && n[i] > n[i+1] && n[i] > 0.1) {
+          maxima.push({ idx: i, val: n[i], pos: pattern.positions[i] });
+        }
+        if (n[i] < n[i-1] && n[i] < n[i+1] && n[i] < 0.3) {
+          minima.push({ idx: i, val: n[i], pos: pattern.positions[i] });
+        }
+      }
+
+      const centerIdx = Math.floor(n.length / 2);
+      log.push({ type: 'constructive',
+        text: `CONSTRUCTIVE: Central maximum at x≈${pattern.positions[centerIdx]?.toFixed(2) || '0.00'}` });
+      log.push({ type: 'constructive',
+        text: `  → Spacelike-separated paths merge (phase diff ≈ 0)` });
+      log.push({ type: 'constructive',
+        text: `  → Weights ADD: multiple evolution paths converge` });
+
+      for (const m of maxima.slice(0, 3)) {
+        if (Math.abs(m.pos) > 0.05) {
+          log.push({ type: 'constructive',
+            text: `CONSTRUCTIVE: Fringe maximum at x≈${m.pos.toFixed(2)} (intensity ${(m.val * 100).toFixed(0)}%)` });
+        }
+      }
+
+      log.push({ type: 'neutral', text: `─────────────────────────` });
+
+      for (const m of minima.slice(0, 3)) {
+        log.push({ type: 'destructive',
+          text: `DESTRUCTIVE: Minimum at x≈${m.pos.toFixed(2)} (intensity ${(m.val * 100).toFixed(0)}%)` });
+        log.push({ type: 'destructive',
+          text: `  → Branchlike-separated paths (phase diff ≈ π)` });
+        log.push({ type: 'destructive',
+          text: `  → Completion forces cancellation of branch weights` });
+      }
+
+      if (minima.length === 0 && pattern.normalized.length < 10) {
+        log.push({ type: 'neutral',
+          text: `No clear minima yet — increase evolution steps for finer resolution` });
+      }
+    }
+
+    log.push({ type: 'neutral', text: `─────────────────────────` });
+    log.push({ type: 'neutral',
+      text: `Branchial dimension: ${this._estimateBranchialDim()}D` });
+    log.push({ type: 'neutral',
+      text: `(= number of interacting quantum subsystems)` });
+
+    return log;
+  }
+
+  _estimateBranchialDim() {
+    const root = this.nodes[0];
+    if (!root) return 1;
+    return (root.state.match(/X/g) || []).length;
+  }
+
+  getTotalSteps() {
+    return this.stepStates.length - 1;
+  }
+
+  /**
+   * Deep observer analysis — physics-grounded breakdown of a selected branch.
+   */
+  analyzeObserver(nodeId) {
+    const node = this.nodes[nodeId];
+    if (!node) return null;
+
+    const ancestors = this.traceAncestry(nodeId);
+    const descendants = this.traceDescendants(nodeId);
+    const fullHistory = new Set([...ancestors, ...descendants]);
+    const totalNodes = this.nodes.length;
+    const totalEdges = this.edges.length;
+    const ancestorEdges = this.getAncestryEdges(ancestors);
+    const descendantEdges = this.getAncestryEdges(descendants);
+    const fullHistoryEdges = this.getAncestryEdges(fullHistory);
+
+    // Find which step the observer is on
+    const observerStep = node.step;
+
+    // Get final step info
+    let finalStep = 0;
+    for (let s = this.stepStates.length - 1; s >= 0; s--) {
+      if (this.stepStates[s] && this.stepStates[s].length > 0) { finalStep = s; break; }
+    }
+    const finalIds = this.stepStates[finalStep] || [];
+    const finalAncestors = finalIds.filter(id => ancestors.has(id));
+
+    // Total weights
+    let totalWeight = 0;
+    for (const id of finalIds) totalWeight += this.nodes[id].weight;
+    const observerWeight = node.weight;
+
+    // Causal cone density: how many nodes per step on the observer's path
+    const stepsWithAncestors = [];
+    for (let s = 0; s <= finalStep; s++) {
+      const stepIds = this.stepStates[s] || [];
+      const inPast = stepIds.filter(id => ancestors.has(id)).length;
+      const inFuture = stepIds.filter(id => descendants.has(id)).length;
+      const inBoth = stepIds.filter(id => ancestors.has(id) && descendants.has(id)).length;
+      const inCone = stepIds.filter(id => fullHistory.has(id)).length;
+      stepsWithAncestors.push({ step: s, inCone, inPast, inFuture, total: stepIds.length, isObserverStep: s === observerStep });
+    }
+
+    // Branching ratio: average branching factor within causal cone
+    const childToParents = new Map();
+    const parentToChildren = new Map();
+    for (const e of this.edges) {
+      if (!childToParents.has(e.to)) childToParents.set(e.to, []);
+      childToParents.get(e.to).push(e.from);
+      if (!parentToChildren.has(e.from)) parentToChildren.set(e.from, []);
+      parentToChildren.get(e.from).push(e.to);
+    }
+
+    let branchingSum = 0, branchingCount = 0;
+    for (const id of ancestors) {
+      const children = (parentToChildren.get(id) || []).filter(c => ancestors.has(c));
+      if (children.length > 0) {
+        branchingSum += children.length;
+        branchingCount++;
+      }
+    }
+    const avgBranching = branchingCount > 0 ? (branchingSum / branchingCount) : 1;
+
+    // Convergence: how many parents does the observer node have?
+    const directParents = (childToParents.get(nodeId) || []);
+    const directChildren = (parentToChildren.get(nodeId) || []);
+
+    // Decoherence analysis: on the branchial graph, find distances
+    // Build adjacency list for branchial graph
+    const branchialAdj = new Map();
+    for (const be of this.branchialEdges) {
+      if (!branchialAdj.has(be.from)) branchialAdj.set(be.from, []);
+      if (!branchialAdj.has(be.to)) branchialAdj.set(be.to, []);
+      branchialAdj.get(be.from).push(be.to);
+      branchialAdj.get(be.to).push(be.from);
+    }
+
+    // BFS from observer on branchial graph to find distances
+    const branchialDist = new Map();
+    if (node.step === finalStep) {
+      branchialDist.set(nodeId, 0);
+      const bfsQ = [nodeId];
+      while (bfsQ.length > 0) {
+        const cur = bfsQ.shift();
+        const curDist = branchialDist.get(cur);
+        for (const nb of (branchialAdj.get(cur) || [])) {
+          if (!branchialDist.has(nb)) {
+            branchialDist.set(nb, curDist + 1);
+            bfsQ.push(nb);
+          }
+        }
+      }
+    }
+
+    // Categorize by decoherence distance
+    let coherent = 0, nearCoherent = 0, decoherent = 0;
+    let maxBranchialDist = 0;
+    for (const [id, d] of branchialDist) {
+      if (id === nodeId) continue;
+      if (d <= 1) coherent++;
+      else if (d <= 3) nearCoherent++;
+      else decoherent++;
+      if (d > maxBranchialDist) maxBranchialDist = d;
+    }
+
+    // Observer's intensity contribution
+    const observerPattern = this.getIntensityPattern(finalAncestors.length > 0 ? finalAncestors : [nodeId]);
+    const globalPattern = this.getIntensityPattern();
+
+    // Find the observer's peak position in the intensity pattern
+    let peakIdx = 0, peakVal = 0;
+    for (let i = 0; i < observerPattern.normalized.length; i++) {
+      if (observerPattern.normalized[i] > peakVal) {
+        peakVal = observerPattern.normalized[i];
+        peakIdx = i;
+      }
+    }
+    const peakPos = observerPattern.positions[peakIdx] || 0;
+
+    // Compute how much of global intensity this observer accounts for
+    let globalTotal = 0, observerTotal = 0;
+    for (const w of globalPattern.weights) globalTotal += w;
+    for (const w of observerPattern.weights) observerTotal += w;
+    const intensityFraction = globalTotal > 0 ? observerTotal / globalTotal : 0;
+
+    // Which slit is this branch associated with?
+    const xCount = (node.state.match(/X/g) || []).length;
+    const positions = [];
+    for (let i = 0; i < node.state.length; i++) {
+      if (node.state[i] === 'X') positions.push(i);
+    }
+    const stateLen = node.state.length;
+    const centerPos = stateLen / 2;
+    const slitBias = positions.length > 0
+      ? positions.reduce((sum, p) => sum + (p - centerPos), 0) / positions.length
+      : 0;
+
+    return {
+      nodeId,
+      state: node.state,
+      step: observerStep,
+      weight: observerWeight,
+      totalWeight,
+      weightFraction: totalWeight > 0 ? observerWeight / totalWeight : 0,
+      ancestors: ancestors.size,
+      descendants: descendants.size,
+      fullHistory: fullHistory.size,
+      totalNodes,
+      ancestorEdges: ancestorEdges.length,
+      descendantEdges: descendantEdges.length,
+      fullHistoryEdges: fullHistoryEdges.length,
+      totalEdges,
+      coneFraction: totalNodes > 0 ? fullHistory.size / totalNodes : 0,
+      pastConeFraction: totalNodes > 0 ? ancestors.size / totalNodes : 0,
+      futureConeFraction: totalNodes > 0 ? descendants.size / totalNodes : 0,
+      stepsWithAncestors,
+      avgBranching,
+      directParents: directParents.length,
+      directChildren: directChildren.length,
+      finalStep,
+      finalStates: finalIds.length,
+      finalAncestors: finalAncestors.length,
+      coherent,
+      nearCoherent,
+      decoherent,
+      maxBranchialDist,
+      intensityFraction,
+      peakPos,
+      slitBias,
+      xCount,
+      branchialDim: this._estimateBranchialDim(),
+    };
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 2: ANALYTICAL COMPARISON (for overlay — NOT used as input)
+// ═══════════════════════════════════════════════════════════════
+
+function sinc(x) { return Math.abs(x) < 1e-8 ? 1.0 : Math.sin(x) / x; }
+
+function analyticalDoubleSlit(x, slitSep, slitWidth, wavelength) {
+  const u = Math.PI * slitSep * x / wavelength;
+  const v = Math.PI * slitWidth * x / wavelength;
+  return Math.cos(u) * Math.cos(u) * sinc(v) * sinc(v);
+}
+
+function analyticalSingleSlit(x, slitWidth, wavelength) {
+  const v = Math.PI * slitWidth * x / wavelength;
+  return sinc(v) * sinc(v);
+}
+
+function analyticalTripleSlit(x, slitSep, slitWidth, wavelength) {
+  const u = Math.PI * slitSep * x / wavelength;
+  const v = Math.PI * slitWidth * x / wavelength;
+  const tripleEnvelope = sinc(v) * sinc(v);
+  const s = Math.sin(3 * u);
+  const s1 = Math.sin(u);
+  const grating = Math.abs(s1) < 1e-8 ? 9.0 : (s * s) / (s1 * s1);
+  return tripleEnvelope * grating / 9.0;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 3: PRESET CONFIGURATIONS
+// ═══════════════════════════════════════════════════════════════
+
+const PRESETS = [
+  { category: 'Sorting (Double-Slit)',
+    key: 'double',
+    label: 'Double Slit',
+    rules: [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}],
+    initial: 'oooooooooXoooXooooooooo',
+    analytical: (x) => analyticalDoubleSlit(x, 1.5, 0.5, 1.0),
+    slitCount: 2,
+    desc: 'Standard Wolfram model double-slit. Two X photons scatter L/R.' },
+  { category: 'Sorting (Double-Slit)',
+    key: 'double-wide',
+    label: 'Double (wide)',
+    rules: [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}],
+    initial: 'ooooooXoooooooXoooooo',
+    analytical: (x) => analyticalDoubleSlit(x, 2.5, 0.5, 1.0),
+    slitCount: 2,
+    desc: 'Wider slit separation — more fringes in the pattern.' },
+  { category: 'Sorting (Double-Slit)',
+    key: 'single-small',
+    label: 'Single Slit',
+    rules: [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}],
+    initial: 'ooooooooXoooooooo',
+    analytical: (x) => analyticalSingleSlit(x, 0.5, 1.0),
+    slitCount: 1,
+    desc: 'One photon — diffraction envelope only, no two-slit fringes.' },
+  { category: 'Sorting (Double-Slit)',
+    key: 'triple',
+    label: 'Triple Slit',
+    rules: [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}],
+    initial: 'oooooooXXXooooooo',
+    analytical: (x) => analyticalTripleSlit(x, 1.0, 0.5, 1.0),
+    slitCount: 3,
+    desc: 'Three photons — 3D branchial space. Grating-like pattern.' },
+
+  { category: 'Asymmetric',
+    key: 'one-way',
+    label: 'One-way sort',
+    rules: [{from:'Xo',to:'oX'}],
+    initial: 'oooooooooXoooXooooooooo',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Only rightward scattering. No completion — breaks time-reversal symmetry.' },
+  { category: 'Asymmetric',
+    key: 'asym-growth',
+    label: 'Sort + grow',
+    rules: [{from:'AB',to:'BA'},{from:'BA',to:'AAB'}],
+    initial: 'oooABooo',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Rearranging + length-increasing. Asymmetric interference.' },
+
+  { category: 'Growth',
+    key: 'fibonacci',
+    label: 'Fibonacci',
+    rules: [{from:'A',to:'AB'},{from:'B',to:'A'}],
+    initial: 'A',
+    analytical: null,
+    slitCount: 0,
+    desc: 'L-system producing Fibonacci words. Self-similar multiway graph.' },
+  { category: 'Growth',
+    key: 'fibonacci-2',
+    label: 'Fibonacci alt',
+    rules: [{from:'A',to:'AB'},{from:'B',to:'BA'}],
+    initial: 'A',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Both symbols grow. Explosive branching, golden ratio structure.' },
+  { category: 'Growth',
+    key: 'thue-morse',
+    label: 'Thue-Morse',
+    rules: [{from:'A',to:'AB'},{from:'B',to:'BA'}],
+    initial: 'AB',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Thue-Morse substitution from AB seed. Aperiodic, fractal branchial.' },
+  { category: 'Growth',
+    key: 'split',
+    label: 'X → XoX',
+    rules: [{from:'X',to:'XoX'}],
+    initial: 'oooXooo',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Each X splits into two. Explosive growth, tree-like multiway graph.' },
+
+  { category: 'Wolfram Canonical',
+    key: 'wolfram-1',
+    label: 'A→BBB, BB→A',
+    rules: [{from:'A',to:'BBB'},{from:'BB',to:'A'}],
+    initial: 'A',
+    analytical: null,
+    slitCount: 0,
+    desc: 'From Wolfram\'s multiway enumeration. Length fluctuates — non-trivial causal structure.' },
+  { category: 'Wolfram Canonical',
+    key: 'wolfram-2',
+    label: 'AB→BA, A→AA',
+    rules: [{from:'AB',to:'BA'},{from:'A',to:'AA'}],
+    initial: 'ABA',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Sorting + duplication. Models particle diffusion with creation.' },
+
+  { category: 'Competing Rules',
+    key: 'sort-annihilate',
+    label: 'Sort + annihilate',
+    rules: [{from:'XY',to:'YX'},{from:'XX',to:'X'}],
+    initial: 'oXYXXYo',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Sorting + annihilation. Paths die naturally — destructive interference without completion.' },
+  { category: 'Competing Rules',
+    key: 'toggle',
+    label: 'Toggle ABA↔BAB',
+    rules: [{from:'ABA',to:'BAB'},{from:'BAB',to:'ABA'}],
+    initial: 'AABABAA',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Reversible 3-char toggle. Long overlapping patterns create dense branchial connectivity.' },
+];
+
+const PRESET_MAP = {};
+for (const p of PRESETS) PRESET_MAP[p.key] = p;
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 4: THREE.JS VISUALIZATION
+// ═══════════════════════════════════════════════════════════════
+
+const centerEl = document.getElementById('center');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setSize(centerEl.clientWidth, centerEl.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x08080f, 1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+centerEl.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x08080f, 0.015);
+
+const camera = new THREE.PerspectiveCamera(50, centerEl.clientWidth / centerEl.clientHeight, 0.1, 500);
+camera.position.set(0, 2, 30);
+camera.lookAt(0, -5, 0);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.rotateSpeed = 0.6;
+controls.zoomSpeed = 1.2;
+controls.autoRotate = false;
+controls.screenSpacePanning = true;
+controls.enablePan = true;
+controls.panSpeed = 1.0;
+// Trackpad-friendly: drag = pan, scroll/pinch = zoom
+// Shift+drag or two-finger-drag = rotate (for rare 3D orbiting)
+controls.mouseButtons = {
+  LEFT: THREE.MOUSE.PAN,
+  MIDDLE: THREE.MOUSE.DOLLY,
+  RIGHT: THREE.MOUSE.ROTATE
+};
+controls.touches = {
+  ONE: THREE.TOUCH.PAN,
+  TWO: THREE.TOUCH.DOLLY_ROTATE
+};
+// Allow Shift+left-drag to rotate instead of pan
+renderer.domElement.addEventListener('mousedown', (e) => {
+  if (e.shiftKey) {
+    controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+  } else {
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+  }
+});
+controls.target.set(0, -5, 0);
+
+// Post-processing
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(centerEl.clientWidth, centerEl.clientHeight),
+  0.4, 0.3, 0.7
+);
+composer.addPass(bloomPass);
+
+// Scene objects
+let multiwayGroup = new THREE.Group();
+let branchialGroup = new THREE.Group();
+let causalGroup = new THREE.Group();
+scene.add(multiwayGroup);
+scene.add(branchialGroup);
+scene.add(causalGroup);
+
+const _tmpColor = new THREE.Color();
+
+let currentView = 'multiway';
+let STEP_SPACING = 3.0;
+let NODE_SIZE = 1.0;
+let currentSystem = null;
+
+// Observer / ancestry highlight state
+let selectedObserverNodeId = null;
+let ancestryHighlightSet = null;
+
+// Interactive mode state
+let interactiveMode = false;
+let interactiveMaxSteps = 10;
+let playInterval = null;
+
+// Raycasting state
+const raycaster = new THREE.Raycaster();
+raycaster.params.Points.threshold = 0.8;
+const mouse = new THREE.Vector2();
+let hoveredNodeIdx = -1;
+let hoveredCausalIdx = -1;
+let selectedCausalEventId = null;
+let lastMouseMoveTime = 0;
+
+// Store node data for raycasting lookups
+let sceneNodeData = []; // [{id, state, weight, step}]
+let currentNodePoints = null; // reference to multiway Points mesh
+let currentEdgeLines = null; // reference to multiway edge LineSegments
+let currentCausalPoints = null; // reference to causal event Points mesh
+let sceneCausalData = []; // [{eventId, ruleIdx, position, step, parentState, childState}]
+
+// Scene geometry scale (updated by buildScene)
+let sceneSpreadScale = 1;
+
+// Saved original colors/sizes for hover highlight restore
+let savedNodeColors = null;
+let savedNodeSizes = null;
+let savedEdgeColors = null;
+let savedEdgeOpacity = 0.35;
+let hoverHighlightNodeId = null; // currently hover-highlighted node ID
+
+// ─── Build the 3D scene from a MultiwaySystem ───
+function buildScene(sys, highlightSet) {
+  multiwayGroup.clear();
+  branchialGroup.clear();
+  causalGroup.clear();
+  sceneNodeData = [];
+  sceneCausalData = [];
+  currentNodePoints = null;
+  currentEdgeLines = null;
+  currentCausalPoints = null;
+  savedNodeColors = null;
+  savedNodeSizes = null;
+  savedEdgeColors = null;
+  hoverHighlightNodeId = null;
+
+  if (!sys || sys.nodes.length === 0) return;
+
+  const totalSteps = sys.getTotalSteps();
+  const currentStep = sys._currentStep;
+  const isInteractive = interactiveMode;
+
+  // MULTIWAY GRAPH
+  const nodePositions = new Float32Array(sys.nodes.length * 3);
+  const maxNodesPerStep = Math.max(...sys.stepStates.filter(Boolean).map(s => s.length), 1);
+  const spreadScale = Math.min(maxNodesPerStep * 0.6, 40);
+  sceneSpreadScale = spreadScale;
+
+  for (const node of sys.nodes) {
+    const i3 = node.id * 3;
+    nodePositions[i3]     = node.x * spreadScale;
+    nodePositions[i3 + 1] = node.y * STEP_SPACING;
+    nodePositions[i3 + 2] = 0;
+  }
+
+  // Node points (colored by weight, with highlight/dim support)
+  const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
+  const nodeColors = new Float32Array(sys.nodes.length * 3);
+  const nodeSizes = new Float32Array(sys.nodes.length);
+
+  const goldColor = new THREE.Color('#CCFF00');
+  const cyanColor = new THREE.Color('#00F0FF');
+  const whiteColor = new THREE.Color('#FFFFFF');
+
+  // Support causal history mode: highlightSet can be a Set or an object {ancestors, descendants, selectedId}
+  // Also supports {causalEventId} for causal event cone highlighting (only affects causal layer)
+  const hlCausalEventOnly = highlightSet && highlightSet.causalEventId !== undefined;
+  const hlAncestors = (highlightSet && !hlCausalEventOnly && highlightSet.ancestors) ? highlightSet.ancestors : (!hlCausalEventOnly ? highlightSet : null);
+  const hlDescendants = (highlightSet && !hlCausalEventOnly && highlightSet.descendants) ? highlightSet.descendants : null;
+  const hlSelectedId = (highlightSet && !hlCausalEventOnly && highlightSet.selectedId !== undefined) ? highlightSet.selectedId : null;
+  const hasHighlight = !!highlightSet && !hlCausalEventOnly;
+  const dimFactor = hasHighlight ? 0.15 : 1.0;
+
+  for (const node of sys.nodes) {
+    const wNorm = node.weight / maxWeight;
+    const isAncestor = hlAncestors ? hlAncestors.has(node.id) : false;
+    const isDescendant = hlDescendants ? hlDescendants.has(node.id) : false;
+    const isSelected = hlSelectedId === node.id;
+    const isHighlighted = hasHighlight ? (isAncestor || isDescendant || isSelected) : true;
+    const isCurrentStep = isInteractive && node.step === currentStep;
+
+    if (isSelected && hasHighlight) {
+      // Selected node: bright white
+      _tmpColor.copy(whiteColor);
+    } else if (isAncestor && isDescendant && hasHighlight) {
+      // Both ancestor and descendant (the selected node itself) — white
+      _tmpColor.copy(goldColor);
+      _tmpColor.lerp(cyanColor, 0.5);
+      _tmpColor.multiplyScalar(0.5 + wNorm * 0.5);
+    } else if (isAncestor && hasHighlight) {
+      // Ancestor: lime/gold — past light cone
+      _tmpColor.copy(goldColor);
+      _tmpColor.multiplyScalar(0.3 + wNorm * 0.7);
+    } else if (isDescendant && hasHighlight) {
+      // Descendant: cyan — future light cone
+      _tmpColor.copy(cyanColor);
+      _tmpColor.multiplyScalar(0.3 + wNorm * 0.7);
+    } else {
+      // Normal coloring
+      _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
+      if (!isHighlighted && hasHighlight) {
+        _tmpColor.multiplyScalar(dimFactor);
+      }
+    }
+
+    // Interactive mode: dim past layers, brighten current
+    if (isInteractive && !hasHighlight) {
+      const stepFade = 1.0 - (currentStep - node.step) * 0.08;
+      const fade = Math.max(0.3, Math.min(1.0, stepFade));
+      if (!isCurrentStep) {
+        _tmpColor.multiplyScalar(fade);
+      }
+    }
+
+    const i3 = node.id * 3;
+    nodeColors[i3] = _tmpColor.r;
+    nodeColors[i3 + 1] = _tmpColor.g;
+    nodeColors[i3 + 2] = _tmpColor.b;
+
+    let size = (1.5 + wNorm * 4.0) * NODE_SIZE;
+    if (isSelected && hasHighlight) {
+      size *= 2.0; // selected node is large
+    } else if (isCurrentStep && !hasHighlight) {
+      size *= 1.3;
+    }
+    if (!isHighlighted && hasHighlight) {
+      size *= 0.6;
+    }
+    nodeSizes[node.id] = size;
+
+    sceneNodeData.push({ id: node.id, state: node.state, weight: node.weight, step: node.step });
+  }
+
+  const nodeGeo = new THREE.BufferGeometry();
+  nodeGeo.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
+  nodeGeo.setAttribute('color', new THREE.BufferAttribute(nodeColors, 3));
+  nodeGeo.setAttribute('size', new THREE.BufferAttribute(nodeSizes, 1));
+
+  const nodeMatMW = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uTime: { value: 0.0 }
+    },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      uniform float uPixelRatio;
+      void main() {
+        vColor = color;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * uPixelRatio * (120.0 / -mvPos.z);
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, d);
+        gl_FragColor = vec4(vColor * 1.2, alpha * 0.85);
+      }
+    `
+  });
+
+  const nodePoints = new THREE.Points(nodeGeo, nodeMatMW);
+  multiwayGroup.add(nodePoints);
+  currentNodePoints = nodePoints;
+
+  // Evolution edges
+  const edgeVerts = new Float32Array(sys.edges.length * 6);
+  const edgeColors = new Float32Array(sys.edges.length * 6);
+
+  for (let i = 0; i < sys.edges.length; i++) {
+    const e = sys.edges[i];
+    const fromNode = sys.nodes[e.from];
+    const toNode = sys.nodes[e.to];
+    const i6 = i * 6;
+
+    edgeVerts[i6]     = fromNode.x * spreadScale;
+    edgeVerts[i6 + 1] = fromNode.y * STEP_SPACING;
+    edgeVerts[i6 + 2] = 0;
+    edgeVerts[i6 + 3] = toNode.x * spreadScale;
+    edgeVerts[i6 + 4] = toNode.y * STEP_SPACING;
+    edgeVerts[i6 + 5] = 0;
+
+    // Use ancestor/descendant sets for edge highlight (works for both Set and object formats)
+    const fromInPast = hlAncestors ? hlAncestors.has(e.from) : false;
+    const toInPast = hlAncestors ? hlAncestors.has(e.to) : false;
+    const fromInFuture = hlDescendants ? hlDescendants.has(e.from) : false;
+    const toInFuture = hlDescendants ? hlDescendants.has(e.to) : false;
+    const fromInHistory = fromInPast || fromInFuture;
+    const toInHistory = toInPast || toInFuture;
+    const isEdgeHighlighted = hasHighlight ? (fromInHistory && toInHistory) : true;
+    const wNorm = toNode.weight / maxWeight;
+
+    if (isEdgeHighlighted && hasHighlight) {
+      // Determine edge direction: past=lime, future=cyan, crossing=blend
+      const bothPast = fromInPast && toInPast;
+      const bothFuture = fromInFuture && toInFuture;
+      if (bothPast && !bothFuture) {
+        _tmpColor.copy(goldColor);
+      } else if (bothFuture && !bothPast) {
+        _tmpColor.copy(cyanColor);
+      } else {
+        _tmpColor.copy(goldColor).lerp(cyanColor, 0.5);
+      }
+      _tmpColor.multiplyScalar(0.3 + wNorm * 0.4);
+    } else {
+      _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.5, 0.15 + wNorm * 0.25);
+      if (!isEdgeHighlighted && hasHighlight) {
+        _tmpColor.multiplyScalar(dimFactor);
+      }
+    }
+
+    edgeColors[i6] = edgeColors[i6 + 3] = _tmpColor.r;
+    edgeColors[i6 + 1] = edgeColors[i6 + 4] = _tmpColor.g;
+    edgeColors[i6 + 2] = edgeColors[i6 + 5] = _tmpColor.b;
+  }
+
+  const edgeGeo = new THREE.BufferGeometry();
+  edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgeVerts, 3));
+  edgeGeo.setAttribute('color', new THREE.BufferAttribute(edgeColors, 3));
+  const edgeOpacity = highlightSet ? 0.5 : 0.35;
+  const edgeMat = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: edgeOpacity,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+  multiwayGroup.add(edgeLines);
+  currentEdgeLines = edgeLines;
+  savedEdgeOpacity = edgeOpacity;
+
+  // BRANCHIAL GRAPH
+  let finalStep = 0;
+  for (let s = sys.stepStates.length - 1; s >= 0; s--) {
+    if (sys.stepStates[s] && sys.stepStates[s].length > 0) { finalStep = s; break; }
+  }
+  const finalIds = sys.stepStates[finalStep] || [];
+  const branchialPositions = new Float32Array(finalIds.length * 3);
+  const branchialColors = new Float32Array(finalIds.length * 3);
+  const branchialSizes = new Float32Array(finalIds.length);
+
+  const bRadius = Math.max(finalIds.length * 0.15, 3);
+  for (let i = 0; i < finalIds.length; i++) {
+    const angle = (i / finalIds.length) * Math.PI * 2 - Math.PI / 2;
+    const i3 = i * 3;
+    branchialPositions[i3]     = Math.cos(angle) * bRadius;
+    branchialPositions[i3 + 1] = Math.sin(angle) * bRadius;
+    branchialPositions[i3 + 2] = 0;
+
+    const node = sys.nodes[finalIds[i]];
+    const wNorm = node.weight / maxWeight;
+    const nodeInPast = hlAncestors ? hlAncestors.has(finalIds[i]) : false;
+    const nodeInFuture = hlDescendants ? hlDescendants.has(finalIds[i]) : false;
+    const isHighlighted = hasHighlight ? (nodeInPast || nodeInFuture) : true;
+
+    if (isHighlighted && hasHighlight) {
+      if (nodeInPast && !nodeInFuture) {
+        _tmpColor.copy(goldColor);
+      } else if (nodeInFuture && !nodeInPast) {
+        _tmpColor.copy(cyanColor);
+      } else {
+        _tmpColor.copy(goldColor).lerp(cyanColor, 0.5);
+      }
+      _tmpColor.multiplyScalar(0.4 + wNorm * 0.6);
+    } else {
+      _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
+      if (!isHighlighted && hasHighlight) _tmpColor.multiplyScalar(dimFactor);
+    }
+
+    branchialColors[i3] = _tmpColor.r;
+    branchialColors[i3 + 1] = _tmpColor.g;
+    branchialColors[i3 + 2] = _tmpColor.b;
+    let sz = (1.5 + wNorm * 5.0) * NODE_SIZE;
+    if (!isHighlighted && hasHighlight) sz *= 0.5;
+    branchialSizes[i] = sz;
+  }
+
+  const branchialNodeGeo = new THREE.BufferGeometry();
+  branchialNodeGeo.setAttribute('position', new THREE.BufferAttribute(branchialPositions, 3));
+  branchialNodeGeo.setAttribute('color', new THREE.BufferAttribute(branchialColors, 3));
+  branchialNodeGeo.setAttribute('size', new THREE.BufferAttribute(branchialSizes, 1));
+
+  const branchialNodeMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      uniform float uPixelRatio;
+      void main() {
+        vColor = color;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * uPixelRatio * (120.0 / -mvPos.z);
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, d);
+        gl_FragColor = vec4(vColor * 1.2, alpha * 0.85);
+      }
+    `
+  });
+
+  const branchialPoints = new THREE.Points(branchialNodeGeo, branchialNodeMat);
+  branchialGroup.add(branchialPoints);
+
+  // Branchial edges
+  const idToFinalIdx = new Map();
+  for (let i = 0; i < finalIds.length; i++) idToFinalIdx.set(finalIds[i], i);
+
+  const bEdgeVerts = new Float32Array(sys.branchialEdges.length * 6);
+  const bEdgeColors = new Float32Array(sys.branchialEdges.length * 6);
+
+  for (let i = 0; i < sys.branchialEdges.length; i++) {
+    const e = sys.branchialEdges[i];
+    const fi = idToFinalIdx.get(e.from);
+    const fj = idToFinalIdx.get(e.to);
+    if (fi === undefined || fj === undefined) continue;
+
+    const i6 = i * 6;
+    bEdgeVerts[i6]     = branchialPositions[fi * 3];
+    bEdgeVerts[i6 + 1] = branchialPositions[fi * 3 + 1];
+    bEdgeVerts[i6 + 2] = 0;
+    bEdgeVerts[i6 + 3] = branchialPositions[fj * 3];
+    bEdgeVerts[i6 + 4] = branchialPositions[fj * 3 + 1];
+    bEdgeVerts[i6 + 5] = 0;
+
+    bEdgeColors[i6] = bEdgeColors[i6 + 3] = 0.2;
+    bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.5;
+    bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.4;
+  }
+
+  const bEdgeGeo = new THREE.BufferGeometry();
+  bEdgeGeo.setAttribute('position', new THREE.BufferAttribute(bEdgeVerts, 3));
+  bEdgeGeo.setAttribute('color', new THREE.BufferAttribute(bEdgeColors, 3));
+  const bEdgeMat = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.25,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  branchialGroup.add(new THREE.LineSegments(bEdgeGeo, bEdgeMat));
+
+  branchialGroup.position.set(spreadScale + bRadius + 8, -(totalSteps * STEP_SPACING) / 2, 0);
+
+  // ── CAUSAL GRAPH ──
+  if (sys.causalEvents && sys.causalEvents.length > 0) {
+    const causalColor = new THREE.Color('#FF6B35'); // warm orange for events
+    const causalPastColor = new THREE.Color('#CCFF00');
+    const causalFutureColor = new THREE.Color('#00F0FF');
+
+    // Determine highlight sets for causal events
+    let hlCausalPast = null, hlCausalFuture = null, hlCausalSelected = null;
+    const hasCausalHighlight = (hasHighlight && hlSelectedId !== null) || hlCausalEventOnly;
+
+    if (hlCausalEventOnly) {
+      // Direct causal event selection — highlight that event's cone
+      const selEvtId = highlightSet.causalEventId;
+      hlCausalSelected = selEvtId;
+      const cone = sys.traceCausalEventCone(selEvtId);
+      hlCausalPast = cone.pastCone;
+      hlCausalFuture = cone.futureCone;
+    } else if (hasHighlight && hlSelectedId !== null) {
+      // State node selection — find events connected to the selected state node
+      const touchEvents = sys.getEventsForNode(hlSelectedId);
+      if (touchEvents.length > 0) {
+        // Use the first event as the selected event and trace its cone
+        const selEvent = touchEvents[0];
+        hlCausalSelected = selEvent.id;
+        const cone = sys.traceCausalEventCone(selEvent.id);
+        hlCausalPast = cone.pastCone;
+        hlCausalFuture = cone.futureCone;
+      }
+    }
+
+    const cEvtCount = sys.causalEvents.length;
+    const cPositions = new Float32Array(cEvtCount * 3);
+    const cColors = new Float32Array(cEvtCount * 3);
+    const cSizes = new Float32Array(cEvtCount);
+
+    for (let i = 0; i < cEvtCount; i++) {
+      const ev = sys.causalEvents[i];
+      const parentNode = sys.nodes[ev.parentNodeId];
+      const childNode = sys.nodes[ev.childNodeId];
+
+      // Position: midpoint between parent and child state, offset in Z
+      const px = (parentNode.x + childNode.x) / 2 * spreadScale;
+      const py = ((parentNode.y + childNode.y) / 2) * STEP_SPACING;
+      const pz = 3; // offset into Z so causal graph sits in front
+
+      cPositions[i * 3] = px;
+      cPositions[i * 3 + 1] = py;
+      cPositions[i * 3 + 2] = pz;
+
+      // Coloring
+      const inPast = hlCausalPast ? hlCausalPast.has(ev.id) : false;
+      const inFuture = hlCausalFuture ? hlCausalFuture.has(ev.id) : false;
+      const isSelected = hlCausalSelected === ev.id;
+      const inCone = inPast || inFuture || isSelected;
+
+      if (isSelected) {
+        _tmpColor.set('#FFFFFF');
+      } else if (inPast && !inFuture) {
+        _tmpColor.copy(causalPastColor).multiplyScalar(0.8);
+      } else if (inFuture && !inPast) {
+        _tmpColor.copy(causalFutureColor).multiplyScalar(0.8);
+      } else if (hasCausalHighlight && !inCone) {
+        _tmpColor.copy(causalColor).multiplyScalar(0.12);
+      } else {
+        _tmpColor.copy(causalColor).multiplyScalar(0.6);
+      }
+
+      cColors[i * 3] = _tmpColor.r;
+      cColors[i * 3 + 1] = _tmpColor.g;
+      cColors[i * 3 + 2] = _tmpColor.b;
+
+      let sz = 2.5 * NODE_SIZE;
+      if (isSelected) sz *= 2.0;
+      if (hasCausalHighlight && !inCone) sz *= 0.5;
+      cSizes[i] = sz;
+
+      sceneCausalData.push({
+        eventId: ev.id,
+        ruleIdx: ev.ruleIdx,
+        position: ev.position,
+        step: ev.step,
+        parentState: parentNode.state,
+        childState: childNode.state
+      });
+    }
+
+    const cGeo = new THREE.BufferGeometry();
+    cGeo.setAttribute('position', new THREE.BufferAttribute(cPositions, 3));
+    cGeo.setAttribute('color', new THREE.BufferAttribute(cColors, 3));
+    cGeo.setAttribute('size', new THREE.BufferAttribute(cSizes, 1));
+
+    const cMat = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      vertexColors: true,
+      uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
+      vertexShader: `
+        attribute float size;
+        varying vec3 vColor;
+        uniform float uPixelRatio;
+        void main() {
+          vColor = color;
+          vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * uPixelRatio * (300.0 / -mvPos.z);
+          gl_Position = projectionMatrix * mvPos;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          vec2 uv = gl_PointCoord - 0.5;
+          float d = length(uv);
+          if (d > 0.5) discard;
+          // Diamond shape for events (vs circles for states)
+          float diamond = abs(uv.x) + abs(uv.y);
+          if (diamond > 0.5) discard;
+          float alpha = smoothstep(0.5, 0.15, diamond);
+          gl_FragColor = vec4(vColor * 1.4, alpha * 0.9);
+        }
+      `
+    });
+
+    const cPoints = new THREE.Points(cGeo, cMat);
+    causalGroup.add(cPoints);
+    currentCausalPoints = cPoints;
+
+    // Causal edges
+    if (sys.causalEdges.length > 0) {
+      const ceVerts = new Float32Array(sys.causalEdges.length * 6);
+      const ceColors = new Float32Array(sys.causalEdges.length * 6);
+
+      for (let i = 0; i < sys.causalEdges.length; i++) {
+        const ce = sys.causalEdges[i];
+        const evFrom = sys.causalEvents[ce.from];
+        const evTo = sys.causalEvents[ce.to];
+        if (!evFrom || !evTo) continue;
+
+        const fromIdx = ce.from;
+        const toIdx = ce.to;
+        const i6 = i * 6;
+
+        ceVerts[i6]     = cPositions[fromIdx * 3];
+        ceVerts[i6 + 1] = cPositions[fromIdx * 3 + 1];
+        ceVerts[i6 + 2] = cPositions[fromIdx * 3 + 2];
+        ceVerts[i6 + 3] = cPositions[toIdx * 3];
+        ceVerts[i6 + 4] = cPositions[toIdx * 3 + 1];
+        ceVerts[i6 + 5] = cPositions[toIdx * 3 + 2];
+
+        // Edge color
+        const fromInCone = hlCausalPast ? (hlCausalPast.has(ce.from) || (hlCausalFuture && hlCausalFuture.has(ce.from))) : false;
+        const toInCone = hlCausalPast ? (hlCausalPast.has(ce.to) || (hlCausalFuture && hlCausalFuture.has(ce.to))) : false;
+        const edgeInCone = fromInCone && toInCone;
+
+        if (edgeInCone && hasCausalHighlight) {
+          _tmpColor.copy(causalColor).multiplyScalar(0.7);
+        } else if (hasCausalHighlight) {
+          _tmpColor.copy(causalColor).multiplyScalar(0.06);
+        } else {
+          _tmpColor.copy(causalColor).multiplyScalar(0.25);
+        }
+
+        ceColors[i6] = ceColors[i6 + 3] = _tmpColor.r;
+        ceColors[i6 + 1] = ceColors[i6 + 4] = _tmpColor.g;
+        ceColors[i6 + 2] = ceColors[i6 + 5] = _tmpColor.b;
+      }
+
+      const ceGeo = new THREE.BufferGeometry();
+      ceGeo.setAttribute('position', new THREE.BufferAttribute(ceVerts, 3));
+      ceGeo.setAttribute('color', new THREE.BufferAttribute(ceColors, 3));
+      const ceMat = new THREE.LineBasicMaterial({
+        vertexColors: true, transparent: true, opacity: 0.4,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      });
+      causalGroup.add(new THREE.LineSegments(ceGeo, ceMat));
+    }
+  }
+
+  updateViewVisibility();
+  fitCamera(sys);
+
+  // Save original colors/sizes for hover highlight restore
+  if (currentNodePoints) {
+    const nc = currentNodePoints.geometry.getAttribute('color');
+    const ns = currentNodePoints.geometry.getAttribute('size');
+    savedNodeColors = new Float32Array(nc.array);
+    savedNodeSizes = new Float32Array(ns.array);
+  }
+  if (currentEdgeLines) {
+    const ec = currentEdgeLines.geometry.getAttribute('color');
+    savedEdgeColors = new Float32Array(ec.array);
+  }
+}
+
+function fitCamera(sys) {
+  if (!sys) return;
+  const totalSteps = sys.getTotalSteps();
+  const centerY = -(totalSteps * STEP_SPACING) / 2;
+
+  if (currentView === 'branchial') {
+    controls.target.set(branchialGroup.position.x, branchialGroup.position.y, 0);
+    camera.position.set(branchialGroup.position.x, branchialGroup.position.y, 25);
+  } else if (currentView === 'causal') {
+    // Focus on causal graph layer (z=3 offset)
+    controls.target.set(0, centerY, 3);
+    camera.position.set(0, centerY + 5, 38);
+  } else if (currentView === 'both') {
+    const midX = branchialGroup.position.x / 2;
+    controls.target.set(midX, centerY, 1.5);
+    camera.position.set(midX, centerY + 5, 50);
+  } else {
+    controls.target.set(0, centerY, 0);
+    camera.position.set(0, centerY + 5, 35);
+  }
+}
+
+function updateViewVisibility() {
+  multiwayGroup.visible = currentView === 'multiway' || currentView === 'both';
+  branchialGroup.visible = currentView === 'branchial' || currentView === 'both';
+  causalGroup.visible = currentView === 'causal' || currentView === 'both';
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 5: 2D CANVAS PLOTS
+// ═══════════════════════════════════════════════════════════════
+
+// Store branchial node positions for click/hover detection
+let branchialCanvasNodes = []; // [{x, y, nodeId, radius, state, weight}]
+
+function drawIntensityPlot(sys, analyticalFn, filterNodeIds) {
+  const canvas = document.getElementById('intensity-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+
+  ctx.clearRect(0, 0, w, h);
+
+  if (!sys) return;
+
+  const pattern = sys.getIntensityPattern(filterNodeIds);
+  if (pattern.normalized.length === 0) return;
+
+  const pad = 20;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+
+  // Draw analytical comparison (dashed line) — only for sorting presets and no filter
+  if (analyticalFn && !filterNodeIds) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.setLineDash([3, 3]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let px = 0; px <= plotW; px++) {
+      const x = (px / plotW) * 2 - 1;
+      const val = analyticalFn(x);
+      const py = pad + plotH * (1 - val);
+      if (px === 0) ctx.moveTo(pad + px, py);
+      else ctx.lineTo(pad + px, py);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw multiway-derived pattern (solid bars)
+  const barW = Math.max(plotW / pattern.normalized.length - 1, 2);
+  for (let i = 0; i < pattern.normalized.length; i++) {
+    const x = pad + (i / (pattern.normalized.length - 1)) * plotW - barW / 2;
+    const barH = pattern.normalized[i] * plotH;
+    const intensity = pattern.normalized[i];
+
+    let r, g, b;
+    if (filterNodeIds) {
+      // Gold-tinted bars when filtered
+      r = Math.floor(100 + intensity * 104);
+      g = Math.floor(140 + intensity * 115);
+      b = Math.floor(0 + intensity * 30);
+    } else {
+      r = Math.floor(40 + intensity * 80);
+      g = Math.floor(80 + intensity * 200);
+      b = Math.floor(120 + intensity * 135);
+    }
+    ctx.fillStyle = `rgba(${r},${g},${b},${0.5 + intensity * 0.5})`;
+    ctx.fillRect(x, pad + plotH - barH, barW, barH);
+  }
+
+  // Axes labels
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '9px Inter';
+  ctx.textAlign = 'center';
+  ctx.fillText('Screen Position', w / 2, h - 2);
+  ctx.save();
+  ctx.translate(8, h / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Intensity (|ψ|²)', 0, 0);
+  ctx.restore();
+
+  // Legend
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'right';
+  if (analyticalFn && !filterNodeIds) {
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillText('─ ─ Analytical', w - pad, pad - 4);
+  }
+  if (filterNodeIds) {
+    ctx.fillStyle = 'rgba(204,255,0,0.5)';
+    ctx.fillText('██ Observer branch', w - pad, pad - 4);
+  } else {
+    ctx.fillStyle = 'rgba(100,200,255,0.4)';
+    ctx.fillText('██ Multiway weights', w - pad, analyticalFn ? pad + 6 : pad - 4);
+  }
+}
+
+function drawBranchialPlot(sys, highlightNodeId) {
+  const canvas = document.getElementById('branchial-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+
+  ctx.clearRect(0, 0, w, h);
+
+  branchialCanvasNodes = [];
+
+  if (!sys) return;
+
+  let finalStep = 0;
+  for (let s = sys.stepStates.length - 1; s >= 0; s--) {
+    if (sys.stepStates[s] && sys.stepStates[s].length > 0) { finalStep = s; break; }
+  }
+  const finalIds = sys.stepStates[finalStep] || [];
+  if (finalIds.length === 0) return;
+
+  const maxWeight = Math.max(...finalIds.map(id => sys.nodes[id].weight), 1);
+
+  const cx = w / 2, cy = h / 2;
+  const radius = Math.min(w, h) * 0.35;
+
+  // Build ancestry set for the highlight (if any)
+  let ancestrySet = null;
+  if (highlightNodeId !== null && highlightNodeId !== undefined) {
+    ancestrySet = sys.traceAncestry(highlightNodeId);
+  }
+
+  // Draw branchial edges
+  const idToIdx = new Map();
+  for (let i = 0; i < finalIds.length; i++) idToIdx.set(finalIds[i], i);
+
+  ctx.lineWidth = 0.5;
+  for (const e of sys.branchialEdges) {
+    const fi = idToIdx.get(e.from);
+    const fj = idToIdx.get(e.to);
+    if (fi === undefined || fj === undefined) continue;
+    const a1 = (fi / finalIds.length) * Math.PI * 2 - Math.PI / 2;
+    const a2 = (fj / finalIds.length) * Math.PI * 2 - Math.PI / 2;
+
+    if (ancestrySet) {
+      const highlighted = ancestrySet.has(e.from) && ancestrySet.has(e.to);
+      ctx.strokeStyle = highlighted ? 'rgba(204,255,0,0.3)' : 'rgba(80,200,160,0.06)';
+    } else {
+      ctx.strokeStyle = 'rgba(80,200,160,0.15)';
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a1) * radius, cy + Math.sin(a1) * radius);
+    ctx.lineTo(cx + Math.cos(a2) * radius, cy + Math.sin(a2) * radius);
+    ctx.stroke();
+  }
+
+  // Draw nodes
+  for (let i = 0; i < finalIds.length; i++) {
+    const angle = (i / finalIds.length) * Math.PI * 2 - Math.PI / 2;
+    const node = sys.nodes[finalIds[i]];
+    const wNorm = node.weight / maxWeight;
+    const nx = cx + Math.cos(angle) * radius;
+    const ny = cy + Math.sin(angle) * radius;
+    const size = 2 + wNorm * 4;
+
+    const isSelected = highlightNodeId === finalIds[i];
+    const isAncestry = ancestrySet ? ancestrySet.has(finalIds[i]) : false;
+
+    ctx.beginPath();
+    ctx.arc(nx, ny, size, 0, Math.PI * 2);
+
+    if (isSelected) {
+      ctx.fillStyle = 'rgba(204,255,0,0.95)';
+    } else if (isAncestry) {
+      ctx.fillStyle = `rgba(204,255,0,${0.4 + wNorm * 0.4})`;
+    } else if (ancestrySet) {
+      // Dimmed
+      const r = Math.floor(40 + wNorm * 100);
+      const g = Math.floor(120 + wNorm * 135);
+      const b = Math.floor(200 + wNorm * 55);
+      ctx.fillStyle = `rgba(${r},${g},${b},${0.1})`;
+    } else {
+      const r = Math.floor(40 + wNorm * 100);
+      const g = Math.floor(120 + wNorm * 135);
+      const b = Math.floor(200 + wNorm * 55);
+      ctx.fillStyle = `rgba(${r},${g},${b},${0.4 + wNorm * 0.6})`;
+    }
+    ctx.fill();
+
+    // Store for click/hover detection
+    branchialCanvasNodes.push({
+      x: nx, y: ny, nodeId: finalIds[i], radius: size + 3,
+      state: node.state, weight: node.weight
+    });
+  }
+
+  // Label
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${finalIds.length} states, ${sys.branchialEdges.length} connections, dim ≈ ${sys._estimateBranchialDim()}D`, cx, h - 6);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 6: RULE EDITOR & UI WIRING
+// ═══════════════════════════════════════════════════════════════
+
+const statusBar = document.getElementById('status-bar');
+const completionLog = document.getElementById('completion-log');
+const statsContainer = document.getElementById('stats-container');
+const ruleEditorEl = document.getElementById('rule-editor');
+const initStateEl = document.getElementById('init-state');
+const safetyWarningEl = document.getElementById('safety-warning');
+const presetGalleryEl = document.getElementById('preset-gallery');
+const tooltipEl = document.getElementById('tooltip');
+const ttStateEl = document.getElementById('tt-state');
+const ttWeightEl = document.getElementById('tt-weight');
+const observerStateEl = document.getElementById('observer-state');
+const observerClearBtn = document.getElementById('observer-clear');
+const observerAnalysisEl = document.getElementById('observer-analysis');
+
+let editorRules = [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}];
+let activePresetKey = 'double';
+
+function renderRuleEditor() {
+  ruleEditorEl.innerHTML = editorRules.map((rule, i) => `
+    <div class="rule-row">
+      <input type="text" class="rule-from" data-idx="${i}" value="${rule.from}" spellcheck="false" placeholder="LHS">
+      <span class="rule-arrow">→</span>
+      <input type="text" class="rule-to" data-idx="${i}" value="${rule.to}" spellcheck="false" placeholder="RHS">
+      ${editorRules.length > 1 ? `<button class="rule-remove" data-idx="${i}">×</button>` : ''}
+    </div>
+  `).join('');
+
+  ruleEditorEl.querySelectorAll('.rule-from').forEach(el => {
+    el.addEventListener('input', e => {
+      editorRules[+e.target.dataset.idx].from = e.target.value;
+      clearActivePreset();
+      updateSafetyWarning();
+    });
+  });
+  ruleEditorEl.querySelectorAll('.rule-to').forEach(el => {
+    el.addEventListener('input', e => {
+      editorRules[+e.target.dataset.idx].to = e.target.value;
+      clearActivePreset();
+      updateSafetyWarning();
+    });
+  });
+  ruleEditorEl.querySelectorAll('.rule-remove').forEach(el => {
+    el.addEventListener('click', e => {
+      editorRules.splice(+e.target.dataset.idx, 1);
+      clearActivePreset();
+      renderRuleEditor();
+    });
+  });
+
+  updateSafetyWarning();
+}
+
+function updateSafetyWarning() {
+  const hasGrowth = editorRules.some(r => r.to.length > r.from.length);
+  safetyWarningEl.style.display = hasGrowth ? 'block' : 'none';
+}
+
+function clearActivePreset() {
+  activePresetKey = null;
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+}
+
+// Preset gallery
+function renderPresetGallery() {
+  let html = '';
+  let lastCategory = '';
+  for (const p of PRESETS) {
+    if (p.category !== lastCategory) {
+      html += `<div class="preset-category" style="width:100%">${p.category}</div>`;
+      lastCategory = p.category;
+    }
+    const active = p.key === activePresetKey ? ' active' : '';
+    html += `<button class="preset-chip${active}" data-key="${p.key}" title="${p.desc}">${p.label}</button>`;
+  }
+  presetGalleryEl.innerHTML = html;
+
+  presetGalleryEl.querySelectorAll('.preset-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const preset = PRESET_MAP[chip.dataset.key];
+      if (!preset) return;
+      loadPreset(preset);
+    });
+  });
+}
+
+function loadPreset(preset) {
+  activePresetKey = preset.key;
+  editorRules = preset.rules.map(r => ({...r}));
+  initStateEl.value = preset.initial;
+  renderRuleEditor();
+  renderPresetGallery();
+  clearObserver();
+  if (interactiveMode) {
+    resetInteractive();
+  } else {
+    runEvolution();
+  }
+}
+
+function getCurrentRules() {
+  return editorRules.filter(r => r.from.length > 0 && r.to.length > 0);
+}
+
+function getCurrentAnalytical() {
+  if (!activePresetKey) return null;
+  const preset = PRESET_MAP[activePresetKey];
+  return preset ? preset.analytical : null;
+}
+
+function getCurrentSlitCount() {
+  if (!activePresetKey) return 0;
+  const preset = PRESET_MAP[activePresetKey];
+  return preset ? preset.slitCount : 0;
+}
+
+// Stats & completion
+function updateStats(sys) {
+  if (!sys) return;
+  const pattern = sys.getIntensityPattern();
+  let totalEdges = sys.edges.length;
+  let totalWeight = 0;
+  let finalStep = 0;
+  for (let s = sys.stepStates.length - 1; s >= 0; s--) {
+    if (sys.stepStates[s] && sys.stepStates[s].length > 0) { finalStep = s; break; }
+  }
+  const finalIds = sys.stepStates[finalStep] || [];
+  for (const id of finalIds) totalWeight += sys.nodes[id].weight;
+
+  const stats = [
+    ['Total States', sys.nodes.length],
+    ['Total Edges', totalEdges],
+    ['Final Step States', finalIds.length],
+    ['Total Path Weight', totalWeight],
+    ['Branchial Edges', sys.branchialEdges.length],
+    ['Branchial Dimension', `${sys._estimateBranchialDim()}D`],
+    ['Evolution Steps', finalStep],
+  ];
+  if (sys.truncated) {
+    stats.push(['Truncated', 'Yes — hit state limit']);
+  }
+
+  statsContainer.innerHTML = stats.map(([label, value]) =>
+    `<div class="stat-row"><span class="stat-label">${label}</span><span class="stat-value">${value}</span></div>`
+  ).join('');
+}
+
+function updateCompletionLog(sys) {
+  if (!sys) return;
+  const log = sys.analyzeCompletion();
+  completionLog.innerHTML = log.map(entry =>
+    `<div class="log-${entry.type}">${entry.text}</div>`
+  ).join('');
+}
+
+// ─── Hover highlight: update GPU buffers in-place for instant path preview ───
+const _hoverGold = new THREE.Color('#CCFF00');
+const _hoverCyan = new THREE.Color('#00F0FF');
+const _hoverWhite = new THREE.Color('#FFFFFF');
+const _hoverTmp = new THREE.Color();
+
+function applyHoverHighlight(nodeId) {
+  if (!currentSystem || !currentNodePoints || !currentEdgeLines) return;
+  if (!savedNodeColors || !savedEdgeColors) return;
+  // Don't override a click-selected observer
+  if (selectedObserverNodeId !== null) return;
+  if (hoverHighlightNodeId === nodeId) return; // already highlighted
+  hoverHighlightNodeId = nodeId;
+
+  const { ancestors, descendants } = currentSystem.traceCausalHistory(nodeId);
+  const sys = currentSystem;
+  const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
+  const dimFactor = 0.15;
+
+  // Update node colors and sizes in-place
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nSizes = currentNodePoints.geometry.getAttribute('size');
+  const nc = nColors.array;
+  const ns = nSizes.array;
+
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const nid = nd.id;
+    const wNorm = nd.weight / maxWeight;
+    const isAncestor = ancestors.has(nid);
+    const isDescendant = descendants.has(nid);
+    const isSelected = nid === nodeId;
+    const isHighlighted = isAncestor || isDescendant || isSelected;
+
+    if (isSelected) {
+      _hoverTmp.copy(_hoverWhite);
+    } else if (isAncestor && isDescendant) {
+      _hoverTmp.copy(_hoverGold).lerp(_hoverCyan, 0.5).multiplyScalar(0.5 + wNorm * 0.5);
+    } else if (isAncestor) {
+      _hoverTmp.copy(_hoverGold).multiplyScalar(0.3 + wNorm * 0.7);
+    } else if (isDescendant) {
+      _hoverTmp.copy(_hoverCyan).multiplyScalar(0.3 + wNorm * 0.7);
+    } else {
+      // Dim non-cone nodes from saved originals
+      const i3 = i * 3;
+      _hoverTmp.setRGB(savedNodeColors[i3], savedNodeColors[i3+1], savedNodeColors[i3+2]);
+      _hoverTmp.multiplyScalar(dimFactor);
+    }
+    const i3 = i * 3;
+    nc[i3] = _hoverTmp.r;
+    nc[i3+1] = _hoverTmp.g;
+    nc[i3+2] = _hoverTmp.b;
+
+    // Adjust sizes
+    if (isSelected) {
+      ns[i] = savedNodeSizes[i] * 2.0;
+    } else if (!isHighlighted) {
+      ns[i] = savedNodeSizes[i] * 0.6;
+    } else {
+      ns[i] = savedNodeSizes[i];
+    }
+  }
+  nColors.needsUpdate = true;
+  nSizes.needsUpdate = true;
+
+  // Update edge colors in-place
+  const eColors = currentEdgeLines.geometry.getAttribute('color');
+  const ec = eColors.array;
+  for (let i = 0; i < sys.edges.length; i++) {
+    const e = sys.edges[i];
+    const fromInPast = ancestors.has(e.from);
+    const toInPast = ancestors.has(e.to);
+    const fromInFuture = descendants.has(e.from);
+    const toInFuture = descendants.has(e.to);
+    const fromInHistory = fromInPast || fromInFuture;
+    const toInHistory = toInPast || toInFuture;
+    const isEdgeHighlighted = fromInHistory && toInHistory;
+    const toNode = sys.nodes[e.to];
+    const wNorm = toNode.weight / maxWeight;
+    const i6 = i * 6;
+
+    if (isEdgeHighlighted) {
+      const bothPast = fromInPast && toInPast;
+      const bothFuture = fromInFuture && toInFuture;
+      if (bothPast && !bothFuture) {
+        _hoverTmp.copy(_hoverGold);
+      } else if (bothFuture && !bothPast) {
+        _hoverTmp.copy(_hoverCyan);
+      } else {
+        _hoverTmp.copy(_hoverGold).lerp(_hoverCyan, 0.5);
+      }
+      _hoverTmp.multiplyScalar(0.3 + wNorm * 0.4);
+    } else {
+      _hoverTmp.setRGB(savedEdgeColors[i6], savedEdgeColors[i6+1], savedEdgeColors[i6+2]);
+      _hoverTmp.multiplyScalar(dimFactor);
+    }
+    ec[i6] = ec[i6+3] = _hoverTmp.r;
+    ec[i6+1] = ec[i6+4] = _hoverTmp.g;
+    ec[i6+2] = ec[i6+5] = _hoverTmp.b;
+  }
+  eColors.needsUpdate = true;
+  currentEdgeLines.material.opacity = 0.5;
+}
+
+function clearHoverHighlight() {
+  if (hoverHighlightNodeId === null) return;
+  if (selectedObserverNodeId !== null) return; // click selection active, don't restore
+  hoverHighlightNodeId = null;
+
+  if (currentNodePoints && savedNodeColors && savedNodeSizes) {
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    const nSizes = currentNodePoints.geometry.getAttribute('size');
+    nColors.array.set(savedNodeColors);
+    nSizes.array.set(savedNodeSizes);
+    nColors.needsUpdate = true;
+    nSizes.needsUpdate = true;
+  }
+  if (currentEdgeLines && savedEdgeColors) {
+    const eColors = currentEdgeLines.geometry.getAttribute('color');
+    eColors.array.set(savedEdgeColors);
+    eColors.needsUpdate = true;
+    currentEdgeLines.material.opacity = savedEdgeOpacity;
+  }
+}
+
+// ─── Keyboard navigation: arrow keys to traverse the graph ───
+function navigateToNode(nodeId) {
+  if (!currentSystem) return;
+  const node = currentSystem.nodes[nodeId];
+  if (!node) return;
+
+  // Select the node (full observer analysis + highlighting)
+  selectCausalHistory(nodeId);
+
+  // Smooth-pan camera to center on the selected node
+  const targetX = node.x * sceneSpreadScale;
+  const targetY = node.y * STEP_SPACING;
+  const camZ = camera.position.z;
+
+  // Animate camera + controls.target over ~300ms
+  const startTarget = controls.target.clone();
+  const startPos = camera.position.clone();
+  const endTarget = new THREE.Vector3(targetX, targetY, startTarget.z);
+  const endPos = new THREE.Vector3(targetX, targetY + (startPos.y - startTarget.y), camZ);
+  const duration = 300;
+  const t0 = performance.now();
+
+  function animateNav() {
+    const elapsed = performance.now() - t0;
+    const t = Math.min(elapsed / duration, 1);
+    // Ease-out cubic
+    const ease = 1 - Math.pow(1 - t, 3);
+    controls.target.lerpVectors(startTarget, endTarget, ease);
+    camera.position.lerpVectors(startPos, endPos, ease);
+    controls.update();
+    if (t < 1) requestAnimationFrame(animateNav);
+  }
+  animateNav();
+}
+
+function getKeyboardNeighbor(direction) {
+  if (!currentSystem || selectedObserverNodeId === null) return null;
+  const sys = currentSystem;
+  const node = sys.nodes[selectedObserverNodeId];
+  if (!node) return null;
+
+  sys._ensureAdjacencyMaps();
+
+  if (direction === 'up') {
+    // Move to nearest parent (one step back)
+    const parents = sys._childToParents.get(node.id) || [];
+    if (parents.length === 0) return null;
+    if (parents.length === 1) return parents[0];
+    // Pick parent closest in x-position
+    let bestId = parents[0];
+    let bestDist = Math.abs(sys.nodes[parents[0]].x - node.x);
+    for (let i = 1; i < parents.length; i++) {
+      const d = Math.abs(sys.nodes[parents[i]].x - node.x);
+      if (d < bestDist) { bestDist = d; bestId = parents[i]; }
+    }
+    return bestId;
+  }
+
+  if (direction === 'down') {
+    // Move to nearest child (one step forward)
+    const children = sys._parentToChildren.get(node.id) || [];
+    if (children.length === 0) return null;
+    if (children.length === 1) return children[0];
+    // Pick child closest in x-position
+    let bestId = children[0];
+    let bestDist = Math.abs(sys.nodes[children[0]].x - node.x);
+    for (let i = 1; i < children.length; i++) {
+      const d = Math.abs(sys.nodes[children[i]].x - node.x);
+      if (d < bestDist) { bestDist = d; bestId = children[i]; }
+    }
+    return bestId;
+  }
+
+  if (direction === 'left' || direction === 'right') {
+    // Move to sibling at the same step, sorted by x-position
+    const stepIds = sys.stepStates[node.step] || [];
+    if (stepIds.length <= 1) return null;
+    // Sort by x-position
+    const sorted = [...stepIds].sort((a, b) => sys.nodes[a].x - sys.nodes[b].x);
+    const idx = sorted.indexOf(node.id);
+    if (idx === -1) return null;
+    if (direction === 'left') {
+      return idx > 0 ? sorted[idx - 1] : sorted[sorted.length - 1]; // wrap around
+    } else {
+      return idx < sorted.length - 1 ? sorted[idx + 1] : sorted[0]; // wrap around
+    }
+  }
+
+  return null;
+}
+
+document.addEventListener('keydown', (e) => {
+  // Only handle arrow keys when a node is selected and no input is focused
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (!currentSystem || selectedObserverNodeId === null) return;
+
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    clearObserver();
+    return;
+  }
+
+  const dirMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+  const dir = dirMap[e.key];
+  if (!dir) return;
+
+  e.preventDefault(); // prevent page scroll
+  const nextId = getKeyboardNeighbor(dir);
+  if (nextId !== null) {
+    navigateToNode(nextId);
+  }
+});
+
+// ─── Observer functions ───
+function clearObserver() {
+  selectedObserverNodeId = null;
+  selectedCausalEventId = null;
+  ancestryHighlightSet = null;
+  hoverHighlightNodeId = null;
+  observerStateEl.style.display = 'none';
+  observerClearBtn.style.display = 'none';
+  observerAnalysisEl.style.display = 'none';
+  observerAnalysisEl.innerHTML = '';
+  observerStateEl.textContent = '';
+  if (currentSystem) {
+    buildScene(currentSystem);
+    drawIntensityPlot(currentSystem, getCurrentAnalytical());
+    drawBranchialPlot(currentSystem);
+  }
+}
+
+function selectObserverNode(nodeId) {
+  // Delegate to full causal history selection
+  selectCausalHistory(nodeId);
+}
+
+function selectCausalHistory(nodeId) {
+  if (!currentSystem) return;
+  const node = currentSystem.nodes[nodeId];
+  if (!node) return;
+
+  selectedObserverNodeId = nodeId;
+  const { full, ancestors, descendants } = currentSystem.traceCausalHistory(nodeId);
+  ancestryHighlightSet = full; // keep for other code that checks this
+
+  observerStateEl.textContent = `${node.state}  (step ${node.step})`;
+  observerStateEl.style.display = 'block';
+  observerClearBtn.style.display = 'inline-block';
+
+  // Get final step IDs that are in the causal cone
+  let finalStep = 0;
+  for (let s = currentSystem.stepStates.length - 1; s >= 0; s--) {
+    if (currentSystem.stepStates[s] && currentSystem.stepStates[s].length > 0) { finalStep = s; break; }
+  }
+  const finalIds = currentSystem.stepStates[finalStep] || [];
+  const filteredFinalIds = finalIds.filter(id => full.has(id));
+
+  // Build scene with directional coloring: ancestors=lime, descendants=cyan
+  buildScene(currentSystem, { ancestors, descendants, selectedId: nodeId });
+  drawIntensityPlot(currentSystem, getCurrentAnalytical(), filteredFinalIds.length > 0 ? filteredFinalIds : null);
+
+  // Highlight on branchial graph if selected node is on final step
+  if (node.step === finalStep) {
+    drawBranchialPlot(currentSystem, nodeId);
+  } else {
+    drawBranchialPlot(currentSystem);
+  }
+
+  // Build observer analysis
+  renderObserverAnalysis(nodeId);
+}
+
+function renderObserverAnalysis(nodeId) {
+  const a = currentSystem.analyzeObserver(nodeId);
+  if (!a) { observerAnalysisEl.style.display = 'none'; return; }
+
+  const pct = (v) => (v * 100).toFixed(1);
+
+  // Determine slit association narrative
+  let slitNarrative = '';
+  if (a.xCount >= 2) {
+    if (Math.abs(a.slitBias) < 1) {
+      slitNarrative = `Photons centered — this branch sees <strong>both slits equally</strong>, consistent with a superposition that hasn't decohered to one path.`;
+    } else if (a.slitBias < 0) {
+      slitNarrative = `Photon positions biased left (Δ≈${a.slitBias.toFixed(1)}) — this observer's history is weighted toward the <strong>left slit</strong>.`;
+    } else {
+      slitNarrative = `Photon positions biased right (Δ≈+${a.slitBias.toFixed(1)}) — this observer's history is weighted toward the <strong>right slit</strong>.`;
+    }
+  } else if (a.xCount === 1) {
+    slitNarrative = `Single photon state — this branch tracks <strong>one particle</strong> through the multiway evolution.`;
+  } else {
+    slitNarrative = `No photons remain in this state — the particle has been <strong>fully absorbed</strong> into the background.`;
+  }
+
+  // Decoherence narrative
+  const totalBranchial = a.coherent + a.nearCoherent + a.decoherent;
+  let decoherenceNarrative = '';
+  if (totalBranchial > 0) {
+    const cohPct = pct(a.coherent / totalBranchial);
+    const decPct = pct(a.decoherent / totalBranchial);
+    if (a.decoherent > a.coherent) {
+      decoherenceNarrative = `This branch is <strong>mostly decoherent</strong> from peers — ${decPct}% of other final states have no recent common ancestry. Measurement on this branch projects out most of the multiway system.`;
+    } else if (a.coherent > a.decoherent) {
+      decoherenceNarrative = `This branch remains <strong>largely coherent</strong> — ${cohPct}% of peers share recent ancestry (branchial distance ≤ 1). The observer can still interfere with nearby branches.`;
+    } else {
+      decoherenceNarrative = `Mixed coherence — roughly equal coherent and decoherent neighbors. This observer sits at a <strong>decoherence boundary</strong>.`;
+    }
+  }
+
+  // Causal cone narrative
+  const coneNarrative = a.coneFraction < 0.3
+    ? `The causal cone covers <strong>${pct(a.coneFraction)}%</strong> of the full multiway graph — this observer only accesses a small slice of the computation.`
+    : a.coneFraction < 0.7
+      ? `The causal cone covers <strong>${pct(a.coneFraction)}%</strong> — this observer has moderate access to the system's history.`
+      : `The causal cone covers <strong>${pct(a.coneFraction)}%</strong> — this observer has access to most of the multiway evolution.`;
+
+  // Collapse narrative
+  const isOnFinalStep = a.step === a.finalStep;
+  const collapseNarrative = isOnFinalStep
+    ? `Selecting this branch is formally equivalent to <strong>projecting onto a measurement basis</strong> in the Wolfram model. The <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) form the past light cone through the multiway graph.`
+    : `This node at <strong>step ${a.step}</strong> sits mid-evolution. Its <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) trace backward to the initial state, and its <strong style="color:rgba(0,240,255,0.8)">${a.descendants} descendants</strong> (cyan) propagate forward to the final step. Together they form a <strong>full causal history</strong> — the complete light cone of this node in the multiway graph.`;
+
+  // Build bars for causal cone per step
+  let coneBarsHtml = '';
+  for (const s of a.stepsWithAncestors) {
+    const pastPct = (s.inPast / Math.max(s.total, 1)) * 100;
+    const futurePct = (s.inFuture / Math.max(s.total, 1)) * 100;
+    const isObs = s.isObserverStep;
+    // Use stacked bar: lime for past, cyan for future
+    coneBarsHtml += `
+      <div class="oa-bar-row">
+        <div class="oa-bar-label"${isObs ? ' style="color:rgba(255,255,255,0.7);font-weight:500"' : ''}>Step ${s.step}${isObs ? ' ◀' : ''}</div>
+        <div class="oa-bar" style="position:relative">
+          <div class="oa-bar-fill" style="width:${pastPct}%;background:rgba(204,255,0,0.5);position:absolute;left:0;top:0"></div>
+          <div class="oa-bar-fill" style="width:${futurePct}%;background:rgba(0,240,255,0.4);position:absolute;right:0;top:0"></div>
+        </div>
+        <div class="oa-bar-value">${s.inCone}/${s.total}</div>
+      </div>`;
+  }
+
+  // Build decoherence bars
+  let decoherenceBarsHtml = '';
+  if (totalBranchial > 0) {
+    const items = [
+      { label: 'Coherent', count: a.coherent, color: 'rgba(204,255,0,0.6)' },
+      { label: 'Near', count: a.nearCoherent, color: 'rgba(0,240,255,0.5)' },
+      { label: 'Decoherent', count: a.decoherent, color: 'rgba(255,80,80,0.5)' },
+    ];
+    for (const item of items) {
+      const barPct = (item.count / totalBranchial) * 100;
+      decoherenceBarsHtml += `
+        <div class="oa-bar-row">
+          <div class="oa-bar-label">${item.label}</div>
+          <div class="oa-bar">
+            <div class="oa-bar-fill" style="width:${barPct}%;background:${item.color}"></div>
+          </div>
+          <div class="oa-bar-value">${item.count}</div>
+        </div>`;
+    }
+  }
+
+  observerAnalysisEl.innerHTML = `
+    <div class="oa-title">Observer Analysis</div>
+
+    <div class="oa-row"><span class="oa-label">Step</span><span class="oa-value">${a.step} / ${a.finalStep}</span></div>
+    <div class="oa-row"><span class="oa-label">Path weight</span><span class="oa-value">${a.weight.toLocaleString()} paths (${pct(a.weightFraction)}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Past cone <span style="color:rgba(204,255,0,0.5)">■</span></span><span class="oa-value">${a.ancestors} nodes (${pct(a.pastConeFraction)}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Future cone <span style="color:rgba(0,240,255,0.5)">■</span></span><span class="oa-value">${a.descendants} nodes (${pct(a.futureConeFraction)}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Full history</span><span class="oa-value">${a.fullHistory} / ${a.totalNodes} (${pct(a.coneFraction)}%)</span></div>
+    <div class="oa-row"><span class="oa-label">History edges</span><span class="oa-value">${a.fullHistoryEdges} / ${a.totalEdges}</span></div>
+    <div class="oa-row"><span class="oa-label">Avg branching</span><span class="oa-value">${a.avgBranching.toFixed(2)}×</span></div>
+    <div class="oa-row"><span class="oa-label">Parents / Children</span><span class="oa-value">${a.directParents} / ${a.directChildren}</span></div>
+    <div class="oa-row"><span class="oa-label">Intensity share</span><span class="oa-value">${pct(a.intensityFraction)}% of global</span></div>
+
+    <div class="oa-divider"></div>
+
+    <div class="oa-section">
+      <div class="oa-title">Measurement ≡ Branch Selection</div>
+      <div class="oa-narrative">${collapseNarrative}</div>
+    </div>
+
+    <div class="oa-section">
+      <div class="oa-title">Causal Cone by Step</div>
+      <div class="oa-narrative">${coneNarrative}</div>
+      ${coneBarsHtml}
+    </div>
+
+    ${totalBranchial > 0 ? `
+    <div class="oa-section">
+      <div class="oa-title">Branchial Coherence</div>
+      <div class="oa-narrative">${decoherenceNarrative}</div>
+      ${decoherenceBarsHtml}
+      <div class="oa-row" style="margin-top:4px"><span class="oa-label">Max branchial distance</span><span class="oa-value">${a.maxBranchialDist}</span></div>
+    </div>` : ''}
+
+    <div class="oa-section">
+      <div class="oa-title">Slit Association</div>
+      <div class="oa-narrative">${slitNarrative}</div>
+    </div>
+  `;
+  observerAnalysisEl.style.display = 'block';
+}
+
+observerClearBtn.addEventListener('click', clearObserver);
+
+// ─── Main evolution runner (Batch) ───
+function runEvolution() {
+  const rules = getCurrentRules();
+  if (rules.length === 0) {
+    statusBar.textContent = 'No valid rules defined';
+    return;
+  }
+  const initialState = initStateEl.value.trim();
+  if (!initialState) {
+    statusBar.textContent = 'No initial state';
+    return;
+  }
+  const steps = parseInt(document.getElementById('sl-steps').value);
+  const maxStates = parseInt(document.getElementById('sl-maxstates').value);
+
+  statusBar.textContent = `Evolving "${initialState.length > 30 ? initialState.slice(0,27) + '...' : initialState}" for ${steps} steps...`;
+
+  requestAnimationFrame(() => {
+    const t0 = performance.now();
+
+    const sys = new MultiwaySystem(rules);
+    sys.maxTotalStates = maxStates;
+    sys.evolve(initialState, steps);
+    currentSystem = sys;
+
+    const elapsed = (performance.now() - t0).toFixed(0);
+    let statusText = `${sys.nodes.length} states · ${sys.edges.length} edges`;
+    if (sys.causalEvents.length > 0) statusText += ` · ${sys.causalEvents.length} events`;
+    statusText += ` · ${elapsed}ms`;
+    if (sys.truncated) statusText += ' (truncated)';
+    statusBar.textContent = statusText;
+
+    clearObserver();
+    buildScene(sys);
+    drawIntensityPlot(sys, getCurrentAnalytical());
+    drawBranchialPlot(sys);
+    updateStats(sys);
+    updateCompletionLog(sys);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PART 7: INTERACTIVE STEPPING MODE
+// ═══════════════════════════════════════════════════════════════
+
+const stepCurrentEl = document.getElementById('step-current');
+const stepTotalEl = document.getElementById('step-total');
+const btnStepBack = document.getElementById('btn-step-back');
+const btnStepFwd = document.getElementById('btn-step-fwd');
+const btnStepPlay = document.getElementById('btn-step-play');
+const btnStepReset = document.getElementById('btn-step-reset');
+
+function updateStepUI() {
+  if (!currentSystem) return;
+  const current = currentSystem._currentStep;
+  stepCurrentEl.textContent = current;
+  stepTotalEl.textContent = interactiveMaxSteps;
+  btnStepBack.disabled = current <= 0;
+  btnStepFwd.disabled = current >= interactiveMaxSteps || currentSystem.truncated;
+
+  let statusText = `Step ${current} / ${interactiveMaxSteps} · ${currentSystem.nodes.length} states · ${currentSystem.edges.length} edges`;
+  if (currentSystem.causalEvents.length > 0) statusText += ` · ${currentSystem.causalEvents.length} events`;
+  statusBar.textContent = statusText;
+}
+
+function refreshSceneAndPlots() {
+  if (!currentSystem) return;
+  clearObserver();
+  buildScene(currentSystem, ancestryHighlightSet);
+  drawIntensityPlot(currentSystem, getCurrentAnalytical());
+  drawBranchialPlot(currentSystem);
+  updateStats(currentSystem);
+  updateCompletionLog(currentSystem);
+  updateStepUI();
+}
+
+function resetInteractive() {
+  stopPlay();
+  const rules = getCurrentRules();
+  if (rules.length === 0) {
+    statusBar.textContent = 'No valid rules defined';
+    return;
+  }
+  const initialState = initStateEl.value.trim();
+  if (!initialState) {
+    statusBar.textContent = 'No initial state';
+    return;
+  }
+  interactiveMaxSteps = parseInt(document.getElementById('sl-steps').value);
+  const maxStates = parseInt(document.getElementById('sl-maxstates').value);
+
+  const sys = new MultiwaySystem(rules);
+  sys.maxTotalStates = maxStates;
+  sys.initInteractive(initialState);
+  currentSystem = sys;
+
+  refreshSceneAndPlots();
+}
+
+function stepForward() {
+  if (!currentSystem) return;
+  if (currentSystem._currentStep >= interactiveMaxSteps) return;
+  if (currentSystem.truncated) return;
+
+  currentSystem.evolveOneStep();
+  refreshSceneAndPlots();
+}
+
+function stepBack() {
+  if (!currentSystem) return;
+  if (currentSystem._currentStep <= 0) return;
+
+  currentSystem.removeLastStep();
+  refreshSceneAndPlots();
+}
+
+function stopPlay() {
+  if (playInterval) {
+    clearInterval(playInterval);
+    playInterval = null;
+    btnStepPlay.textContent = '▶▶ Play';
+    btnStepPlay.classList.remove('playing');
+  }
+}
+
+function togglePlay() {
+  if (playInterval) {
+    stopPlay();
+  } else {
+    btnStepPlay.textContent = '⏸ Pause';
+    btnStepPlay.classList.add('playing');
+    playInterval = setInterval(() => {
+      if (!currentSystem || currentSystem._currentStep >= interactiveMaxSteps || currentSystem.truncated) {
+        stopPlay();
+        return;
+      }
+      stepForward();
+    }, 500);
+  }
+}
+
+btnStepFwd.addEventListener('click', stepForward);
+btnStepBack.addEventListener('click', stepBack);
+btnStepPlay.addEventListener('click', togglePlay);
+btnStepReset.addEventListener('click', resetInteractive);
+
+// ─── Mode toggle ───
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const mode = tab.dataset.mode;
+    interactiveMode = (mode === 'interactive');
+
+    document.getElementById('batch-controls').style.display = interactiveMode ? 'none' : 'block';
+    document.getElementById('interactive-controls').style.display = interactiveMode ? 'block' : 'none';
+
+    stopPlay();
+    clearObserver();
+
+    if (interactiveMode) {
+      resetInteractive();
+    } else {
+      runEvolution();
+    }
+  });
+});
+
+// ─── Slider wiring ───
+document.getElementById('sl-steps').addEventListener('input', e => {
+  document.getElementById('v-steps').textContent = e.target.value;
+  if (interactiveMode) {
+    interactiveMaxSteps = parseInt(e.target.value);
+    updateStepUI();
+  }
+});
+
+document.getElementById('sl-maxstates').addEventListener('input', e => {
+  document.getElementById('v-maxstates').textContent = e.target.value;
+});
+
+document.getElementById('sl-spacing').addEventListener('input', e => {
+  STEP_SPACING = parseFloat(e.target.value);
+  document.getElementById('v-spacing').textContent = STEP_SPACING.toFixed(1);
+  if (currentSystem) buildScene(currentSystem, ancestryHighlightSet);
+});
+
+document.getElementById('sl-nsize').addEventListener('input', e => {
+  NODE_SIZE = parseFloat(e.target.value);
+  document.getElementById('v-nsize').textContent = NODE_SIZE.toFixed(1);
+  if (currentSystem) buildScene(currentSystem, ancestryHighlightSet);
+});
+
+document.getElementById('sl-bloom').addEventListener('input', e => {
+  const val = parseFloat(e.target.value);
+  document.getElementById('v-bloom').textContent = val.toFixed(2);
+  bloomPass.strength = val;
+});
+
+document.getElementById('btn-run').addEventListener('click', () => {
+  clearObserver();
+  runEvolution();
+});
+
+document.getElementById('btn-add-rule').addEventListener('click', () => {
+  editorRules.push({from: '', to: ''});
+  clearActivePreset();
+  renderRuleEditor();
+  const inputs = ruleEditorEl.querySelectorAll('.rule-from');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+});
+
+initStateEl.addEventListener('input', () => {
+  clearActivePreset();
+});
+
+// View tabs
+document.querySelectorAll('.view-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentView = tab.dataset.view;
+    updateViewVisibility();
+    if (currentSystem) fitCamera(currentSystem);
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 8: RAYCASTING / TOOLTIPS (3D + 2D)
+// ═══════════════════════════════════════════════════════════════
+
+// 3D raycasting — debounced on mouse move
+renderer.domElement.addEventListener('mousemove', (e) => {
+  const now = performance.now();
+  if (now - lastMouseMoveTime < 30) return; // debounce ~30ms
+  lastMouseMoveTime = now;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // Check causal events first (they're in front at z=3)
+  if (currentCausalPoints && sceneCausalData.length > 0 && causalGroup.visible) {
+    const causalIntersects = raycaster.intersectObject(currentCausalPoints);
+    if (causalIntersects.length > 0) {
+      const idx = causalIntersects[0].index;
+      if (idx < sceneCausalData.length) {
+        const cd = sceneCausalData[idx];
+        const ruleLabel = currentSystem ? currentSystem.rules[cd.ruleIdx] : null;
+        const ruleStr = ruleLabel ? `${ruleLabel.from}→${ruleLabel.to}` : `rule ${cd.ruleIdx}`;
+        showCausalTooltip(e.clientX, e.clientY, cd);
+        hoveredNodeIdx = -1;
+        hoveredCausalIdx = idx;
+        clearHoverHighlight();
+        return;
+      }
+    }
+  }
+
+  // Then check state nodes
+  if (currentNodePoints && sceneNodeData.length > 0 && multiwayGroup.visible) {
+    const intersects = raycaster.intersectObject(currentNodePoints);
+    if (intersects.length > 0) {
+      const idx = intersects[0].index;
+      if (idx < sceneNodeData.length) {
+        const nd = sceneNodeData[idx];
+        showTooltip(e.clientX, e.clientY, nd.state, nd.weight, nd.step);
+        hoveredNodeIdx = idx;
+        hoveredCausalIdx = -1;
+        applyHoverHighlight(nd.id);
+        return;
+      }
+    }
+  }
+
+  hoveredNodeIdx = -1;
+  hoveredCausalIdx = -1;
+  clearHoverHighlight();
+  hideTooltip();
+});
+
+renderer.domElement.addEventListener('mouseleave', () => {
+  hoveredNodeIdx = -1;
+  hoveredCausalIdx = -1;
+  clearHoverHighlight();
+  hideTooltip();
+});
+
+// Track mousedown position to distinguish clicks from drags
+let mouseDownPos = { x: 0, y: 0 };
+let mouseDownShift = false;
+renderer.domElement.addEventListener('mousedown', (e) => {
+  mouseDownPos.x = e.clientX;
+  mouseDownPos.y = e.clientY;
+  mouseDownShift = e.shiftKey;
+});
+
+// 3D canvas — click to select node and highlight causal history
+renderer.domElement.addEventListener('click', (e) => {
+  if (!currentSystem) return;
+
+  // Ignore if user dragged (panning) or was shift-rotating — threshold of 5px
+  const dx = e.clientX - mouseDownPos.x;
+  const dy = e.clientY - mouseDownPos.y;
+  if (Math.sqrt(dx * dx + dy * dy) > 5) return;
+  if (mouseDownShift) return; // shift+click = rotate, not select
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // Check causal event clicks first (if causal view is visible)
+  if (currentCausalPoints && sceneCausalData.length > 0 && causalGroup.visible) {
+    const causalIntersects = raycaster.intersectObject(currentCausalPoints);
+    if (causalIntersects.length > 0) {
+      const idx = causalIntersects[0].index;
+      if (idx < sceneCausalData.length) {
+        const cd = sceneCausalData[idx];
+        selectCausalEvent(cd.eventId);
+        return;
+      }
+    }
+  }
+
+  // Then check state node clicks
+  if (currentNodePoints && sceneNodeData.length > 0 && multiwayGroup.visible) {
+    const intersects = raycaster.intersectObject(currentNodePoints);
+    if (intersects.length > 0) {
+      const idx = intersects[0].index;
+      if (idx < sceneNodeData.length) {
+        const nd = sceneNodeData[idx];
+        selectCausalHistory(nd.id);
+        return;
+      }
+    }
+  }
+
+  // Clicked empty space — clear selection
+  clearObserver();
+});
+
+// 2D branchial canvas — mouse hover
+const branchialCanvas = document.getElementById('branchial-canvas');
+branchialCanvas.addEventListener('mousemove', (e) => {
+  if (branchialCanvasNodes.length === 0) {
+    hideTooltip();
+    return;
+  }
+
+  const rect = branchialCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  let closest = null;
+  let closestDist = Infinity;
+  for (const bn of branchialCanvasNodes) {
+    const dx = mx - bn.x;
+    const dy = my - bn.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < bn.radius + 5 && dist < closestDist) {
+      closestDist = dist;
+      closest = bn;
+    }
+  }
+
+  if (closest) {
+    showTooltip(e.clientX, e.clientY, closest.state, closest.weight);
+  } else {
+    hideTooltip();
+  }
+});
+
+branchialCanvas.addEventListener('mouseleave', hideTooltip);
+
+// 2D branchial canvas — click to select observer
+branchialCanvas.addEventListener('click', (e) => {
+  if (!currentSystem || branchialCanvasNodes.length === 0) return;
+
+  const rect = branchialCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  let closest = null;
+  let closestDist = Infinity;
+  for (const bn of branchialCanvasNodes) {
+    const dx = mx - bn.x;
+    const dy = my - bn.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < bn.radius + 5 && dist < closestDist) {
+      closestDist = dist;
+      closest = bn;
+    }
+  }
+
+  if (closest) {
+    selectObserverNode(closest.nodeId);
+  } else {
+    clearObserver();
+  }
+});
+
+function showTooltip(x, y, state, weight, step) {
+  ttStateEl.textContent = state.length > 60 ? state.slice(0, 57) + '...' : state;
+  ttWeightEl.textContent = `${weight} path${weight !== 1 ? 's' : ''}`;
+  if (step !== undefined) {
+    ttWeightEl.textContent += ` (step ${step})`;
+  }
+  tooltipEl.style.display = 'block';
+
+  // Position tooltip, keeping it in viewport
+  const tw = tooltipEl.offsetWidth;
+  const th = tooltipEl.offsetHeight;
+  let tx = x + 12;
+  let ty = y - 8;
+  if (tx + tw > window.innerWidth - 10) tx = x - tw - 12;
+  if (ty + th > window.innerHeight - 10) ty = y - th - 8;
+  if (ty < 10) ty = 10;
+
+  tooltipEl.style.left = tx + 'px';
+  tooltipEl.style.top = ty + 'px';
+}
+
+function hideTooltip() {
+  tooltipEl.style.display = 'none';
+}
+
+function showCausalTooltip(x, y, cd) {
+  const ruleLabel = currentSystem ? currentSystem.rules[cd.ruleIdx] : null;
+  const ruleStr = ruleLabel ? `${ruleLabel.from}\u2192${ruleLabel.to}` : `rule ${cd.ruleIdx}`;
+  ttStateEl.textContent = `\u25C7 Event #${cd.eventId} [${ruleStr}]`;
+  ttWeightEl.textContent = `step ${cd.step} \u00B7 pos ${cd.position} \u00B7 ${cd.parentState.length > 20 ? cd.parentState.slice(0,17)+'...' : cd.parentState} \u2192 ${cd.childState.length > 20 ? cd.childState.slice(0,17)+'...' : cd.childState}`;
+  tooltipEl.style.display = 'block';
+  const tw = tooltipEl.offsetWidth;
+  const th = tooltipEl.offsetHeight;
+  let tx = x + 12;
+  let ty = y - 8;
+  if (tx + tw > window.innerWidth - 10) tx = x - tw - 12;
+  if (ty + th > window.innerHeight - 10) ty = y - th - 8;
+  if (ty < 10) ty = 10;
+  tooltipEl.style.left = tx + 'px';
+  tooltipEl.style.top = ty + 'px';
+}
+
+// Select a causal event and highlight its light cone in the event graph
+function selectCausalEvent(eventId) {
+  if (!currentSystem) return;
+  const ev = currentSystem.causalEvents[eventId];
+  if (!ev) return;
+
+  selectedCausalEventId = eventId;
+  // Also set observer state to the parent node for consistent UX
+  selectedObserverNodeId = ev.parentNodeId;
+  ancestryHighlightSet = null; // don't highlight state graph
+
+  const ruleLabel = currentSystem.rules[ev.ruleIdx];
+  const ruleStr = ruleLabel ? `${ruleLabel.from}\u2192${ruleLabel.to}` : `rule ${ev.ruleIdx}`;
+  observerStateEl.textContent = `\u25C7 Event #${eventId} [${ruleStr}] (step ${ev.step})`;
+  observerStateEl.style.display = 'block';
+  observerClearBtn.style.display = 'inline-block';
+
+  // Rebuild scene with causal event cone highlighting
+  buildScene(currentSystem, { causalEventId: eventId });
+
+  // Build causal-event-specific analysis
+  renderCausalEventAnalysis(eventId);
+}
+
+function renderCausalEventAnalysis(eventId) {
+  const sys = currentSystem;
+  if (!sys) return;
+  const cone = sys.traceCausalEventCone(eventId);
+  const inv = sys.checkCausalInvariance();
+  const ev = sys.causalEvents[eventId];
+
+  // Compute geodesic length: longest chain in the causal graph
+  const geodesic = computeCausalGeodesic(sys, eventId);
+
+  const pct = (v) => (v * 100).toFixed(1);
+  const totalEvents = sys.causalEvents.length;
+  const totalCausalEdges = sys.causalEdges.length;
+  const pastSize = cone.pastCone.size;
+  const futureSize = cone.futureCone.size;
+  const fullSize = cone.fullCone.size;
+
+  const ruleLabel = sys.rules[ev.ruleIdx];
+  const ruleStr = ruleLabel ? `${ruleLabel.from}\u2192${ruleLabel.to}` : `rule ${ev.ruleIdx}`;
+
+  // Causal invariance narrative
+  let invNarrative = '';
+  if (inv.total > 0) {
+    if (inv.invariance > 0.9) {
+      invNarrative = `<strong>${pct(inv.invariance)}%</strong> of event pairs commute \u2014 the system is <strong>highly causal-invariant</strong>. In Wolfram\u2019s framework, this means spacetime geometry is well-defined: the causal graph approximates a Lorentzian manifold.`;
+    } else if (inv.invariance > 0.5) {
+      invNarrative = `<strong>${pct(inv.invariance)}%</strong> of event pairs commute \u2014 <strong>partial causal invariance</strong>. Some branches break commutativity, creating regions where spacetime geometry becomes ambiguous.`;
+    } else {
+      invNarrative = `Only <strong>${pct(inv.invariance)}%</strong> commute \u2014 the system is <strong>causal-variant</strong>. Spacetime geometry is not globally well-defined; different updating orders yield genuinely different event graphs.`;
+    }
+  }
+
+  // Cone narrative
+  const coneFrac = fullSize / Math.max(totalEvents, 1);
+  const coneNarrative = coneFrac < 0.3
+    ? `This event\u2019s light cone covers <strong>${pct(coneFrac)}%</strong> of all events \u2014 a narrow causal slice.`
+    : coneFrac < 0.7
+      ? `This event\u2019s light cone covers <strong>${pct(coneFrac)}%</strong> of all events \u2014 moderate causal reach.`
+      : `This event\u2019s light cone covers <strong>${pct(coneFrac)}%</strong> of all events \u2014 broad causal influence.`;
+
+  // Build cone-per-step bars for causal events
+  const eventsByStep = new Map();
+  for (const e of sys.causalEvents) {
+    if (!eventsByStep.has(e.step)) eventsByStep.set(e.step, []);
+    eventsByStep.get(e.step).push(e);
+  }
+  let coneBarsHtml = '';
+  const sortedSteps = [...eventsByStep.keys()].sort((a, b) => a - b);
+  for (const step of sortedSteps) {
+    const stepEvents = eventsByStep.get(step);
+    const inPast = stepEvents.filter(e => cone.pastCone.has(e.id)).length;
+    const inFuture = stepEvents.filter(e => cone.futureCone.has(e.id)).length;
+    const total = stepEvents.length;
+    const pastPct = (inPast / Math.max(total, 1)) * 100;
+    const futurePct = (inFuture / Math.max(total, 1)) * 100;
+    const isEvStep = step === ev.step;
+    coneBarsHtml += `
+      <div class="oa-bar-row">
+        <div class="oa-bar-label"${isEvStep ? ' style="color:rgba(255,255,255,0.7);font-weight:500"' : ''}>Step ${step}${isEvStep ? ' \u25C0' : ''}</div>
+        <div class="oa-bar" style="position:relative">
+          <div class="oa-bar-fill" style="width:${pastPct}%;background:rgba(204,255,0,0.5);position:absolute;left:0;top:0"></div>
+          <div class="oa-bar-fill" style="width:${futurePct}%;background:rgba(0,240,255,0.4);position:absolute;right:0;top:0"></div>
+        </div>
+        <div class="oa-bar-value">${inPast + inFuture - (cone.pastCone.has(eventId) && cone.futureCone.has(eventId) && isEvStep ? 1 : 0)}/${total}</div>
+      </div>`;
+  }
+
+  observerAnalysisEl.innerHTML = `
+    <div class="oa-title">Causal Event Analysis</div>
+
+    <div class="oa-row"><span class="oa-label">Event</span><span class="oa-value">#${eventId} [${ruleStr}]</span></div>
+    <div class="oa-row"><span class="oa-label">Step</span><span class="oa-value">${ev.step}</span></div>
+    <div class="oa-row"><span class="oa-label">Position</span><span class="oa-value">${ev.position} in "${sys.nodes[ev.parentNodeId].state.length > 25 ? sys.nodes[ev.parentNodeId].state.slice(0,22)+'...' : sys.nodes[ev.parentNodeId].state}"</span></div>
+    <div class="oa-row"><span class="oa-label">Past cone <span style="color:rgba(204,255,0,0.5)">\u25A0</span></span><span class="oa-value">${pastSize} events (${pct(pastSize / Math.max(totalEvents, 1))}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Future cone <span style="color:rgba(0,240,255,0.5)">\u25A0</span></span><span class="oa-value">${futureSize} events (${pct(futureSize / Math.max(totalEvents, 1))}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Full light cone</span><span class="oa-value">${fullSize} / ${totalEvents} events</span></div>
+    <div class="oa-row"><span class="oa-label">Causal edges</span><span class="oa-value">${totalCausalEdges}</span></div>
+    <div class="oa-row"><span class="oa-label">Geodesic depth</span><span class="oa-value">${geodesic.pastDepth} past \u00B7 ${geodesic.futureDepth} future \u00B7 ${geodesic.pastDepth + geodesic.futureDepth} total</span></div>
+
+    <div class="oa-divider"></div>
+
+    <div class="oa-section">
+      <div class="oa-title">Spacetime Light Cone</div>
+      <div class="oa-narrative">${coneNarrative} The <strong style="color:rgba(204,255,0,0.8)">${pastSize} past events</strong> (lime) are the spacetime past \u2014 everything that <em>could have influenced</em> this event. The <strong style="color:rgba(0,240,255,0.8)">${futureSize} future events</strong> (cyan) are the spacetime future \u2014 everything this event <em>can influence</em>.</div>
+    </div>
+
+    <div class="oa-section">
+      <div class="oa-title">Causal Cone by Step</div>
+      ${coneBarsHtml}
+    </div>
+
+    <div class="oa-section">
+      <div class="oa-title">Causal Invariance</div>
+      <div class="oa-narrative">${invNarrative}</div>
+      <div class="oa-row" style="margin-top:4px"><span class="oa-label">Confluent pairs</span><span class="oa-value">${inv.confluent}</span></div>
+      <div class="oa-row"><span class="oa-label">Divergent pairs</span><span class="oa-value">${inv.divergent}</span></div>
+      <div class="oa-row"><span class="oa-label">Invariance score</span><span class="oa-value">${pct(inv.invariance)}%</span></div>
+    </div>
+
+    <div class="oa-section">
+      <div class="oa-title">Geodesic Length</div>
+      <div class="oa-narrative">The longest causal chain through this event spans <strong>${geodesic.pastDepth + geodesic.futureDepth} steps</strong> in the event graph. In Wolfram\u2019s framework, geodesic length in the causal graph corresponds to <strong>proper time</strong> \u2014 the number of irreducible updating events between two points in spacetime.</div>
+    </div>
+  `;
+  observerAnalysisEl.style.display = 'block';
+}
+
+// Compute geodesic (longest causal chain) through a given event
+function computeCausalGeodesic(sys, eventId) {
+  // Build adjacency
+  const childToParents = new Map();
+  const parentToChildren = new Map();
+  for (const e of sys.causalEdges) {
+    if (!childToParents.has(e.to)) childToParents.set(e.to, []);
+    childToParents.get(e.to).push(e.from);
+    if (!parentToChildren.has(e.from)) parentToChildren.set(e.from, []);
+    parentToChildren.get(e.from).push(e.to);
+  }
+
+  // BFS backward to find longest chain (depth)
+  let pastDepth = 0;
+  let queue = [{ id: eventId, depth: 0 }];
+  const visitedPast = new Set([eventId]);
+  while (queue.length > 0) {
+    const { id, depth } = queue.shift();
+    if (depth > pastDepth) pastDepth = depth;
+    for (const p of (childToParents.get(id) || [])) {
+      if (!visitedPast.has(p)) {
+        visitedPast.add(p);
+        queue.push({ id: p, depth: depth + 1 });
+      }
+    }
+  }
+
+  // BFS forward
+  let futureDepth = 0;
+  queue = [{ id: eventId, depth: 0 }];
+  const visitedFuture = new Set([eventId]);
+  while (queue.length > 0) {
+    const { id, depth } = queue.shift();
+    if (depth > futureDepth) futureDepth = depth;
+    for (const c of (parentToChildren.get(id) || [])) {
+      if (!visitedFuture.has(c)) {
+        visitedFuture.add(c);
+        queue.push({ id: c, depth: depth + 1 });
+      }
+    }
+  }
+
+  return { pastDepth, futureDepth };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 9: RESIZE + ANIMATION LOOP
+// ═══════════════════════════════════════════════════════════════
+
+function onResize() {
+  const w = centerEl.clientWidth, h = centerEl.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  composer.setSize(w, h);
+  if (currentSystem) {
+    drawIntensityPlot(currentSystem, getCurrentAnalytical());
+    drawBranchialPlot(currentSystem, selectedObserverNodeId);
+  }
+}
+window.addEventListener('resize', onResize);
+
+// Animation loop with pulse for current-step nodes in interactive mode
+let animTime = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  animTime += 0.016;
+
+  // Pulse current-step nodes in interactive mode
+  if (interactiveMode && currentNodePoints && currentSystem && !ancestryHighlightSet) {
+    const geo = currentNodePoints.geometry;
+    const sizes = geo.attributes.size;
+    if (sizes) {
+      const currentStep = currentSystem._currentStep;
+      const pulse = 1.0 + 0.15 * Math.sin(animTime * 4.0);
+      let needsUpdate = false;
+      for (let i = 0; i < sceneNodeData.length; i++) {
+        if (sceneNodeData[i].step === currentStep) {
+          const wNorm = sceneNodeData[i].weight / Math.max(...currentSystem.nodes.map(n => n.weight), 1);
+          const baseSize = (1.5 + wNorm * 4.0) * NODE_SIZE * 1.3;
+          sizes.array[i] = baseSize * pulse;
+          needsUpdate = true;
+        }
+      }
+      if (needsUpdate) sizes.needsUpdate = true;
+    }
+  }
+
+  composer.render();
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 10: PHYSICS TOOLS — ALL 10 WOLFRAM FEATURES
+// ═══════════════════════════════════════════════════════════════
+
+// ─── State for all tools ───
+let heatmapEnabled = false;
+let geodesicEnabled = false;
+let geodesicFirstNode = null;
+let geodesicPath = null; // array of node IDs for drawn path
+let branchial3dEnabled = false;
+let energyDensityEnabled = false;
+let ciHighlightEnabled = false;
+let currentReferenceFrame = 'default';
+
+// ─── 1. BRANCHIAL DISTANCE HEATMAP ───
+// Colors all nodes by BFS distance from selected observer on the
+// branchial graph. Near = warm orange, far = cool blue.
+
+function computeBranchialDistances(sys, sourceNodeId) {
+  // Build branchial adjacency from ALL steps (not just final)
+  const branchialAdj = new Map();
+  // Use the branchial edges (final step) + evolution edges for cross-step connectivity
+  for (const be of sys.branchialEdges) {
+    if (!branchialAdj.has(be.from)) branchialAdj.set(be.from, []);
+    if (!branchialAdj.has(be.to)) branchialAdj.set(be.to, []);
+    branchialAdj.get(be.from).push(be.to);
+    branchialAdj.get(be.to).push(be.from);
+  }
+  // Also add evolution edges for full cross-step branchial distance
+  for (const e of sys.edges) {
+    if (!branchialAdj.has(e.from)) branchialAdj.set(e.from, []);
+    if (!branchialAdj.has(e.to)) branchialAdj.set(e.to, []);
+    branchialAdj.get(e.from).push(e.to);
+    branchialAdj.get(e.to).push(e.from);
+  }
+
+  const dist = new Map();
+  dist.set(sourceNodeId, 0);
+  const queue = [sourceNodeId];
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    const d = dist.get(cur);
+    for (const nb of (branchialAdj.get(cur) || [])) {
+      if (!dist.has(nb)) {
+        dist.set(nb, d + 1);
+        queue.push(nb);
+      }
+    }
+  }
+  return dist;
+}
+
+function applyBranchialHeatmap() {
+  if (!heatmapEnabled || !currentSystem || selectedObserverNodeId === null) return;
+  if (!currentNodePoints || !savedNodeColors) return;
+
+  const distances = computeBranchialDistances(currentSystem, selectedObserverNodeId);
+  let maxDist = 0;
+  for (const d of distances.values()) if (d > maxDist) maxDist = d;
+  if (maxDist === 0) maxDist = 1;
+
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nc = nColors.array;
+  const warmColor = new THREE.Color('#FF6B35');
+  const coolColor = new THREE.Color('#2040A0');
+  const selectedColor = new THREE.Color('#FFFFFF');
+
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const d = distances.get(nd.id);
+    const i3 = i * 3;
+    if (nd.id === selectedObserverNodeId) {
+      nc[i3] = selectedColor.r;
+      nc[i3 + 1] = selectedColor.g;
+      nc[i3 + 2] = selectedColor.b;
+    } else if (d !== undefined) {
+      const t = d / maxDist;
+      _hoverTmp.copy(warmColor).lerp(coolColor, t);
+      _hoverTmp.multiplyScalar(0.4 + (1 - t) * 0.6);
+      nc[i3] = _hoverTmp.r;
+      nc[i3 + 1] = _hoverTmp.g;
+      nc[i3 + 2] = _hoverTmp.b;
+    } else {
+      nc[i3] = nc[i3 + 1] = nc[i3 + 2] = 0.05;
+    }
+  }
+  nColors.needsUpdate = true;
+}
+
+document.getElementById('toggle-heatmap').addEventListener('click', function() {
+  heatmapEnabled = !heatmapEnabled;
+  this.classList.toggle('active', heatmapEnabled);
+  if (heatmapEnabled && selectedObserverNodeId !== null) {
+    applyBranchialHeatmap();
+  } else if (!heatmapEnabled && currentNodePoints && savedNodeColors) {
+    // Restore original colors
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    nColors.array.set(savedNodeColors);
+    nColors.needsUpdate = true;
+  }
+});
+
+
+// ─── 2. GEODESIC TRACER ───
+// Click two nodes to find and draw shortest path between them.
+
+let geodesicLineObj = null; // THREE.Line for path
+
+function findShortestPath(sys, fromId, toId) {
+  sys._ensureAdjacencyMaps();
+  // BFS from fromId
+  const parent = new Map();
+  parent.set(fromId, null);
+  const queue = [fromId];
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    if (cur === toId) break;
+    // Check both directions
+    const neighbors = new Set();
+    for (const c of (sys._parentToChildren.get(cur) || [])) neighbors.add(c);
+    for (const p of (sys._childToParents.get(cur) || [])) neighbors.add(p);
+    for (const nb of neighbors) {
+      if (!parent.has(nb)) {
+        parent.set(nb, cur);
+        queue.push(nb);
+      }
+    }
+  }
+  if (!parent.has(toId)) return null;
+  // Reconstruct path
+  const path = [];
+  let cur = toId;
+  while (cur !== null) {
+    path.unshift(cur);
+    cur = parent.get(cur);
+  }
+  return path;
+}
+
+function drawGeodesicPath(path) {
+  clearGeodesicPath();
+  if (!path || path.length < 2 || !currentSystem) return;
+
+  const positions = [];
+  for (const nodeId of path) {
+    const node = currentSystem.nodes[nodeId];
+    positions.push(
+      node.x * sceneSpreadScale,
+      node.y * STEP_SPACING,
+      0.5 // slightly in front
+    );
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  const mat = new THREE.LineBasicMaterial({
+    color: 0xFF6B35,
+    linewidth: 2,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false
+  });
+  geodesicLineObj = new THREE.Line(geo, mat);
+  multiwayGroup.add(geodesicLineObj);
+}
+
+function clearGeodesicPath() {
+  if (geodesicLineObj) {
+    multiwayGroup.remove(geodesicLineObj);
+    geodesicLineObj.geometry.dispose();
+    geodesicLineObj.material.dispose();
+    geodesicLineObj = null;
+  }
+}
+
+const geodesicResultEl = document.getElementById('geodesic-result');
+
+document.getElementById('toggle-geodesic').addEventListener('click', function() {
+  geodesicEnabled = !geodesicEnabled;
+  this.classList.toggle('active', geodesicEnabled);
+  if (!geodesicEnabled) {
+    geodesicFirstNode = null;
+    clearGeodesicPath();
+    geodesicResultEl.style.display = 'none';
+  } else {
+    geodesicResultEl.style.display = 'block';
+    geodesicResultEl.textContent = 'Click first node...';
+    geodesicFirstNode = null;
+  }
+});
+
+
+// ─── 3. REFERENCE FRAME SELECTOR ───
+// Different foliation orderings change how nodes are laid out within each step.
+
+function applyReferenceFrame(frame) {
+  if (!currentSystem) return;
+  currentReferenceFrame = frame;
+
+  const sys = currentSystem;
+  for (let step = 0; step <= sys.stepStates.length; step++) {
+    const ids = sys.stepStates[step];
+    if (!ids) continue;
+
+    switch (frame) {
+      case 'weight':
+        ids.sort((a, b) => sys.nodes[b].weight - sys.nodes[a].weight);
+        break;
+      case 'alpha':
+        ids.sort((a, b) => sys.nodes[a].state.localeCompare(sys.nodes[b].state));
+        break;
+      case 'reverse':
+        ids.sort((a, b) => sys.nodes[b].state.localeCompare(sys.nodes[a].state));
+        break;
+      default: // 'default'
+        ids.sort((a, b) => sys.nodes[a].state.localeCompare(sys.nodes[b].state));
+        break;
+    }
+
+    const count = ids.length;
+    for (let i = 0; i < count; i++) {
+      const node = sys.nodes[ids[i]];
+      node.x = count === 1 ? 0 : (i / (count - 1) - 0.5);
+    }
+  }
+
+  // Rebuild scene with new layout
+  clearObserver();
+  buildScene(sys);
+  drawIntensityPlot(sys, getCurrentAnalytical());
+  drawBranchialPlot(sys);
+}
+
+document.querySelectorAll('[data-frame]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-frame]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyReferenceFrame(btn.dataset.frame);
+  });
+});
+
+
+// ─── 4. MULTIWAY TOKEN VIEW ───
+// Show character-level diffs when a node is selected.
+
+function renderTokenView(nodeId) {
+  const container = document.getElementById('token-view');
+  if (!currentSystem || nodeId === null || nodeId === undefined) {
+    container.style.display = 'none';
+    return;
+  }
+
+  const sys = currentSystem;
+  const node = sys.nodes[nodeId];
+  if (!node) { container.style.display = 'none'; return; }
+
+  // Find parent states
+  sys._ensureAdjacencyMaps();
+  const parents = sys._childToParents.get(nodeId) || [];
+  if (parents.length === 0) {
+    // Root node — show plain state
+    container.innerHTML = node.state.split('').map(c =>
+      `<span class="token-char unchanged">${c}</span>`
+    ).join('');
+    container.style.display = 'flex';
+    return;
+  }
+
+  // Compare with first parent
+  const parentState = sys.nodes[parents[0]].state;
+  const childState = node.state;
+
+  // Simple character diff
+  const maxLen = Math.max(parentState.length, childState.length);
+  let html = '<div style="margin-bottom:4px;font-size:8px;color:rgba(255,255,255,0.25)">PARENT:</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:1px;margin-bottom:6px">';
+  for (let i = 0; i < parentState.length; i++) {
+    const changed = i >= childState.length || parentState[i] !== childState[i];
+    html += `<span class="token-char ${changed ? 'changed' : 'unchanged'}">${parentState[i]}</span>`;
+  }
+  html += '</div>';
+  html += '<div style="margin-bottom:4px;font-size:8px;color:rgba(0,240,255,0.4)">CHILD:</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:1px">';
+  for (let i = 0; i < childState.length; i++) {
+    const changed = i >= parentState.length || childState[i] !== parentState[i];
+    html += `<span class="token-char ${changed ? 'changed' : 'unchanged'}">${childState[i]}</span>`;
+  }
+  html += '</div>';
+
+  container.innerHTML = html;
+  container.style.display = 'block';
+}
+
+
+// ─── 5. BRANCHIAL 3D EMBEDDING ───
+// Spectral layout using graph Laplacian eigenvectors.
+
+let branchial3dGroup = null;
+
+function computeSpectralEmbedding(sys) {
+  // Build adjacency matrix for branchial graph at final step
+  let finalStep = 0;
+  for (let s = sys.stepStates.length - 1; s >= 0; s--) {
+    if (sys.stepStates[s] && sys.stepStates[s].length > 0) { finalStep = s; break; }
+  }
+  const finalIds = sys.stepStates[finalStep] || [];
+  const n = finalIds.length;
+  if (n < 4) return null;
+
+  const idToIdx = new Map();
+  for (let i = 0; i < n; i++) idToIdx.set(finalIds[i], i);
+
+  // Degree and adjacency
+  const degree = new Float32Array(n);
+  const adj = [];
+  for (let i = 0; i < n; i++) adj.push([]);
+
+  for (const be of sys.branchialEdges) {
+    const i = idToIdx.get(be.from);
+    const j = idToIdx.get(be.to);
+    if (i !== undefined && j !== undefined) {
+      adj[i].push(j);
+      adj[j].push(i);
+      degree[i]++;
+      degree[j]++;
+    }
+  }
+
+  // Power iteration for the 3 smallest non-trivial Laplacian eigenvectors
+  // Use normalized Laplacian: L = I - D^{-1/2} A D^{-1/2}
+  // We'll use inverse iteration on (L + shift*I) to find smallest eigenvalues
+
+  // Simple approach: random walk spectral embedding
+  // Compute 3 eigenvectors using subspace iteration
+  const k = 3;
+  const maxIter = 50;
+
+  // Initialize random vectors
+  const vecs = [];
+  for (let d = 0; d < k; d++) {
+    const v = new Float32Array(n);
+    for (let i = 0; i < n; i++) v[i] = Math.random() - 0.5;
+    vecs.push(v);
+  }
+
+  // Multiply by (D^{-1} * A) — random walk matrix
+  function multiply(v) {
+    const result = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      let sum = 0;
+      for (const j of adj[i]) {
+        sum += v[j];
+      }
+      result[i] = degree[i] > 0 ? sum / degree[i] : 0;
+    }
+    return result;
+  }
+
+  // Gram-Schmidt orthogonalization
+  function orthogonalize(vecs) {
+    for (let i = 0; i < vecs.length; i++) {
+      // Subtract projection onto previous vectors
+      for (let j = 0; j < i; j++) {
+        let dot = 0, norm = 0;
+        for (let k = 0; k < n; k++) {
+          dot += vecs[i][k] * vecs[j][k];
+          norm += vecs[j][k] * vecs[j][k];
+        }
+        if (norm > 1e-10) {
+          const scale = dot / norm;
+          for (let k = 0; k < n; k++) vecs[i][k] -= scale * vecs[j][k];
+        }
+      }
+      // Normalize
+      let norm = 0;
+      for (let k = 0; k < n; k++) norm += vecs[i][k] * vecs[i][k];
+      norm = Math.sqrt(norm);
+      if (norm > 1e-10) {
+        for (let k = 0; k < n; k++) vecs[i][k] /= norm;
+      }
+    }
+  }
+
+  // Subtract the constant eigenvector (eigenvalue 1)
+  function removeConstant(v) {
+    let mean = 0;
+    for (let i = 0; i < n; i++) mean += v[i];
+    mean /= n;
+    for (let i = 0; i < n; i++) v[i] -= mean;
+  }
+
+  for (let iter = 0; iter < maxIter; iter++) {
+    for (let d = 0; d < k; d++) {
+      vecs[d] = multiply(vecs[d]);
+      removeConstant(vecs[d]);
+    }
+    orthogonalize(vecs);
+  }
+
+  // Return positions
+  const positions = [];
+  for (let i = 0; i < n; i++) {
+    positions.push({
+      nodeId: finalIds[i],
+      x: vecs[0][i] * 8,
+      y: vecs[1][i] * 8,
+      z: vecs.length > 2 ? vecs[2][i] * 8 : 0
+    });
+  }
+  return positions;
+}
+
+function buildBranchial3d() {
+  if (branchial3dGroup) {
+    scene.remove(branchial3dGroup);
+    branchial3dGroup = null;
+  }
+  if (!branchial3dEnabled || !currentSystem) return;
+
+  const positions = computeSpectralEmbedding(currentSystem);
+  if (!positions || positions.length < 4) return;
+
+  branchial3dGroup = new THREE.Group();
+  const sys = currentSystem;
+  const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
+
+  // Build node points
+  const nodePos = new Float32Array(positions.length * 3);
+  const nodeCol = new Float32Array(positions.length * 3);
+  const nodeSz = new Float32Array(positions.length);
+
+  const nodeIdToIdx = new Map();
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    nodeIdToIdx.set(p.nodeId, i);
+    nodePos[i * 3] = p.x;
+    nodePos[i * 3 + 1] = p.y;
+    nodePos[i * 3 + 2] = p.z;
+
+    const node = sys.nodes[p.nodeId];
+    const wNorm = node.weight / maxWeight;
+    _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.7, 0.25 + wNorm * 0.5);
+    nodeCol[i * 3] = _hoverTmp.r;
+    nodeCol[i * 3 + 1] = _hoverTmp.g;
+    nodeCol[i * 3 + 2] = _hoverTmp.b;
+    nodeSz[i] = (1.5 + wNorm * 4.0) * NODE_SIZE;
+  }
+
+  const nGeo = new THREE.BufferGeometry();
+  nGeo.setAttribute('position', new THREE.BufferAttribute(nodePos, 3));
+  nGeo.setAttribute('color', new THREE.BufferAttribute(nodeCol, 3));
+  nGeo.setAttribute('size', new THREE.BufferAttribute(nodeSz, 1));
+
+  const nMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      uniform float uPixelRatio;
+      void main() {
+        vColor = color;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * uPixelRatio * (120.0 / -mvPos.z);
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.1, d);
+        gl_FragColor = vec4(vColor * 1.2, alpha * 0.85);
+      }
+    `
+  });
+  branchial3dGroup.add(new THREE.Points(nGeo, nMat));
+
+  // Edges
+  const edgeVerts = [];
+  const edgeColors = [];
+  for (const be of sys.branchialEdges) {
+    const fi = nodeIdToIdx.get(be.from);
+    const fj = nodeIdToIdx.get(be.to);
+    if (fi === undefined || fj === undefined) continue;
+    edgeVerts.push(nodePos[fi*3], nodePos[fi*3+1], nodePos[fi*3+2]);
+    edgeVerts.push(nodePos[fj*3], nodePos[fj*3+1], nodePos[fj*3+2]);
+    edgeColors.push(0.3,0.15,0.5, 0.3,0.15,0.5);
+  }
+
+  if (edgeVerts.length > 0) {
+    const eGeo = new THREE.BufferGeometry();
+    eGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgeVerts, 3));
+    eGeo.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
+    const eMat = new THREE.LineBasicMaterial({
+      vertexColors: true, transparent: true, opacity: 0.2,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    branchial3dGroup.add(new THREE.LineSegments(eGeo, eMat));
+  }
+
+  // Position the 3D branchial embedding to the right of the branchial ring
+  const totalSteps = sys.getTotalSteps();
+  branchial3dGroup.position.set(
+    sceneSpreadScale + 30 + 15,
+    -(totalSteps * STEP_SPACING) / 2,
+    0
+  );
+  scene.add(branchial3dGroup);
+}
+
+document.getElementById('toggle-branchial3d').addEventListener('click', function() {
+  branchial3dEnabled = !branchial3dEnabled;
+  this.classList.toggle('active', branchial3dEnabled);
+  if (branchial3dEnabled) {
+    buildBranchial3d();
+  } else if (branchial3dGroup) {
+    scene.remove(branchial3dGroup);
+    branchial3dGroup = null;
+  }
+});
+
+
+// ─── 6. CAUSAL INVARIANCE VERIFIER ───
+// Already have checkCausalInvariance() in MultiwaySystem. Wire up the button.
+
+const ciResultEl = document.getElementById('ci-result');
+
+document.getElementById('btn-verify-ci').addEventListener('click', () => {
+  if (!currentSystem) return;
+  const inv = currentSystem.checkCausalInvariance();
+  ciResultEl.style.display = 'block';
+  ciResultEl.innerHTML = `
+    <div><span class="ci-confluent">Confluent (commuting): ${inv.confluent}</span></div>
+    <div><span class="ci-divergent">Divergent (non-commuting): ${inv.divergent}</span></div>
+    <div class="ci-score">Invariance score: ${(inv.invariance * 100).toFixed(1)}%</div>
+    <div style="margin-top:4px;color:rgba(255,255,255,0.3)">${
+      inv.invariance > 0.9 ? 'Highly causal-invariant — spacetime geometry is well-defined.'
+      : inv.invariance > 0.5 ? 'Partial invariance — some branches break commutativity.'
+      : 'Causal-variant — spacetime geometry is not globally well-defined.'
+    }</div>
+  `;
+});
+
+document.getElementById('btn-highlight-ci').addEventListener('click', () => {
+  if (!currentSystem || !currentNodePoints) return;
+  ciHighlightEnabled = !ciHighlightEnabled;
+
+  if (!ciHighlightEnabled) {
+    // Restore
+    if (savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+    document.getElementById('btn-highlight-ci').classList.remove('active');
+    return;
+  }
+  document.getElementById('btn-highlight-ci').classList.add('active');
+
+  // Color causal events by confluent/divergent
+  // For state nodes: mark parents of divergent events red, confluent green
+  const sys = currentSystem;
+  const eventsByStep = new Map();
+  for (const ev of sys.causalEvents) {
+    if (!eventsByStep.has(ev.step)) eventsByStep.set(ev.step, []);
+    eventsByStep.get(ev.step).push(ev);
+  }
+
+  const nodeStatus = new Map(); // nodeId -> 'confluent'|'divergent'|'mixed'
+
+  for (const [step, events] of eventsByStep) {
+    const byParent = new Map();
+    for (const ev of events) {
+      if (!byParent.has(ev.parentNodeId)) byParent.set(ev.parentNodeId, []);
+      byParent.get(ev.parentNodeId).push(ev);
+    }
+    for (const [parentId, evs] of byParent) {
+      if (evs.length <= 1) {
+        if (!nodeStatus.has(parentId)) nodeStatus.set(parentId, 'confluent');
+        continue;
+      }
+      let hasConf = false, hasDiv = false;
+      for (let i = 0; i < evs.length; i++) {
+        for (let j = i + 1; j < evs.length; j++) {
+          const aIn = evs[i].inputRange;
+          const bIn = evs[j].inputRange;
+          if (aIn[0] <= bIn[1] && bIn[0] <= aIn[1]) {
+            hasDiv = true;
+          } else {
+            hasConf = true;
+          }
+        }
+      }
+      const status = hasDiv && hasConf ? 'mixed' : hasDiv ? 'divergent' : 'confluent';
+      nodeStatus.set(parentId, status);
+    }
+  }
+
+  // Apply colors
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nc = nColors.array;
+  const confColor = new THREE.Color('#50DC8C');
+  const divColor = new THREE.Color('#FF6450');
+  const mixColor = new THREE.Color('#FFB850');
+
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const status = nodeStatus.get(nd.id);
+    const i3 = i * 3;
+    if (status === 'confluent') {
+      nc[i3] = confColor.r * 0.7; nc[i3+1] = confColor.g * 0.7; nc[i3+2] = confColor.b * 0.7;
+    } else if (status === 'divergent') {
+      nc[i3] = divColor.r * 0.7; nc[i3+1] = divColor.g * 0.7; nc[i3+2] = divColor.b * 0.7;
+    } else if (status === 'mixed') {
+      nc[i3] = mixColor.r * 0.7; nc[i3+1] = mixColor.g * 0.7; nc[i3+2] = mixColor.b * 0.7;
+    }
+    // Nodes not involved in events keep their original color
+  }
+  nColors.needsUpdate = true;
+});
+
+
+// ─── 7. ENERGY-MOMENTUM DENSITY ───
+// Heat overlay: causal edge density per spatial region.
+
+function applyEnergyDensity() {
+  if (!energyDensityEnabled || !currentSystem || !currentNodePoints || !savedNodeColors) return;
+
+  const sys = currentSystem;
+  // Count causal events per node (input + output)
+  const eventCount = new Map();
+  for (const ev of sys.causalEvents) {
+    eventCount.set(ev.parentNodeId, (eventCount.get(ev.parentNodeId) || 0) + 1);
+    eventCount.set(ev.childNodeId, (eventCount.get(ev.childNodeId) || 0) + 1);
+  }
+
+  let maxCount = 0;
+  for (const c of eventCount.values()) if (c > maxCount) maxCount = c;
+  if (maxCount === 0) maxCount = 1;
+
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nc = nColors.array;
+  const coldColor = new THREE.Color('#0A1030');
+  const warmColor = new THREE.Color('#FF2020');
+  const hotColor = new THREE.Color('#FFFF40');
+
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const count = eventCount.get(nd.id) || 0;
+    const t = count / maxCount;
+    const i3 = i * 3;
+
+    if (t < 0.5) {
+      _hoverTmp.copy(coldColor).lerp(warmColor, t * 2);
+    } else {
+      _hoverTmp.copy(warmColor).lerp(hotColor, (t - 0.5) * 2);
+    }
+    _hoverTmp.multiplyScalar(0.3 + t * 0.7);
+    nc[i3] = _hoverTmp.r;
+    nc[i3 + 1] = _hoverTmp.g;
+    nc[i3 + 2] = _hoverTmp.b;
+  }
+  nColors.needsUpdate = true;
+}
+
+document.getElementById('toggle-energy').addEventListener('click', function() {
+  energyDensityEnabled = !energyDensityEnabled;
+  this.classList.toggle('active', energyDensityEnabled);
+  if (energyDensityEnabled) {
+    applyEnergyDensity();
+  } else if (currentNodePoints && savedNodeColors) {
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    nColors.array.set(savedNodeColors);
+    nColors.needsUpdate = true;
+  }
+});
+
+
+// ─── 8. RULIAL EXPLORATION MODE ───
+// Modify rules mid-evolution to explore rulial space.
+
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789Xo';
+
+function randomString(len) {
+  let s = '';
+  for (let i = 0; i < len; i++) {
+    s += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+  }
+  return s;
+}
+
+document.getElementById('btn-rulial-mutate').addEventListener('click', () => {
+  if (editorRules.length === 0) return;
+  // Pick a random rule and mutate one character
+  const ruleIdx = Math.floor(Math.random() * editorRules.length);
+  const rule = editorRules[ruleIdx];
+  const side = Math.random() < 0.5 ? 'from' : 'to';
+  const str = rule[side];
+  if (str.length === 0) return;
+  const charIdx = Math.floor(Math.random() * str.length);
+  const newChar = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+  rule[side] = str.substring(0, charIdx) + newChar + str.substring(charIdx + 1);
+  clearActivePreset();
+  renderRuleEditor();
+  if (interactiveMode) resetInteractive(); else runEvolution();
+});
+
+document.getElementById('btn-rulial-extend').addEventListener('click', () => {
+  const len = Math.floor(Math.random() * 2) + 1;
+  const from = randomString(len + 1);
+  const to = randomString(len + Math.floor(Math.random() * 2));
+  editorRules.push({ from, to });
+  clearActivePreset();
+  renderRuleEditor();
+  if (interactiveMode) resetInteractive(); else runEvolution();
+});
+
+document.getElementById('btn-rulial-reset').addEventListener('click', () => {
+  if (activePresetKey && PRESET_MAP[activePresetKey]) {
+    loadPreset(PRESET_MAP[activePresetKey]);
+  } else {
+    loadPreset(PRESET_MAP['double']);
+  }
+});
+
+
+// ─── 9. ENTANGLEMENT SPEED MEASUREMENT ───
+// Measure branchial graph growth per step vs causal graph growth.
+
+function measureEntanglementSpeed() {
+  if (!currentSystem) return null;
+  const sys = currentSystem;
+
+  const results = [];
+  for (let step = 0; step < sys.stepStates.length; step++) {
+    const stepIds = sys.stepStates[step] || [];
+    const stateCount = stepIds.length;
+
+    // Count branchial edges at this step
+    // Build branchial graph for this step
+    let branchialCount = 0;
+    if (step > 0) {
+      const prevStepMap = sys.stateMap.get(step - 1);
+      if (prevStepMap) {
+        const parentMap = new Map();
+        for (const edge of sys.edges) {
+          const child = sys.nodes[edge.to];
+          if (child && child.step === step) {
+            if (!parentMap.has(edge.to)) parentMap.set(edge.to, new Set());
+            parentMap.get(edge.to).add(edge.from);
+          }
+        }
+        for (let i = 0; i < stepIds.length; i++) {
+          for (let j = i + 1; j < stepIds.length; j++) {
+            const pi = parentMap.get(stepIds[i]);
+            const pj = parentMap.get(stepIds[j]);
+            if (pi && pj) {
+              for (const p of pi) {
+                if (pj.has(p)) { branchialCount++; break; }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Count causal events at this step
+    const causalCount = sys.causalEvents.filter(ev => ev.step === step).length;
+
+    results.push({ step, stateCount, branchialCount, causalCount });
+  }
+
+  return results;
+}
+
+function drawSpeedChart(data) {
+  const canvas = document.getElementById('speed-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  if (!data || data.length < 2) return;
+
+  const pad = 20;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+
+  const maxBranch = Math.max(...data.map(d => d.branchialCount), 1);
+  const maxCausal = Math.max(...data.map(d => d.causalCount), 1);
+  const maxVal = Math.max(maxBranch, maxCausal);
+
+  // Branchial line (purple)
+  ctx.strokeStyle = 'rgba(112,0,255,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = pad + (i / (data.length - 1)) * plotW;
+    const y = pad + plotH * (1 - data[i].branchialCount / maxVal);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Causal line (orange)
+  ctx.strokeStyle = 'rgba(255,107,53,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = pad + (i / (data.length - 1)) * plotW;
+    const y = pad + plotH * (1 - data[i].causalCount / maxVal);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Legend
+  ctx.font = '8px Inter';
+  ctx.fillStyle = 'rgba(112,0,255,0.7)';
+  ctx.textAlign = 'right';
+  ctx.fillText('── Branchial edges', w - pad, pad - 2);
+  ctx.fillStyle = 'rgba(255,107,53,0.7)';
+  ctx.fillText('── Causal events', w - pad, pad + 8);
+
+  // Axes
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Evolution Step', w / 2, h - 2);
+}
+
+document.getElementById('btn-measure-speed').addEventListener('click', () => {
+  const data = measureEntanglementSpeed();
+  if (!data) return;
+  drawSpeedChart(data);
+
+  // Compute entanglement velocity (average ratio)
+  const speedResultEl = document.getElementById('speed-result');
+  let totalRatio = 0, ratioCount = 0;
+  for (const d of data) {
+    if (d.causalCount > 0 && d.branchialCount > 0) {
+      totalRatio += d.branchialCount / d.causalCount;
+      ratioCount++;
+    }
+  }
+  const avgRatio = ratioCount > 0 ? (totalRatio / ratioCount).toFixed(3) : 'N/A';
+
+  speedResultEl.style.display = 'block';
+  speedResultEl.innerHTML = `
+    <div>Avg branchial/causal ratio: <span class="ci-score">${avgRatio}</span></div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:2px">
+      ${avgRatio > 1 ? 'Entanglement propagates faster than causal influence — superluminal quantum correlations.' :
+        avgRatio < 1 ? 'Causal propagation dominates — classical regime.' :
+        'Balanced causal and branchial growth.'}
+    </div>
+  `;
+});
+
+
+// ─── 10. OBSERVER PERSISTENCE TRACKER ───
+// Track causal cone self-overlap decay over time.
+
+function measureObserverPersistence() {
+  if (!currentSystem || selectedObserverNodeId === null) return null;
+  const sys = currentSystem;
+  const nodeId = selectedObserverNodeId;
+  const node = sys.nodes[nodeId];
+  if (!node) return null;
+
+  sys._ensureAdjacencyMaps();
+
+  // For each step forward from the observer, compute the fraction of
+  // descendants at that step that share ancestry with the observer's
+  // current causal cone.
+  const ancestors = sys.traceAncestry(nodeId);
+  const results = [];
+
+  for (let step = node.step; step < sys.stepStates.length; step++) {
+    const stepIds = sys.stepStates[step] || [];
+    if (stepIds.length === 0) continue;
+
+    // For each node at this step, check if it's a descendant of the observer
+    let totalDescendants = 0;
+    let overlapping = 0;
+
+    for (const sid of stepIds) {
+      // Is this node reachable from the observer?
+      const nodeAncestors = sys.traceAncestry(sid);
+      if (nodeAncestors.has(nodeId)) {
+        totalDescendants++;
+        // Check overlap: how many of this node's ancestors also appear in the observer's ancestry?
+        let overlap = 0;
+        for (const a of nodeAncestors) {
+          if (ancestors.has(a)) overlap++;
+        }
+        if (overlap > ancestors.size * 0.3) overlapping++;
+      }
+    }
+
+    const persistence = totalDescendants > 0 ? overlapping / totalDescendants : 0;
+    results.push({
+      step: step - node.step,
+      totalDescendants,
+      overlapping,
+      persistence,
+      totalAtStep: stepIds.length
+    });
+  }
+
+  return results;
+}
+
+function drawPersistenceChart(data) {
+  const canvas = document.getElementById('persistence-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  if (!data || data.length < 2) return;
+
+  const pad = 20;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+
+  // Persistence line (lime)
+  ctx.strokeStyle = 'rgba(204,255,0,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < data.length; i++) {
+    const x = pad + (i / (data.length - 1)) * plotW;
+    const y = pad + plotH * (1 - data[i].persistence);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Fill area
+  ctx.fillStyle = 'rgba(204,255,0,0.08)';
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + plotH);
+  for (let i = 0; i < data.length; i++) {
+    const x = pad + (i / (data.length - 1)) * plotW;
+    const y = pad + plotH * (1 - data[i].persistence);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad + plotW, pad + plotH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Axes
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'center';
+  ctx.fillText('Steps from Observer', w / 2, h - 2);
+  ctx.textAlign = 'left';
+  ctx.fillText('100%', pad, pad - 2);
+  ctx.textAlign = 'right';
+  ctx.fillText('0%', pad - 2, pad + plotH + 10);
+}
+
+document.getElementById('btn-measure-persistence').addEventListener('click', () => {
+  if (!currentSystem || selectedObserverNodeId === null) {
+    document.getElementById('persistence-result').style.display = 'block';
+    document.getElementById('persistence-result').textContent = 'Select an observer node first.';
+    return;
+  }
+
+  const data = measureObserverPersistence();
+  if (!data || data.length < 2) {
+    document.getElementById('persistence-result').style.display = 'block';
+    document.getElementById('persistence-result').textContent = 'Not enough steps to measure decay.';
+    return;
+  }
+
+  drawPersistenceChart(data);
+
+  // Compute half-life
+  const persistenceResultEl = document.getElementById('persistence-result');
+  let halfLife = data.length;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].persistence < 0.5) {
+      halfLife = i;
+      break;
+    }
+  }
+
+  const decayRate = data.length > 1 && data[0].persistence > 0
+    ? ((data[0].persistence - data[data.length - 1].persistence) / data.length).toFixed(3)
+    : 'N/A';
+
+  persistenceResultEl.style.display = 'block';
+  persistenceResultEl.innerHTML = `
+    <div>Persistence half-life: <span class="ci-score">${halfLife} steps</span></div>
+    <div>Avg decay rate: <span class="ci-score">${decayRate}/step</span></div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:2px">
+      ${halfLife <= 2 ? 'Rapid decoherence — observer identity dissolves quickly across branches.'
+        : halfLife <= 5 ? 'Moderate persistence — the observer maintains partial coherence.'
+        : 'High persistence — strong self-overlap suggests robust classical behavior.'}
+    </div>
+  `;
+});
+
+
+// ─── HOOK: Update tools on observer selection ───
+const _origSelectCausalHistory = selectCausalHistory;
+selectCausalHistory = function(nodeId) {
+  _origSelectCausalHistory(nodeId);
+  // Update heatmap if active
+  if (heatmapEnabled) applyBranchialHeatmap();
+  // Update token view
+  renderTokenView(nodeId);
+  // Handle geodesic node picking
+  if (geodesicEnabled && currentSystem) {
+    if (geodesicFirstNode === null) {
+      geodesicFirstNode = nodeId;
+      geodesicResultEl.textContent = `Node A: #${nodeId} (step ${currentSystem.nodes[nodeId].step}). Click second node...`;
+    } else {
+      const path = findShortestPath(currentSystem, geodesicFirstNode, nodeId);
+      if (path) {
+        drawGeodesicPath(path);
+        geodesicResultEl.innerHTML = `Path: ${path.length} nodes, <span class="ci-score">${path.length - 1} steps</span> (proper time)`;
+      } else {
+        geodesicResultEl.textContent = 'No path found between these nodes.';
+      }
+      geodesicFirstNode = null;
+    }
+  }
+};
+
+const _origClearObserver = clearObserver;
+clearObserver = function() {
+  _origClearObserver();
+  renderTokenView(null);
+  clearGeodesicPath();
+  // Reset heatmap / energy overlays since they depend on selection
+  if (heatmapEnabled && currentNodePoints && savedNodeColors) {
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    nColors.array.set(savedNodeColors);
+    nColors.needsUpdate = true;
+  }
+};
+
+// Hook into buildScene to re-apply overlays
+const _origBuildScene = buildScene;
+buildScene = function(sys, highlightSet) {
+  _origBuildScene(sys, highlightSet);
+  // Re-build branchial 3D if enabled
+  if (branchial3dEnabled) buildBranchial3d();
+  // Re-apply energy density if enabled
+  if (energyDensityEnabled) setTimeout(applyEnergyDensity, 0);
+};
+
+
+// ─── INITIAL SETUP ───
+renderRuleEditor();
+renderPresetGallery();
+runEvolution();
+animate();
+
+// Expose for testing / debugging
+window._selectCausalEvent = selectCausalEvent;
+window._selectCausalHistory = selectCausalHistory;
+window._clearObserver = clearObserver;
+window._currentSystem = () => currentSystem;
+window._camera = camera;
+window._controls = controls;
+window._applyHoverHighlight = applyHoverHighlight;
+window._clearHoverHighlight = clearHoverHighlight;
+window._hoverState = () => ({ hoverHighlightNodeId, savedNodeColors: !!savedNodeColors, savedEdgeColors: !!savedEdgeColors, currentEdgeLines: !!currentEdgeLines });
+window._navigateToNode = navigateToNode;
+window._getKeyboardNeighbor = getKeyboardNeighbor;
+window._measureEntanglementSpeed = measureEntanglementSpeed;
+window._measureObserverPersistence = measureObserverPersistence;
+window._computeBranchialDistances = computeBranchialDistances;
+window._findShortestPath = findShortestPath;
+
+</script>
+</body>
+</html>
