@@ -1067,11 +1067,11 @@
     <div class="section-title" style="margin-top: 18px;">Visualization</div>
 
     <div class="view-tabs">
-      <button class="view-tab active" data-view="multiway">Multiway</button>
+      <button class="view-tab" data-view="multiway">Multiway</button>
       <button class="view-tab" data-view="causal">Causal</button>
       <button class="view-tab" data-view="branchial">Branchial</button>
       <button class="view-tab" data-view="both">Both</button>
-      <button class="view-tab" data-view="spacetime" style="color:rgba(204,255,0,0.8)">Spacetime</button>
+      <button class="view-tab active" data-view="spacetime" style="color:rgba(204,255,0,0.8)">Spacetime</button>
     </div>
 
     <div class="ctrl-group">
@@ -1086,7 +1086,7 @@
 
 
     <!-- SPACETIME HYPERGRAPH REWRITING -->
-    <div class="spacetime-controls" id="spacetime-controls">
+    <div class="spacetime-controls active" id="spacetime-controls">
       <div class="section-title">Hypergraph Rules</div>
       <div class="tool-desc" style="margin-bottom: 6px;">Wolfram-style set substitution on ordered relations. These rules rewrite patterns of hyperedges, producing a spatial hypergraph whose structure encodes emergent spacetime geometry.</div>
 
@@ -2438,22 +2438,49 @@ controls.panSpeed = 1.0;
 // Trackpad-friendly: drag = pan, scroll/pinch = zoom
 // Shift+drag or two-finger-drag = rotate (for rare 3D orbiting)
 controls.mouseButtons = {
-  LEFT: THREE.MOUSE.PAN,
+  LEFT: THREE.MOUSE.ROTATE,
   MIDDLE: THREE.MOUSE.DOLLY,
-  RIGHT: THREE.MOUSE.ROTATE
+  RIGHT: THREE.MOUSE.PAN
 };
 controls.touches = {
-  ONE: THREE.TOUCH.PAN,
-  TWO: THREE.TOUCH.DOLLY_ROTATE
+  ONE: THREE.TOUCH.ROTATE,
+  TWO: THREE.TOUCH.DOLLY_PAN
 };
-// Allow Shift+left-drag to rotate instead of pan
+
+// ─── CONTROL MODES ───
+// Spacetime: click+drag = orbit, Ctrl+drag = pan (3D exploration)
+// Flat views: click+drag = pan, Shift+drag = orbit (graph navigation)
+let _controlMode = 'spacetime'; // current mode
+
+function setSpacetimeControls() {
+  _controlMode = 'spacetime';
+  controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+  controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+  controls.touches.ONE = THREE.TOUCH.ROTATE;
+  controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
+}
+
+function setFlatControls() {
+  _controlMode = 'flat';
+  controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+  controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
+  controls.touches.ONE = THREE.TOUCH.PAN;
+  controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+}
+
+// Modifier key overrides:
+// In spacetime mode: Ctrl+drag = pan (override orbit)
+// In flat mode: Shift+drag = rotate (override pan)
 renderer.domElement.addEventListener('mousedown', (e) => {
-  if (e.shiftKey) {
-    controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+  if (_controlMode === 'spacetime') {
+    controls.mouseButtons.LEFT = (e.ctrlKey || e.metaKey) ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
   } else {
-    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    controls.mouseButtons.LEFT = e.shiftKey ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
   }
 });
+
+// Start in spacetime mode (default view)
+setSpacetimeControls();
 controls.target.set(0, -5, 0);
 
 // Post-processing
@@ -2475,7 +2502,7 @@ scene.add(causalGroup);
 
 const _tmpColor = new THREE.Color();
 
-let currentView = 'multiway';
+let currentView = 'spacetime';
 let STEP_SPACING = 3.0;
 let NODE_SIZE = 1.0;
 let currentSystem = null;
@@ -3071,6 +3098,10 @@ function updateViewVisibility() {
   multiwayGroup.visible = currentView === 'multiway' || currentView === 'both';
   branchialGroup.visible = currentView === 'branchial' || currentView === 'both';
   causalGroup.visible = currentView === 'causal' || currentView === 'both';
+  // spacetimeGroup visibility handled by PART 13 handler
+  if (typeof spacetimeGroup !== 'undefined') {
+    spacetimeGroup.visible = currentView === 'spacetime';
+  }
 }
 
 
@@ -8413,19 +8444,20 @@ function updateFoliation(eventIndex) {
 
 // ─── EVENT LISTENERS ───
 
-// View tab: show/hide spacetime controls
+// View tab: show/hide spacetime controls + switch input mode
 document.querySelectorAll('.view-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     if (tab.dataset.view === 'spacetime') {
       document.getElementById('spacetime-controls').classList.add('active');
-      // Show spacetime group, hide others
       spacetimeGroup.visible = true;
       multiwayGroup.visible = false;
       branchialGroup.visible = false;
       causalGroup.visible = false;
+      setSpacetimeControls();
     } else {
       document.getElementById('spacetime-controls').classList.remove('active');
       spacetimeGroup.visible = false;
+      setFlatControls();
     }
   });
 });
@@ -8478,6 +8510,16 @@ renderRuleEditor();
 renderPresetGallery();
 runEvolution();
 animate();
+
+// Default to spacetime view: hide multiway groups, auto-evolve
+if (currentView === 'spacetime') {
+  multiwayGroup.visible = false;
+  branchialGroup.visible = false;
+  causalGroup.visible = false;
+  spacetimeGroup.visible = true;
+  // Auto-evolve the default spacetime preset on load
+  setTimeout(() => { evolveSpacetime(); }, 200);
+}
 
 // Expose for testing / debugging
 window._selectCausalEvent = selectCausalEvent;
