@@ -825,6 +825,192 @@
     #app { grid-template-columns: 1fr; grid-template-rows: auto 50vh auto; }
     .panel { max-height: 40vh; }
   }
+
+
+  /* ─── GRAVITY & GEOMETRY ─── */
+  #ricci-canvas, #geodev-canvas {
+    width: 100%;
+    height: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  .ricci-positive { color: #FF4040; }
+  .ricci-negative { color: #4080FF; }
+  .ricci-flat { color: rgba(255,255,255,0.4); }
+  .tangle-count { color: #CCFF00; font-weight: 500; }
+  .tangle-item {
+    background: rgba(112,0,255,0.12);
+    border: 1px solid rgba(112,0,255,0.25);
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .tangle-item:hover {
+    background: rgba(112,0,255,0.25);
+  }
+  .tangle-item .tangle-label {
+    color: rgba(204,255,0,0.9);
+    font-weight: 500;
+  }
+  .tangle-item .tangle-info {
+    color: rgba(255,255,255,0.5);
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  .geodev-converging { color: #FF6040; }
+  .geodev-diverging { color: #40A0FF; }
+  /* ─── QUANTUM ZENO ─── */
+  #zeno-canvas {
+    width: 100%;
+    height: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  .zeno-active-indicator {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(204,255,0,0.8);
+    margin-right: 4px;
+    animation: zeno-pulse 1s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes zeno-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* ─── TUNNELING ─── */
+  #tunneling-canvas {
+    width: 100%;
+    height: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  .tunnel-path { color: rgba(0,240,255,0.8); }
+  .tunnel-ratio { color: rgba(204,255,0,0.8); font-weight: 500; }
+
+  /* ─── OBSERVER BRANCHING ASYMMETRY ─── */
+  #asymmetry-canvas {
+    width: 100%;
+    height: 120px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  .asymmetry-subjective { color: rgba(0,240,255,0.8); }
+  .asymmetry-total { color: rgba(112,0,255,0.8); }
+  .asymmetry-ratio { color: rgba(204,255,0,0.8); font-weight: 500; }
+
+  /* ─── HOLOGRAPHIC BOUND ─── */
+  #holographic-canvas {
+    width: 100%;
+    height: 120px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  .holo-area { color: rgba(0,240,255,0.8); }
+  .holo-volume { color: rgba(255,107,53,0.8); }
+  .holo-scaling { color: rgba(204,255,0,0.8); font-weight: 500; }
+
+
+  /* ─── SPACETIME MODE ─── */
+  .spacetime-controls {
+    display: none;
+    margin-top: 10px;
+  }
+  .spacetime-controls.active { display: block; }
+  .st-rule-editor { margin-bottom: 10px; }
+  .st-rule-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .st-rule-input {
+    flex: 1;
+    background: rgba(0,240,255,0.06);
+    border: 1px solid rgba(0,240,255,0.2);
+    color: #e8e8f0;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .st-rule-arrow { color: rgba(255,255,255,0.3); font-size: 12px; }
+  .st-preset-chip {
+    display: inline-block;
+    padding: 3px 8px;
+    margin: 2px 3px 2px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(112,0,255,0.15);
+    border: 1px solid rgba(112,0,255,0.3);
+    color: rgba(204,255,0,0.8);
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .st-preset-chip:hover { background: rgba(112,0,255,0.3); }
+  .st-preset-chip.active { background: rgba(112,0,255,0.4); border-color: rgba(204,255,0,0.5); }
+  .st-dim-readout {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .st-dim-value {
+    font-size: 22px;
+    font-weight: 500;
+    color: #00F0FF;
+    line-height: 1;
+  }
+  .st-dim-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+  .st-stats {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .st-stats span { color: rgba(204,255,0,0.7); font-weight: 500; }
+  #dim-canvas {
+    width: 100%;
+    height: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.3);
+  }
+  .foliation-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+    margin-bottom: 2px;
+  }
 </style>
 </head>
 <body>
@@ -885,6 +1071,7 @@
       <button class="view-tab" data-view="causal">Causal</button>
       <button class="view-tab" data-view="branchial">Branchial</button>
       <button class="view-tab" data-view="both">Both</button>
+      <button class="view-tab" data-view="spacetime" style="color:rgba(204,255,0,0.8)">Spacetime</button>
     </div>
 
     <div class="ctrl-group">
@@ -897,6 +1084,49 @@
       <input type="range" id="sl-nsize" min="0.3" max="2" step="0.1" value="1.0">
     </div>
 
+
+    <!-- SPACETIME HYPERGRAPH REWRITING -->
+    <div class="spacetime-controls" id="spacetime-controls">
+      <div class="section-title">Hypergraph Rules</div>
+      <div class="tool-desc" style="margin-bottom: 6px;">Wolfram-style set substitution on ordered relations. These rules rewrite patterns of hyperedges, producing a spatial hypergraph whose structure encodes emergent spacetime geometry.</div>
+
+      <div class="st-rule-editor" id="st-rule-editor">
+        <div class="st-rule-row">
+          <input class="st-rule-input" id="st-lhs" value="{{x,y},{x,z}}" spellcheck="false">
+          <span class="st-rule-arrow">→</span>
+          <input class="st-rule-input" id="st-rhs" value="{{x,z},{x,w},{y,w},{z,w}}" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 8px; font-size: 9px;">Spacetime Presets</div>
+      <div id="st-preset-gallery">
+        <button class="st-preset-chip active" data-st-key="dim27">dim ≈ 2.7</button>
+        <button class="st-preset-chip" data-st-key="chain27">Chain ≈ 2.7</button>
+        <button class="st-preset-chip" data-st-key="flat2d">Flat 2D</button>
+        <button class="st-preset-chip" data-st-key="try3d">3D surface</button>
+        <button class="st-preset-chip" data-st-key="sierpinski">Sierpiński</button>
+      </div>
+
+      <div class="ctrl-group" style="margin-top: 10px;">
+        <div class="ctrl-label">Rewrite Steps <span class="ctrl-val" id="v-st-steps">8</span></div>
+        <input type="range" id="sl-st-steps" min="3" max="16" step="1" value="8">
+      </div>
+
+      <button class="action-btn" id="btn-st-evolve" style="margin-top: 8px;">Evolve Hypergraph</button>
+
+      <div class="foliation-label">Foliation Slice</div>
+      <div class="ctrl-group">
+        <div class="ctrl-label">Event <span class="ctrl-val" id="v-st-slice">0</span> / <span id="st-slice-max">0</span></div>
+        <input type="range" id="sl-st-slice" min="0" max="0" step="1" value="0" disabled>
+      </div>
+
+      <div class="st-dim-readout" id="st-dim-readout" style="display:none">
+        <div class="st-dim-value" id="st-dim-value">—</div>
+        <div class="st-dim-label">Emergent Dimension</div>
+        <canvas id="dim-canvas"></canvas>
+        <div class="st-stats" id="st-stats"></div>
+      </div>
+    </div>
     <div class="ctrl-group">
       <div class="ctrl-label">Bloom <span class="ctrl-val" id="v-bloom">0.4</span></div>
       <input type="range" id="sl-bloom" min="0" max="1.5" step="0.05" value="0.4">
@@ -1030,6 +1260,89 @@
       <button class="tool-btn" id="btn-measure-persistence">Measure</button>
       <canvas id="persistence-canvas"></canvas>
       <div id="persistence-result" class="tool-result" style="display:none"></div>
+    </div>
+
+
+
+
+    <div class="section-title" style="margin-top: 16px;" id="sec-spatial-geometry">Spatial Geometry</div>
+    <div class="tool-section" id="spatial-geom-section" style="display:none">
+      <div class="tool-title">Hypergraph Spatial Slice</div>
+      <div class="tool-desc">The current spacelike hypersurface — the "now" of the universe at this foliation step. Nodes = atoms of space. Edges = spatial relations. Dimension is measured by BFS ball growth: V(r) ~ r^d.</div>
+      <div class="st-dim-readout" id="st-dim-readout-right" style="display:none">
+        <div class="st-dim-value" id="st-dim-value-right">—</div>
+        <div class="st-dim-label">Emergent Dimension (spatial hypergraph)</div>
+        <div class="st-stats" id="st-stats-right"></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 16px;">Gravity & Geometry</div>
+
+    <!-- DISCRETE RICCI CURVATURE -->
+    <div class="tool-section">
+      <div class="tool-title">Discrete Ricci Curvature <button class="tool-toggle" id="toggle-ricci" title="Ollivier-Ricci curvature overlay on the evolution graph"></button></div>
+      <div class="tool-desc">Ollivier-Ricci curvature on the multiway graph. Blue = negative (expanding space), red = positive (gravitational well). Computed by comparing BFS ball growth to expected flat-graph growth.</div>
+      <canvas id="ricci-canvas"></canvas>
+      <div id="ricci-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- GEODESIC DEVIATION -->
+    <div class="tool-section">
+      <div class="tool-title">Geodesic Deviation</div>
+      <div class="tool-desc">Select an observer, then measure how bundles of nearby geodesics converge (positive curvature → gravity) or diverge (negative curvature → expansion). The Einstein equation emerges when this scales with energy density.</div>
+      <button class="tool-btn" id="btn-geodesic-deviation">Measure Deviation</button>
+      <canvas id="geodev-canvas"></canvas>
+      <div id="geodev-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- TOPOLOGICAL OBSTRUCTION DETECTOR -->
+    <div class="tool-section">
+      <div class="tool-title">Topological Obstruction Detector</div>
+      <div class="tool-desc">Find self-regenerating state tangles: nodes whose descendant states cycle back to structurally similar states. In Wolfram's framework, persistent tangles = matter (localized topological obstructions in the hypergraph).</div>
+      <button class="tool-btn" id="btn-detect-tangles">Find Tangles</button>
+      <button class="tool-btn" id="btn-highlight-tangles">Highlight on Graph</button>
+      <div id="tangle-list" style="display:none"></div>
+      <div id="tangle-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <div class="section-title" style="margin-top: 16px;">Quantum Tests</div>
+
+    <!-- QUANTUM ZENO EFFECT -->
+    <div class="tool-section">
+      <div class="tool-title">Quantum Zeno Effect <button class="tool-toggle" id="toggle-zeno" title="Repeated observation freezes branch evolution"></button></div>
+      <div class="tool-desc">Select an observer, then enable. At each evolution step, only branches containing the observed state survive — collapsing the multiway graph. Measures how observation frequency suppresses branching.</div>
+      <div id="zeno-status" class="tool-result" style="display:none"></div>
+      <canvas id="zeno-canvas"></canvas>
+      <div id="zeno-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- QUANTUM TUNNELING -->
+    <div class="tool-section">
+      <div class="tool-title">Quantum Tunneling Detector</div>
+      <div class="tool-desc">Find state pairs where branchial distance is much shorter than causal geodesic distance — evidence of tunneling through branchial space. These are states that are "far apart" causally but "close" quantum-mechanically.</div>
+      <button class="tool-btn" id="btn-detect-tunneling">Detect Tunneling</button>
+      <button class="tool-btn" id="btn-highlight-tunneling">Highlight Paths</button>
+      <canvas id="tunneling-canvas"></canvas>
+      <div id="tunneling-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- OBSERVER BRANCHING ASYMMETRY -->
+    <div class="tool-section">
+      <div class="tool-title">Observer Branching Asymmetry</div>
+      <div class="tool-desc">Compare the subjective multiway graph (branches reachable from observer's causal cone) to the total graph. The ratio quantifies how much of the ruliad a finite observer can access — tests Wolfram's claim that physics = what observers sample.</div>
+      <button class="tool-btn" id="btn-measure-asymmetry">Measure</button>
+      <button class="tool-btn" id="btn-show-subjective">Show Subjective View</button>
+      <canvas id="asymmetry-canvas"></canvas>
+      <div id="asymmetry-result" class="tool-result" style="display:none"></div>
+    </div>
+
+    <!-- DISCRETE HOLOGRAPHIC BOUND -->
+    <div class="tool-section">
+      <div class="tool-title">Discrete Holographic Bound</div>
+      <div class="tool-desc">Measure whether entropy (branch count) scales with boundary area or bulk volume of causal regions. Area-law scaling = holographic principle holds. Tests the discrete Bousso bound in the multiway graph.</div>
+      <button class="tool-btn" id="btn-measure-holographic">Measure</button>
+      <canvas id="holographic-canvas"></canvas>
+      <div id="holographic-result" class="tool-result" style="display:none"></div>
     </div>
 
     <div class="section-title" style="margin-top: 16px;">Statistics</div>
@@ -2053,6 +2366,40 @@ const PRESETS = [
     analytical: null,
     slitCount: 0,
     desc: 'Reversible 3-char toggle. Long overlapping patterns create dense branchial connectivity.' },
+
+  { category: 'Wolfram Canonical',
+    key: 'wolfram-3',
+    label: 'A→AAB, B→BA',
+    rules: [{from:'A',to:'AAB'},{from:'B',to:'BA'}],
+    initial: 'AB',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Growth + rearrangement. Creates dense causal tangles — regions that persist = proto-matter.' },
+  { category: 'Wolfram Canonical',
+    key: 'wolfram-4',
+    label: 'BA→AAB, A→B',
+    rules: [{from:'BA',to:'AAB'},{from:'A',to:'B'}],
+    initial: 'BABA',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Decay + growth compete. Stable tangles represent topological obstructions — test for emergent mass.' },
+
+  { category: 'Growth',
+    key: 'cyclic-growth',
+    label: 'Cyclic A→B→C→A',
+    rules: [{from:'A',to:'AB'},{from:'B',to:'BC'},{from:'C',to:'A'}],
+    initial: 'ABC',
+    analytical: null,
+    slitCount: 0,
+    desc: '3-symbol cycle with growth. Rich causal structure — look for dimension and curvature variation.' },
+  { category: 'Growth',
+    key: 'binary-cascade',
+    label: 'Binary Cascade',
+    rules: [{from:'A',to:'BC'},{from:'B',to:'AB'},{from:'C',to:'BA'}],
+    initial: 'AA',
+    analytical: null,
+    slitCount: 0,
+    desc: 'Each symbol expands into two others. Dense multiway graph with high branching — tests geodesic deviation.' },
 ];
 
 const PRESET_MAP = {};
@@ -5249,6 +5596,2883 @@ buildScene = function(sys, highlightSet) {
 };
 
 
+
+
+// ═══════════════════════════════════════════════════════════════
+// PART 11: QUANTUM TESTS — 4 NEW FEATURES
+// ═══════════════════════════════════════════════════════════════
+
+// ─── A. QUANTUM ZENO EFFECT ───
+// When enabled, at each interactive step the multiway graph is
+// "observed" by keeping only branches that contain the observer's
+// state. This simulates the quantum Zeno effect: frequent
+// measurement prevents the system from evolving to orthogonal states.
+
+let zenoEnabled = false;
+let zenoHistory = []; // { step, totalBranches, survivingBranches, frozenRatio }
+let zenoObserverState = null; // the state string being "observed"
+
+function zenoObserve(sys) {
+  // Called after each interactive step when Zeno is active.
+  // Prune branches at the latest step that don't contain the observed state.
+  if (!zenoEnabled || !sys || selectedObserverNodeId === null) return;
+
+  const observerNode = sys.nodes[selectedObserverNodeId];
+  if (!observerNode) return;
+
+  // The "observed" state: we track the observer's state string
+  zenoObserverState = observerNode.state;
+
+  const currentStep = sys._currentStep;
+  if (currentStep === undefined || !sys.stepStates[currentStep]) return;
+
+  const stepIds = sys.stepStates[currentStep];
+  const totalBranches = stepIds.length;
+
+  // Find all nodes at the current step that share ancestry with the observer
+  sys._ensureAdjacencyMaps();
+  const observerDescendants = sys.traceDescendants(selectedObserverNodeId);
+
+  let survivingBranches = 0;
+  for (const sid of stepIds) {
+    if (observerDescendants.has(sid)) {
+      survivingBranches++;
+    }
+  }
+
+  const frozenRatio = totalBranches > 0 ? 1 - (survivingBranches / totalBranches) : 0;
+  zenoHistory.push({ step: currentStep, totalBranches, survivingBranches, frozenRatio });
+
+  // Update the observer to track the most-weighted surviving descendant
+  let bestDescendant = null;
+  let bestWeight = -1;
+  for (const sid of stepIds) {
+    if (observerDescendants.has(sid) && sys.nodes[sid].weight > bestWeight) {
+      bestWeight = sys.nodes[sid].weight;
+      bestDescendant = sid;
+    }
+  }
+  if (bestDescendant !== null && bestDescendant !== selectedObserverNodeId) {
+    // Update observer to track the dominant branch
+    selectedObserverNodeId = bestDescendant;
+  }
+
+  // Visual feedback: dim non-surviving branches
+  if (currentNodePoints && savedNodeColors) {
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    const nc = nColors.array;
+    for (let i = 0; i < sceneNodeData.length; i++) {
+      const nd = sceneNodeData[i];
+      if (nd.step === currentStep && !observerDescendants.has(nd.id)) {
+        const i3 = i * 3;
+        nc[i3] *= 0.12;
+        nc[i3 + 1] *= 0.12;
+        nc[i3 + 2] *= 0.12;
+      }
+    }
+    nColors.needsUpdate = true;
+  }
+
+  drawZenoChart();
+  updateZenoResult();
+}
+
+function drawZenoChart() {
+  const canvas = document.getElementById('zeno-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  if (zenoHistory.length < 2) return;
+
+  const pad = 20;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+
+  // Draw frozen ratio over time (lime)
+  ctx.strokeStyle = 'rgba(204,255,0,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < zenoHistory.length; i++) {
+    const x = pad + (i / (zenoHistory.length - 1)) * plotW;
+    const y = pad + plotH * (1 - zenoHistory[i].frozenRatio);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Fill area
+  ctx.fillStyle = 'rgba(204,255,0,0.06)';
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + plotH);
+  for (let i = 0; i < zenoHistory.length; i++) {
+    const x = pad + (i / (zenoHistory.length - 1)) * plotW;
+    const y = pad + plotH * (1 - zenoHistory[i].frozenRatio);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad + plotW, pad + plotH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw total vs surviving as bar comparison
+  const maxBranch = Math.max(...zenoHistory.map(h => h.totalBranches), 1);
+  ctx.strokeStyle = 'rgba(112,0,255,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < zenoHistory.length; i++) {
+    const x = pad + (i / (zenoHistory.length - 1)) * plotW;
+    const y = pad + plotH * (1 - zenoHistory[i].totalBranches / maxBranch);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(0,240,255,0.5)';
+  ctx.beginPath();
+  for (let i = 0; i < zenoHistory.length; i++) {
+    const x = pad + (i / (zenoHistory.length - 1)) * plotW;
+    const y = pad + plotH * (1 - zenoHistory[i].survivingBranches / maxBranch);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Legend
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(204,255,0,0.7)';
+  ctx.fillText('── Frozen ratio', w - pad, pad - 2);
+  ctx.fillStyle = 'rgba(112,0,255,0.5)';
+  ctx.fillText('── Total branches', w - pad, pad + 8);
+  ctx.fillStyle = 'rgba(0,240,255,0.5)';
+  ctx.fillText('── Surviving', w - pad, pad + 18);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Evolution Step', w / 2, h - 2);
+}
+
+function updateZenoResult() {
+  const el = document.getElementById('zeno-result');
+  if (zenoHistory.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+
+  const latest = zenoHistory[zenoHistory.length - 1];
+  const avgFrozen = zenoHistory.reduce((s, h) => s + h.frozenRatio, 0) / zenoHistory.length;
+
+  el.innerHTML = `
+    <div>Step ${latest.step}: ${latest.survivingBranches}/${latest.totalBranches} branches survive</div>
+    <div>Frozen ratio: <span class="ci-score">${(latest.frozenRatio * 100).toFixed(1)}%</span></div>
+    <div>Avg suppression: <span class="ci-score">${(avgFrozen * 100).toFixed(1)}%</span></div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:2px">${
+      avgFrozen > 0.7 ? 'Strong Zeno effect — observation significantly suppresses branching.'
+      : avgFrozen > 0.3 ? 'Partial Zeno effect — some branches are frozen by observation.'
+      : 'Weak Zeno effect — the system evolves freely despite observation.'
+    }</div>
+  `;
+}
+
+document.getElementById('toggle-zeno').addEventListener('click', function() {
+  zenoEnabled = !zenoEnabled;
+  this.classList.toggle('active', zenoEnabled);
+
+  const statusEl = document.getElementById('zeno-status');
+  if (zenoEnabled) {
+    if (selectedObserverNodeId === null) {
+      statusEl.style.display = 'block';
+      statusEl.textContent = 'Select an observer node first, then enable.';
+      zenoEnabled = false;
+      this.classList.remove('active');
+      return;
+    }
+    zenoHistory = [];
+    zenoObserverState = currentSystem ? currentSystem.nodes[selectedObserverNodeId]?.state : null;
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '<span class="zeno-active-indicator"></span>Zeno mode active — observing state: <span class="ci-score">' +
+      (zenoObserverState || '?') + '</span>. Use interactive stepping.';
+  } else {
+    statusEl.style.display = 'none';
+    // Restore colors
+    if (currentNodePoints && savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+  }
+});
+
+
+// ─── B. QUANTUM TUNNELING DETECTOR ───
+// Find state pairs where branchial distance << causal geodesic distance.
+// These are "tunneling" events — quantum-mechanically close but classically far.
+
+let tunnelingPairs = []; // { nodeA, nodeB, branchialDist, causalDist, ratio }
+let tunnelingHighlightEnabled = false;
+let tunnelingLineObjs = [];
+
+function detectTunneling() {
+  if (!currentSystem) return [];
+  const sys = currentSystem;
+
+  // Get nodes at the final step
+  let finalStep = 0;
+  for (let s = sys.stepStates.length - 1; s >= 0; s--) {
+    if (sys.stepStates[s] && sys.stepStates[s].length > 0) { finalStep = s; break; }
+  }
+  const finalIds = sys.stepStates[finalStep] || [];
+  if (finalIds.length < 3) return [];
+
+  // Compute branchial distances (BFS on branchial graph)
+  const branchialAdj = new Map();
+  for (const be of sys.branchialEdges) {
+    if (!branchialAdj.has(be.from)) branchialAdj.set(be.from, []);
+    if (!branchialAdj.has(be.to)) branchialAdj.set(be.to, []);
+    branchialAdj.get(be.from).push(be.to);
+    branchialAdj.get(be.to).push(be.from);
+  }
+
+  // BFS branchial distance from each final node
+  function branchialBFS(sourceId) {
+    const dist = new Map();
+    dist.set(sourceId, 0);
+    const queue = [sourceId];
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      const d = dist.get(cur);
+      for (const nb of (branchialAdj.get(cur) || [])) {
+        if (!dist.has(nb)) { dist.set(nb, d + 1); queue.push(nb); }
+      }
+    }
+    return dist;
+  }
+
+  // Causal distance uses the evolution graph (parent-child edges)
+  // which is the findShortestPath function already available
+
+  const pairs = [];
+  const maxPairs = 50; // limit for performance
+
+  // Sample pairs from final-step nodes
+  const sampleSize = Math.min(finalIds.length, 20);
+  const sampled = finalIds.slice().sort(() => Math.random() - 0.5).slice(0, sampleSize);
+
+  for (let i = 0; i < sampled.length; i++) {
+    const bDists = branchialBFS(sampled[i]);
+
+    for (let j = i + 1; j < sampled.length; j++) {
+      const branchialDist = bDists.get(sampled[j]);
+      if (branchialDist === undefined) continue; // disconnected
+      if (branchialDist === 0) continue;
+
+      // Causal geodesic distance
+      const path = findShortestPath(sys, sampled[i], sampled[j]);
+      const causalDist = path ? path.length - 1 : Infinity;
+
+      if (causalDist === Infinity || causalDist === 0) continue;
+
+      const ratio = causalDist / branchialDist;
+
+      if (ratio > 1.5) { // Tunneling: causal much longer than branchial
+        pairs.push({
+          nodeA: sampled[i],
+          nodeB: sampled[j],
+          branchialDist,
+          causalDist,
+          ratio
+        });
+      }
+
+      if (pairs.length >= maxPairs) break;
+    }
+    if (pairs.length >= maxPairs) break;
+  }
+
+  pairs.sort((a, b) => b.ratio - a.ratio);
+  return pairs;
+}
+
+function drawTunnelingChart(pairs) {
+  const canvas = document.getElementById('tunneling-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  if (pairs.length === 0) return;
+
+  const pad = 20;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+
+  const maxCausal = Math.max(...pairs.map(p => p.causalDist));
+  const maxBranchial = Math.max(...pairs.map(p => p.branchialDist));
+
+  // Scatter plot: x = branchial distance, y = causal distance
+  // Points above the diagonal are tunneling candidates
+  for (const p of pairs) {
+    const x = pad + (p.branchialDist / maxBranchial) * plotW;
+    const y = pad + plotH * (1 - p.causalDist / maxCausal);
+    const intensity = Math.min(p.ratio / 5, 1);
+
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0, ${Math.floor(240 * intensity)}, ${Math.floor(255 * intensity)}, ${0.4 + intensity * 0.5})`;
+    ctx.fill();
+  }
+
+  // Draw diagonal (no-tunneling line)
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + plotH);
+  ctx.lineTo(pad + plotW, pad);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.font = '8px Inter';
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Branchial Distance →', w / 2, h - 2);
+  ctx.save();
+  ctx.translate(8, h / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Causal Distance →', 0, 0);
+  ctx.restore();
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(0,240,255,0.4)';
+  ctx.fillText('above diagonal = tunneling', w - pad, pad - 2);
+}
+
+function clearTunnelingHighlight() {
+  for (const obj of tunnelingLineObjs) {
+    multiwayGroup.remove(obj);
+    obj.geometry.dispose();
+    obj.material.dispose();
+  }
+  tunnelingLineObjs = [];
+}
+
+function highlightTunnelingPaths() {
+  clearTunnelingHighlight();
+  if (!currentSystem || tunnelingPairs.length === 0) return;
+
+  const sys = currentSystem;
+  const topPairs = tunnelingPairs.slice(0, 5); // show top 5
+
+  for (const pair of topPairs) {
+    // Draw branchial "shortcut" as a cyan arc
+    const nodeA = sys.nodes[pair.nodeA];
+    const nodeB = sys.nodes[pair.nodeB];
+    if (!nodeA || !nodeB) continue;
+
+    const ax = nodeA.x * sceneSpreadScale;
+    const ay = nodeA.y * STEP_SPACING;
+    const bx = nodeB.x * sceneSpreadScale;
+    const by = nodeB.y * STEP_SPACING;
+
+    // Create curved line between the two nodes
+    const midX = (ax + bx) / 2;
+    const midY = (ay + by) / 2;
+    const dx = bx - ax;
+    const dy = by - ay;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    // Offset perpendicular to the line
+    const perpX = -dy / dist * dist * 0.3;
+    const perpY = dx / dist * dist * 0.3;
+
+    const points = [];
+    const segments = 20;
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const ct = 1 - t;
+      // Quadratic bezier: P0, control, P1
+      const x = ct * ct * ax + 2 * ct * t * (midX + perpX) + t * t * bx;
+      const y = ct * ct * ay + 2 * ct * t * (midY + perpY) + t * t * by;
+      points.push(x, y, 1.0);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+    const mat = new THREE.LineBasicMaterial({
+      color: 0x00F0FF,
+      transparent: true,
+      opacity: 0.6,
+      depthWrite: false,
+      linewidth: 2
+    });
+    const line = new THREE.Line(geo, mat);
+    multiwayGroup.add(line);
+    tunnelingLineObjs.push(line);
+  }
+
+  // Also highlight the nodes
+  if (currentNodePoints) {
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    const nc = nColors.array;
+    const tunnelNodes = new Set();
+    for (const p of topPairs) {
+      tunnelNodes.add(p.nodeA);
+      tunnelNodes.add(p.nodeB);
+    }
+    for (let i = 0; i < sceneNodeData.length; i++) {
+      if (tunnelNodes.has(sceneNodeData[i].id)) {
+        const i3 = i * 3;
+        nc[i3] = 0; nc[i3 + 1] = 0.94; nc[i3 + 2] = 1.0; // cyan
+      }
+    }
+    nColors.needsUpdate = true;
+  }
+}
+
+document.getElementById('btn-detect-tunneling').addEventListener('click', () => {
+  tunnelingPairs = detectTunneling();
+  const resultEl = document.getElementById('tunneling-result');
+  resultEl.style.display = 'block';
+
+  if (tunnelingPairs.length === 0) {
+    resultEl.textContent = 'No tunneling pairs detected. Try more evolution steps or different rules.';
+    return;
+  }
+
+  drawTunnelingChart(tunnelingPairs);
+
+  let html = `<div>Found <span class="tunnel-path">${tunnelingPairs.length}</span> tunneling pairs</div>`;
+  html += '<div style="margin-top:4px">';
+  for (const p of tunnelingPairs.slice(0, 5)) {
+    html += `<div>Nodes ${p.nodeA}↔${p.nodeB}: branchial=<span class="tunnel-path">${p.branchialDist}</span> causal=<span class="ci-divergent">${p.causalDist}</span> ratio=<span class="tunnel-ratio">${p.ratio.toFixed(1)}×</span></div>`;
+  }
+  html += '</div>';
+
+  const avgRatio = tunnelingPairs.reduce((s, p) => s + p.ratio, 0) / tunnelingPairs.length;
+  html += `<div style="margin-top:4px">Avg tunneling ratio: <span class="tunnel-ratio">${avgRatio.toFixed(2)}×</span></div>`;
+  html += `<div style="color:rgba(255,255,255,0.3);margin-top:2px">${
+    avgRatio > 3 ? 'Strong tunneling — significant branchial shortcuts bypass causal structure.'
+    : avgRatio > 2 ? 'Moderate tunneling — some states are much closer in Hilbert space than in spacetime.'
+    : 'Mild tunneling — branchial and causal distances are roughly aligned.'
+  }</div>`;
+
+  resultEl.innerHTML = html;
+});
+
+document.getElementById('btn-highlight-tunneling').addEventListener('click', function() {
+  tunnelingHighlightEnabled = !tunnelingHighlightEnabled;
+  this.classList.toggle('active', tunnelingHighlightEnabled);
+
+  if (tunnelingHighlightEnabled) {
+    if (tunnelingPairs.length === 0) {
+      tunnelingPairs = detectTunneling();
+    }
+    highlightTunnelingPaths();
+  } else {
+    clearTunnelingHighlight();
+    if (currentNodePoints && savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+  }
+});
+
+
+// ─── C. OBSERVER BRANCHING ASYMMETRY ───
+// Compare subjective (observer-reachable) vs total multiway graph.
+// The ratio = what fraction of the ruliad this observer can access.
+
+let subjectiveViewEnabled = false;
+
+function measureBranchingAsymmetry() {
+  if (!currentSystem || selectedObserverNodeId === null) return null;
+  const sys = currentSystem;
+
+  sys._ensureAdjacencyMaps();
+  const observerNode = sys.nodes[selectedObserverNodeId];
+  if (!observerNode) return null;
+
+  // Get the observer's full causal cone (ancestors + descendants)
+  const { full: causalCone, ancestors, descendants } = sys.traceCausalHistory(selectedObserverNodeId);
+
+  const results = [];
+  for (let step = 0; step < sys.stepStates.length; step++) {
+    const stepIds = sys.stepStates[step] || [];
+    if (stepIds.length === 0) continue;
+
+    const totalAtStep = stepIds.length;
+    let subjectiveAtStep = 0;
+
+    for (const sid of stepIds) {
+      if (causalCone.has(sid)) {
+        subjectiveAtStep++;
+      }
+    }
+
+    const accessRatio = totalAtStep > 0 ? subjectiveAtStep / totalAtStep : 0;
+
+    // Branchial connectivity within subjective graph
+    let subjectiveBranchialEdges = 0;
+    let totalBranchialEdges = 0;
+    // Count branchial edges at this step
+    for (const be of sys.branchialEdges) {
+      const fromNode = sys.nodes[be.from];
+      const toNode = sys.nodes[be.to];
+      if (fromNode && toNode && fromNode.step === step && toNode.step === step) {
+        totalBranchialEdges++;
+        if (causalCone.has(be.from) && causalCone.has(be.to)) {
+          subjectiveBranchialEdges++;
+        }
+      }
+    }
+
+    results.push({
+      step,
+      totalNodes: totalAtStep,
+      subjectiveNodes: subjectiveAtStep,
+      accessRatio,
+      totalBranchialEdges,
+      subjectiveBranchialEdges,
+      branchialRatio: totalBranchialEdges > 0 ? subjectiveBranchialEdges / totalBranchialEdges : 0
+    });
+  }
+
+  return {
+    stepData: results,
+    totalConeSize: causalCone.size,
+    totalGraphSize: sys.nodes.length,
+    overallRatio: causalCone.size / sys.nodes.length,
+    ancestorCount: ancestors.size,
+    descendantCount: descendants.size
+  };
+}
+
+function drawAsymmetryChart(data) {
+  const canvas = document.getElementById('asymmetry-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  if (!data || data.stepData.length < 2) return;
+
+  const pad = 20;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+  const steps = data.stepData;
+
+  const maxNodes = Math.max(...steps.map(s => s.totalNodes), 1);
+
+  // Total nodes (purple, filled area)
+  ctx.fillStyle = 'rgba(112,0,255,0.12)';
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + plotH);
+  for (let i = 0; i < steps.length; i++) {
+    const x = pad + (i / (steps.length - 1)) * plotW;
+    const y = pad + plotH * (1 - steps[i].totalNodes / maxNodes);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad + plotW, pad + plotH);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(112,0,255,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < steps.length; i++) {
+    const x = pad + (i / (steps.length - 1)) * plotW;
+    const y = pad + plotH * (1 - steps[i].totalNodes / maxNodes);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Subjective nodes (cyan, filled area)
+  ctx.fillStyle = 'rgba(0,240,255,0.12)';
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + plotH);
+  for (let i = 0; i < steps.length; i++) {
+    const x = pad + (i / (steps.length - 1)) * plotW;
+    const y = pad + plotH * (1 - steps[i].subjectiveNodes / maxNodes);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(pad + plotW, pad + plotH);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(0,240,255,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < steps.length; i++) {
+    const x = pad + (i / (steps.length - 1)) * plotW;
+    const y = pad + plotH * (1 - steps[i].subjectiveNodes / maxNodes);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Access ratio line (lime, secondary axis)
+  ctx.strokeStyle = 'rgba(204,255,0,0.6)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  for (let i = 0; i < steps.length; i++) {
+    const x = pad + (i / (steps.length - 1)) * plotW;
+    const y = pad + plotH * (1 - steps[i].accessRatio);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Legend
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(112,0,255,0.7)';
+  ctx.fillText('── Total branches', w - pad, pad - 2);
+  ctx.fillStyle = 'rgba(0,240,255,0.8)';
+  ctx.fillText('── Subjective (observer cone)', w - pad, pad + 8);
+  ctx.fillStyle = 'rgba(204,255,0,0.6)';
+  ctx.fillText('- - Access ratio', w - pad, pad + 18);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Evolution Step', w / 2, h - 2);
+}
+
+function applySubjectiveView() {
+  // Dim all nodes NOT in the observer's causal cone
+  if (!subjectiveViewEnabled || !currentSystem || selectedObserverNodeId === null) return;
+  if (!currentNodePoints || !savedNodeColors) return;
+
+  const sys = currentSystem;
+  sys._ensureAdjacencyMaps();
+  const { full: causalCone } = sys.traceCausalHistory(selectedObserverNodeId);
+
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nc = nColors.array;
+
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const i3 = i * 3;
+    if (!causalCone.has(nd.id)) {
+      // Dim non-subjective nodes to near-invisible
+      nc[i3] *= 0.08;
+      nc[i3 + 1] *= 0.08;
+      nc[i3 + 2] *= 0.08;
+    } else {
+      // Brighten subjective nodes slightly
+      nc[i3] = Math.min(nc[i3] * 1.3, 1);
+      nc[i3 + 1] = Math.min(nc[i3 + 1] * 1.3, 1);
+      nc[i3 + 2] = Math.min(nc[i3 + 2] * 1.3, 1);
+    }
+  }
+  nColors.needsUpdate = true;
+
+  // Also dim edges
+  if (currentEdgeLines) {
+    const eColors = currentEdgeLines.geometry.getAttribute('color');
+    if (eColors) {
+      const ec = eColors.array;
+      const edgeData = currentSystem.edges;
+      for (let i = 0; i < edgeData.length; i++) {
+        const inCone = causalCone.has(edgeData[i].from) && causalCone.has(edgeData[i].to);
+        const i6 = i * 6;
+        if (!inCone) {
+          ec[i6] *= 0.05; ec[i6+1] *= 0.05; ec[i6+2] *= 0.05;
+          ec[i6+3] *= 0.05; ec[i6+4] *= 0.05; ec[i6+5] *= 0.05;
+        }
+      }
+      eColors.needsUpdate = true;
+    }
+  }
+}
+
+document.getElementById('btn-measure-asymmetry').addEventListener('click', () => {
+  if (!currentSystem || selectedObserverNodeId === null) {
+    const el = document.getElementById('asymmetry-result');
+    el.style.display = 'block';
+    el.textContent = 'Select an observer node first.';
+    return;
+  }
+
+  const data = measureBranchingAsymmetry();
+  if (!data) return;
+
+  drawAsymmetryChart(data);
+
+  const el = document.getElementById('asymmetry-result');
+  el.style.display = 'block';
+
+  const pct = (data.overallRatio * 100).toFixed(1);
+  el.innerHTML = `
+    <div>Causal cone: <span class="asymmetry-subjective">${data.totalConeSize}</span> / <span class="asymmetry-total">${data.totalGraphSize}</span> nodes</div>
+    <div>Observer accesses: <span class="asymmetry-ratio">${pct}%</span> of the multiway graph</div>
+    <div>Ancestors: ${data.ancestorCount} · Descendants: ${data.descendantCount}</div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:2px">${
+      data.overallRatio > 0.8 ? 'Observer sees most of the graph — near-complete causal access.'
+      : data.overallRatio > 0.4 ? 'Partial access — the observer samples a significant slice of the ruliad.'
+      : data.overallRatio > 0.15 ? 'Limited access — most branches are causally disconnected from this observer.'
+      : 'Highly restricted — the observer occupies a thin thread through the multiway space. Physics ≈ what this observer can sample.'
+    }</div>
+  `;
+});
+
+document.getElementById('btn-show-subjective').addEventListener('click', function() {
+  subjectiveViewEnabled = !subjectiveViewEnabled;
+  this.classList.toggle('active', subjectiveViewEnabled);
+
+  if (subjectiveViewEnabled) {
+    if (selectedObserverNodeId === null) {
+      subjectiveViewEnabled = false;
+      this.classList.remove('active');
+      const el = document.getElementById('asymmetry-result');
+      el.style.display = 'block';
+      el.textContent = 'Select an observer node first.';
+      return;
+    }
+    // Re-apply saved colors first, then apply subjective view
+    if (currentNodePoints && savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+    applySubjectiveView();
+  } else {
+    // Restore original colors
+    if (currentNodePoints && savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+    if (currentEdgeLines && savedEdgeColors) {
+      const eColors = currentEdgeLines.geometry.getAttribute('color');
+      eColors.array.set(savedEdgeColors);
+      eColors.needsUpdate = true;
+    }
+  }
+});
+
+
+// ─── D. DISCRETE HOLOGRAPHIC BOUND ───
+// For expanding causal regions, measure whether entropy (branch count)
+// scales with boundary (surface area) or bulk (volume).
+// Area-law → holographic principle holds.
+
+function measureHolographicBound() {
+  if (!currentSystem || selectedObserverNodeId === null) return null;
+  const sys = currentSystem;
+
+  sys._ensureAdjacencyMaps();
+  const observerNode = sys.nodes[selectedObserverNodeId];
+  if (!observerNode) return null;
+
+  // For increasing "radii" from the observer (in BFS steps),
+  // measure: volume (nodes inside), boundary (nodes at exactly that radius),
+  // and entropy (distinct branches/states inside).
+  const distances = new Map();
+  distances.set(selectedObserverNodeId, 0);
+  const queue = [selectedObserverNodeId];
+
+  // BFS on the full evolution graph (parent-child)
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    const d = distances.get(cur);
+    const neighbors = new Set();
+    for (const c of (sys._parentToChildren.get(cur) || [])) neighbors.add(c);
+    for (const p of (sys._childToParents.get(cur) || [])) neighbors.add(p);
+    for (const nb of neighbors) {
+      if (!distances.has(nb)) {
+        distances.set(nb, d + 1);
+        queue.push(nb);
+      }
+    }
+  }
+
+  let maxDist = 0;
+  for (const d of distances.values()) if (d > maxDist) maxDist = d;
+
+  const results = [];
+  for (let r = 1; r <= maxDist; r++) {
+    let volumeNodes = 0; // nodes at distance <= r
+    let boundaryNodes = 0; // nodes at distance exactly r
+    const statesInside = new Set(); // unique states inside radius r
+
+    for (const [nodeId, dist] of distances) {
+      if (dist <= r) {
+        volumeNodes++;
+        statesInside.add(sys.nodes[nodeId].state);
+      }
+      if (dist === r) {
+        boundaryNodes++;
+      }
+    }
+
+    const entropy = statesInside.size; // number of distinct states = branch count
+
+    results.push({
+      radius: r,
+      volume: volumeNodes,
+      boundary: boundaryNodes,
+      entropy
+    });
+  }
+
+  // Analyze scaling: fit log(entropy) vs log(boundary) and log(volume)
+  // Simple linear regression in log space
+  function logRegression(xs, ys) {
+    const n = xs.length;
+    if (n < 2) return { slope: 0, r2: 0 };
+    const logXs = xs.map(x => Math.log(Math.max(x, 1)));
+    const logYs = ys.map(y => Math.log(Math.max(y, 1)));
+    const meanX = logXs.reduce((s, x) => s + x, 0) / n;
+    const meanY = logYs.reduce((s, y) => s + y, 0) / n;
+    let num = 0, den = 0;
+    for (let i = 0; i < n; i++) {
+      num += (logXs[i] - meanX) * (logYs[i] - meanY);
+      den += (logXs[i] - meanX) ** 2;
+    }
+    const slope = den > 0 ? num / den : 0;
+
+    // R-squared
+    let ssRes = 0, ssTot = 0;
+    for (let i = 0; i < n; i++) {
+      const pred = meanY + slope * (logXs[i] - meanX);
+      ssRes += (logYs[i] - pred) ** 2;
+      ssTot += (logYs[i] - meanY) ** 2;
+    }
+    const r2 = ssTot > 0 ? 1 - ssRes / ssTot : 0;
+    return { slope, r2 };
+  }
+
+  const validResults = results.filter(r => r.boundary > 0 && r.entropy > 0);
+  const boundaryFit = logRegression(
+    validResults.map(r => r.boundary),
+    validResults.map(r => r.entropy)
+  );
+  const volumeFit = logRegression(
+    validResults.map(r => r.volume),
+    validResults.map(r => r.entropy)
+  );
+
+  return {
+    radiusData: results,
+    boundaryScaling: boundaryFit,
+    volumeScaling: volumeFit,
+    isHolographic: boundaryFit.r2 > volumeFit.r2
+  };
+}
+
+function drawHolographicChart(data) {
+  const canvas = document.getElementById('holographic-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  if (!data || data.radiusData.length < 2) return;
+
+  const pad = 25;
+  const plotW = w - pad * 2;
+  const plotH = h - pad * 2;
+  const rd = data.radiusData;
+
+  const maxEntropy = Math.max(...rd.map(r => r.entropy), 1);
+  const maxBoundary = Math.max(...rd.map(r => r.boundary), 1);
+  const maxVolume = Math.max(...rd.map(r => r.volume), 1);
+
+  // Entropy line (lime)
+  ctx.strokeStyle = 'rgba(204,255,0,0.8)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < rd.length; i++) {
+    const x = pad + (i / (rd.length - 1)) * plotW;
+    const y = pad + plotH * (1 - rd[i].entropy / maxEntropy);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Boundary line (cyan)
+  ctx.strokeStyle = 'rgba(0,240,255,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < rd.length; i++) {
+    const x = pad + (i / (rd.length - 1)) * plotW;
+    const y = pad + plotH * (1 - rd[i].boundary / maxBoundary);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Volume line (orange)
+  ctx.strokeStyle = 'rgba(255,107,53,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < rd.length; i++) {
+    const x = pad + (i / (rd.length - 1)) * plotW;
+    const y = pad + plotH * (1 - rd[i].volume / maxVolume);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Legend
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(204,255,0,0.8)';
+  ctx.fillText('── Entropy (states)', w - pad, pad - 2);
+  ctx.fillStyle = 'rgba(0,240,255,0.6)';
+  ctx.fillText('── Boundary', w - pad, pad + 8);
+  ctx.fillStyle = 'rgba(255,107,53,0.6)';
+  ctx.fillText('── Volume', w - pad, pad + 18);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Causal Radius (BFS steps from observer)', w / 2, h - 2);
+}
+
+document.getElementById('btn-measure-holographic').addEventListener('click', () => {
+  if (!currentSystem || selectedObserverNodeId === null) {
+    const el = document.getElementById('holographic-result');
+    el.style.display = 'block';
+    el.textContent = 'Select an observer node first.';
+    return;
+  }
+
+  const data = measureHolographicBound();
+  if (!data || data.radiusData.length < 2) {
+    document.getElementById('holographic-result').style.display = 'block';
+    document.getElementById('holographic-result').textContent = 'Not enough data — try more evolution steps.';
+    return;
+  }
+
+  drawHolographicChart(data);
+
+  const el = document.getElementById('holographic-result');
+  el.style.display = 'block';
+
+  const bSlope = data.boundaryScaling.slope.toFixed(2);
+  const bR2 = data.boundaryScaling.r2.toFixed(3);
+  const vSlope = data.volumeScaling.slope.toFixed(2);
+  const vR2 = data.volumeScaling.r2.toFixed(3);
+
+  el.innerHTML = `
+    <div>Entropy ~ Boundary<sup>${bSlope}</sup> (R²=<span class="holo-area">${bR2}</span>)</div>
+    <div>Entropy ~ Volume<sup>${vSlope}</sup> (R²=<span class="holo-volume">${vR2}</span>)</div>
+    <div style="margin-top:4px">Scaling: <span class="holo-scaling">${data.isHolographic ? 'AREA LAW (Holographic)' : 'VOLUME LAW (Non-holographic)'}</span></div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:2px">${
+      data.isHolographic
+        ? 'Entropy correlates more strongly with boundary size — the discrete holographic principle appears to hold. Information is encoded on the surface of causal regions.'
+        : 'Entropy scales more with volume — the holographic bound is not saturated. This may indicate a non-gravitational (flat space) regime.'
+    }</div>
+  `;
+});
+
+
+// ─── HOOK: Zeno into interactive stepping ───
+// Intercept both batch and interactive step functions
+const _origRunEvolution = runEvolution;
+runEvolution = function() {
+  _origRunEvolution();
+  if (zenoEnabled && currentSystem) {
+    zenoObserve(currentSystem);
+  }
+};
+
+// Hook refreshSceneAndPlots to preserve observer during Zeno
+const _origRefreshSceneAndPlots = refreshSceneAndPlots;
+refreshSceneAndPlots = function() {
+  let savedZenoObserver = null;
+  if (zenoEnabled && selectedObserverNodeId !== null) {
+    savedZenoObserver = selectedObserverNodeId;
+  }
+  _origRefreshSceneAndPlots();
+  // Re-select the observer and apply Zeno after scene rebuild
+  if (zenoEnabled && savedZenoObserver !== null && currentSystem) {
+    // Find the best matching node: the saved observer or its closest descendant
+    if (currentSystem.nodes[savedZenoObserver]) {
+      selectedObserverNodeId = savedZenoObserver;
+      selectCausalHistory(savedZenoObserver);
+    }
+    setTimeout(() => {
+      if (zenoEnabled && currentSystem) zenoObserve(currentSystem);
+    }, 100);
+  }
+};
+
+// Also hook into buildScene to clean up tunneling + subjective view
+const _origBuildScene11 = buildScene;
+buildScene = function(sys, highlightSet) {
+  _origBuildScene11(sys, highlightSet);
+  clearTunnelingHighlight();
+  // Re-apply subjective view if enabled
+  if (subjectiveViewEnabled) setTimeout(applySubjectiveView, 0);
+};
+
+// Hook into clearObserver to reset quantum tools
+const _origClearObserver11 = clearObserver;
+clearObserver = function() {
+  _origClearObserver11();
+  // Reset subjective view
+  if (subjectiveViewEnabled) {
+    subjectiveViewEnabled = false;
+    document.getElementById('btn-show-subjective').classList.remove('active');
+  }
+  // Reset tunneling highlight
+  if (tunnelingHighlightEnabled) {
+    tunnelingHighlightEnabled = false;
+    document.getElementById('btn-highlight-tunneling').classList.remove('active');
+    clearTunnelingHighlight();
+  }
+};
+
+// Expose for testing
+window._zenoObserve = zenoObserve;
+window._detectTunneling = detectTunneling;
+window._measureBranchingAsymmetry = measureBranchingAsymmetry;
+window._measureHolographicBound = measureHolographicBound;
+
+
+
+// ═══════════════════════════════════════════════════════════
+// PART 12: GRAVITY & GEOMETRY
+// Discrete Ricci curvature, geodesic deviation, topological obstructions
+// ═══════════════════════════════════════════════════════════
+
+// ─── State variables ───
+let ricciCurvatureEnabled = false;
+let ricciCurvatureData = null; // Map: nodeId -> curvature value
+let tangleData = null; // Array of tangle objects
+let tangleHighlightEnabled = false;
+
+// ─── DISCRETE RICCI CURVATURE ───
+// Ollivier-Ricci curvature approximation:
+// For each node, measure the BFS ball growth rate.
+// In a flat graph, the ball grows polynomially.
+// Positive curvature (gravity) = ball grows slower than expected (focusing)
+// Negative curvature (expansion) = ball grows faster (defocusing)
+
+function computeRicciCurvature() {
+  const sys = currentSystem;
+  if (!sys || sys.nodes.length < 3) return null;
+  
+  sys._ensureAdjacencyMaps();
+  
+  // Build undirected adjacency for the multiway graph
+  const adj = new Map();
+  for (const e of sys.edges) {
+    if (!adj.has(e.from)) adj.set(e.from, new Set());
+    if (!adj.has(e.to)) adj.set(e.to, new Set());
+    adj.get(e.from).add(e.to);
+    adj.get(e.to).add(e.from);
+  }
+  // Also include branchial edges
+  for (const be of sys.branchialEdges) {
+    if (!adj.has(be.from)) adj.set(be.from, new Set());
+    if (!adj.has(be.to)) adj.set(be.to, new Set());
+    adj.get(be.from).add(be.to);
+    adj.get(be.to).add(be.from);
+  }
+  
+  const curvature = new Map();
+  const maxRadius = 3; // BFS radius for ball computation
+  
+  for (let i = 0; i < sys.nodes.length; i++) {
+    const nodeId = i;
+    const neighbors = adj.get(nodeId);
+    if (!neighbors || neighbors.size === 0) {
+      curvature.set(nodeId, 0);
+      continue;
+    }
+    
+    // BFS balls at radius 1, 2, 3
+    const ballSizes = [1]; // radius 0 = just the node
+    const visited = new Set([nodeId]);
+    let frontier = new Set([nodeId]);
+    
+    for (let r = 1; r <= maxRadius; r++) {
+      const nextFrontier = new Set();
+      for (const nid of frontier) {
+        const nbrs = adj.get(nid);
+        if (nbrs) {
+          for (const nb of nbrs) {
+            if (!visited.has(nb)) {
+              visited.add(nb);
+              nextFrontier.add(nb);
+            }
+          }
+        }
+      }
+      ballSizes.push(visited.size);
+      frontier = nextFrontier;
+      if (frontier.size === 0) break;
+    }
+    
+    // In a d-dimensional flat graph, ball volume ~ r^d
+    // Growth ratio: |B(r)| / |B(r-1)|
+    // Positive curvature: growth ratio decreasing (focusing)
+    // Negative curvature: growth ratio increasing (defocusing)
+    
+    if (ballSizes.length < 3) {
+      curvature.set(nodeId, 0);
+      continue;
+    }
+    
+    // Compute average degree for expected flat growth
+    const degree = neighbors.size;
+    
+    // Compare actual growth to expected flat-space growth
+    // Expected flat growth at radius r: ~ degree * (degree-1)^(r-1) for tree-like
+    // Actual: ballSizes[r]
+    // Ricci curvature ~ 1 - (actual_growth / expected_growth)
+    
+    let kappa = 0;
+    if (ballSizes.length >= 3) {
+      const actualGrowth2 = ballSizes[2] / Math.max(ballSizes[1], 1);
+      const expectedGrowth = Math.max(degree, 1); // tree-like expectation
+      
+      // Ollivier-Ricci approximation: kappa ≈ 1 - W1(mu_x, mu_y) / d(x,y)
+      // Simplified: curvature ≈ 1 - actualGrowth / expectedGrowth
+      kappa = 1 - actualGrowth2 / expectedGrowth;
+    }
+    
+    if (ballSizes.length >= 4) {
+      // Refine with radius-3 data
+      const growth3 = ballSizes[3] / Math.max(ballSizes[2], 1);
+      const growth2 = ballSizes[2] / Math.max(ballSizes[1], 1);
+      // Focusing = growth slowing down (positive curvature)
+      // Defocusing = growth speeding up (negative curvature)
+      const growthAccel = growth3 - growth2;
+      kappa = -growthAccel / Math.max(Math.abs(growth2), 0.5);
+    }
+    
+    // Clamp to [-1, 1]
+    kappa = Math.max(-1, Math.min(1, kappa));
+    curvature.set(nodeId, kappa);
+  }
+  
+  return curvature;
+}
+
+function applyRicciOverlay() {
+  if (!ricciCurvatureEnabled || !currentSystem || !currentNodePoints || !savedNodeColors) return;
+  
+  ricciCurvatureData = computeRicciCurvature();
+  if (!ricciCurvatureData) return;
+  
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nc = nColors.array;
+  
+  // Blue (negative/expanding) → white (flat) → red (positive/gravitational)
+  const negColor = new THREE.Color('#2060FF'); // blue - expanding space
+  const flatColor = new THREE.Color('#303040'); // near-black neutral
+  const posColor = new THREE.Color('#FF3030'); // red - gravitational well
+  
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const kappa = ricciCurvatureData.get(nd.id) || 0;
+    const i3 = i * 3;
+    
+    if (kappa < 0) {
+      // Negative curvature → blue (expanding)
+      const t = Math.min(Math.abs(kappa), 1);
+      _hoverTmp.copy(flatColor).lerp(negColor, t);
+    } else {
+      // Positive curvature → red (gravitational)
+      const t = Math.min(kappa, 1);
+      _hoverTmp.copy(flatColor).lerp(posColor, t);
+    }
+    
+    nc[i3] = _hoverTmp.r;
+    nc[i3 + 1] = _hoverTmp.g;
+    nc[i3 + 2] = _hoverTmp.b;
+  }
+  nColors.needsUpdate = true;
+  
+  // Draw curvature distribution chart
+  drawRicciChart();
+  updateRicciResult();
+}
+
+function drawRicciChart() {
+  if (!ricciCurvatureData) return;
+  
+  const canvas = document.getElementById('ricci-canvas');
+  canvas.style.display = 'block';
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  
+  const w = rect.width;
+  const h = rect.height;
+  const pad = 35;
+  const plotW = w - 2 * pad;
+  const plotH = h - 2 * pad;
+  
+  // Histogram of curvature values
+  const bins = 30;
+  const binCounts = new Array(bins).fill(0);
+  const binEdges = [];
+  for (let i = 0; i <= bins; i++) {
+    binEdges.push(-1 + (2 * i / bins));
+  }
+  
+  for (const [, kappa] of ricciCurvatureData) {
+    const binIdx = Math.min(Math.floor((kappa + 1) / 2 * bins), bins - 1);
+    if (binIdx >= 0) binCounts[binIdx]++;
+  }
+  
+  const maxCount = Math.max(...binCounts, 1);
+  const barW = plotW / bins;
+  
+  for (let i = 0; i < bins; i++) {
+    const barH = (binCounts[i] / maxCount) * plotH;
+    const x = pad + i * barW;
+    const y = pad + plotH - barH;
+    
+    // Color by curvature sign
+    const kappaCenter = -1 + (2 * i + 1) / bins;
+    if (kappaCenter < -0.05) {
+      ctx.fillStyle = `rgba(32, 96, 255, ${0.3 + 0.5 * Math.abs(kappaCenter)})`;
+    } else if (kappaCenter > 0.05) {
+      ctx.fillStyle = `rgba(255, 48, 48, ${0.3 + 0.5 * kappaCenter})`;
+    } else {
+      ctx.fillStyle = 'rgba(128, 128, 160, 0.4)';
+    }
+    ctx.fillRect(x, y, barW - 1, barH);
+  }
+  
+  // Zero line
+  const zeroX = pad + plotW / 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(zeroX, pad);
+  ctx.lineTo(zeroX, pad + plotH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Labels
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'left';
+  ctx.fillText('−κ (expanding)', pad, h - 4);
+  ctx.textAlign = 'right';
+  ctx.fillText('+κ (gravity)', w - pad, h - 4);
+  ctx.textAlign = 'center';
+  ctx.fillText('flat', zeroX, h - 4);
+  ctx.fillText('Ricci Curvature Distribution', w / 2, pad - 6);
+}
+
+function updateRicciResult() {
+  if (!ricciCurvatureData) return;
+  
+  const resultEl = document.getElementById('ricci-result');
+  resultEl.style.display = 'block';
+  
+  let posCount = 0, negCount = 0, flatCount = 0;
+  let sumKappa = 0, maxKappa = -Infinity, minKappa = Infinity;
+  
+  for (const [, kappa] of ricciCurvatureData) {
+    sumKappa += kappa;
+    if (kappa > maxKappa) maxKappa = kappa;
+    if (kappa < minKappa) minKappa = kappa;
+    if (kappa > 0.05) posCount++;
+    else if (kappa < -0.05) negCount++;
+    else flatCount++;
+  }
+  
+  const avgKappa = sumKappa / ricciCurvatureData.size;
+  const scalarCurvature = sumKappa; // Discrete analog of scalar curvature = sum over nodes
+  
+  resultEl.innerHTML = `
+    <div>Avg curvature: <span class="ci-score">${avgKappa.toFixed(4)}</span></div>
+    <div>Scalar curvature (Σκ): <span class="ci-score">${scalarCurvature.toFixed(2)}</span></div>
+    <div><span class="ricci-positive">+κ gravitational: ${posCount}</span> | 
+         <span class="ricci-flat">flat: ${flatCount}</span> | 
+         <span class="ricci-negative">−κ expanding: ${negCount}</span></div>
+    <div>Range: [${minKappa.toFixed(3)}, ${maxKappa.toFixed(3)}]</div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:3px">${
+      avgKappa > 0.05 ? 'Net positive curvature — spacetime is contracting. Gravitational effects dominate.'
+      : avgKappa < -0.05 ? 'Net negative curvature — spacetime is expanding. De Sitter-like geometry.'
+      : 'Near-flat on average. Curvature fluctuations represent quantum gravity corrections.'
+    }</div>
+  `;
+}
+
+document.getElementById('toggle-ricci').addEventListener('click', function() {
+  ricciCurvatureEnabled = !ricciCurvatureEnabled;
+  this.classList.toggle('active', ricciCurvatureEnabled);
+  
+  // Disable other overlays to avoid conflicts
+  if (ricciCurvatureEnabled) {
+    if (energyDensityEnabled) {
+      energyDensityEnabled = false;
+      document.getElementById('toggle-energy').classList.remove('active');
+    }
+    if (heatmapEnabled) {
+      heatmapEnabled = false;
+      document.getElementById('toggle-heatmap').classList.remove('active');
+    }
+    if (ciHighlightEnabled) {
+      ciHighlightEnabled = false;
+      document.getElementById('btn-highlight-ci').classList.remove('active');
+    }
+    applyRicciOverlay();
+  } else {
+    ricciCurvatureData = null;
+    document.getElementById('ricci-canvas').style.display = '';
+    document.getElementById('ricci-result').style.display = 'none';
+    if (currentNodePoints && savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+  }
+});
+
+
+// ─── GEODESIC DEVIATION ───
+// Measure how bundles of nearby geodesics converge or diverge.
+// This is the discrete analog of the Jacobi equation:
+// d²J/ds² + R(T,J)T = 0
+// Positive Riemann curvature → convergence → gravity
+// Negative → divergence → expansion
+
+function measureGeodesicDeviation() {
+  const sys = currentSystem;
+  if (!sys || sys.nodes.length < 5) return null;
+  
+  sys._ensureAdjacencyMaps();
+  
+  // Strategy: from the observer (or root), trace multiple geodesic paths
+  // (shortest paths to various leaf nodes). Measure how the pairwise
+  // distance between endpoints of "initially nearby" geodesics changes.
+  
+  const observerNode = selectedObserverNodeId !== null ? selectedObserverNodeId : 0;
+  const observerStep = sys.nodes[observerNode].step;
+  
+  // Find geodesics from observer to nodes at later steps
+  const targetNodes = [];
+  const maxStep = sys.stepStates.length - 1;
+  
+  // Collect nodes at the final step (or close to it)
+  for (let s = Math.max(observerStep + 2, maxStep - 1); s <= maxStep; s++) {
+    const stepIds = sys.stepStates[s] || [];
+    for (const id of stepIds) {
+      targetNodes.push(id);
+    }
+  }
+  
+  if (targetNodes.length < 2) return null;
+  
+  // Compute geodesics from observer to all targets
+  const geodesics = [];
+  for (const targetId of targetNodes) {
+    const path = findShortestPath(sys, observerNode, targetId);
+    if (path && path.length >= 3) {
+      geodesics.push(path);
+    }
+  }
+  
+  if (geodesics.length < 2) return null;
+  
+  // Group geodesics by their initial direction (first step neighbor)
+  const byFirstStep = new Map();
+  for (const geo of geodesics) {
+    const firstNeighbor = geo[1]; // First node after observer
+    if (!byFirstStep.has(firstNeighbor)) byFirstStep.set(firstNeighbor, []);
+    byFirstStep.get(firstNeighbor).push(geo);
+  }
+  
+  // For each bundle (geodesics sharing the same first step),
+  // measure how endpoint separation changes along the path
+  const deviationData = [];
+  
+  for (const [startNeighbor, bundle] of byFirstStep) {
+    if (bundle.length < 2) continue;
+    
+    // Measure separation at each step depth
+    const maxLen = Math.max(...bundle.map(g => g.length));
+    const separationProfile = [];
+    
+    for (let depth = 1; depth < maxLen; depth++) {
+      // Collect nodes at this depth across all geodesics in the bundle
+      const nodesAtDepth = [];
+      for (const geo of bundle) {
+        if (depth < geo.length) {
+          nodesAtDepth.push(geo[depth]);
+        }
+      }
+      
+      if (nodesAtDepth.length < 2) continue;
+      
+      // Compute average pairwise graph distance at this depth
+      let totalDist = 0;
+      let pairs = 0;
+      
+      for (let i = 0; i < nodesAtDepth.length; i++) {
+        for (let j = i + 1; j < nodesAtDepth.length; j++) {
+          // Use step difference + branchial-like distance
+          const ni = sys.nodes[nodesAtDepth[i]];
+          const nj = sys.nodes[nodesAtDepth[j]];
+          if (ni && nj) {
+            // Branchial distance: same step = edit distance of states
+            // Different step: |step diff| + state-distance proxy
+            const stepDiff = Math.abs(ni.step - nj.step);
+            const stateDist = ni.state === nj.state ? 0 : 
+              levenshteinLike(ni.state, nj.state);
+            totalDist += stepDiff + stateDist;
+            pairs++;
+          }
+        }
+      }
+      
+      if (pairs > 0) {
+        separationProfile.push({
+          depth,
+          avgSeparation: totalDist / pairs,
+          numPaths: nodesAtDepth.length
+        });
+      }
+    }
+    
+    if (separationProfile.length >= 2) {
+      // Compute deviation: is separation increasing or decreasing?
+      const firstSep = separationProfile[0].avgSeparation;
+      const lastSep = separationProfile[separationProfile.length - 1].avgSeparation;
+      const deviation = (lastSep - firstSep) / Math.max(firstSep, 0.01);
+      
+      deviationData.push({
+        startNeighbor,
+        bundleSize: bundle.length,
+        profile: separationProfile,
+        deviation,
+        converging: deviation < -0.1,
+        diverging: deviation > 0.1
+      });
+    }
+  }
+  
+  return deviationData;
+}
+
+// Simple edit distance proxy (not full Levenshtein for performance)
+function levenshteinLike(a, b) {
+  if (a === b) return 0;
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 0;
+  let diff = Math.abs(a.length - b.length);
+  const minLen = Math.min(a.length, b.length);
+  for (let i = 0; i < minLen; i++) {
+    if (a[i] !== b[i]) diff++;
+  }
+  return diff;
+}
+
+function drawGeodevChart(data) {
+  const canvas = document.getElementById('geodev-canvas');
+  canvas.style.display = 'block';
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  
+  const w = rect.width;
+  const h = rect.height;
+  const pad = 30;
+  const plotW = w - 2 * pad;
+  const plotH = h - 2 * pad;
+  
+  if (!data || data.length === 0) return;
+  
+  // Find global ranges
+  let maxDepth = 0, maxSep = 0;
+  for (const bundle of data) {
+    for (const pt of bundle.profile) {
+      if (pt.depth > maxDepth) maxDepth = pt.depth;
+      if (pt.avgSeparation > maxSep) maxSep = pt.avgSeparation;
+    }
+  }
+  if (maxDepth === 0) maxDepth = 1;
+  if (maxSep === 0) maxSep = 1;
+  
+  // Draw each bundle's separation profile
+  const colors = [
+    'rgba(255, 96, 64, 0.8)',   // red-orange (converging)
+    'rgba(64, 160, 255, 0.8)',  // blue (diverging)
+    'rgba(204, 255, 0, 0.6)',   // lime
+    'rgba(160, 80, 255, 0.6)',  // purple
+    'rgba(255, 200, 0, 0.6)',   // gold
+    'rgba(0, 240, 255, 0.6)',   // cyan
+  ];
+  
+  for (let bi = 0; bi < data.length; bi++) {
+    const bundle = data[bi];
+    const profile = bundle.profile;
+    const color = bundle.converging ? colors[0] : bundle.diverging ? colors[1] : colors[2 + (bi % 4)];
+    
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    
+    for (let pi = 0; pi < profile.length; pi++) {
+      const x = pad + (profile[pi].depth / maxDepth) * plotW;
+      const y = pad + plotH - (profile[pi].avgSeparation / maxSep) * plotH;
+      if (pi === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    
+    // Endpoint dot
+    const last = profile[profile.length - 1];
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(
+      pad + (last.depth / maxDepth) * plotW,
+      pad + plotH - (last.avgSeparation / maxSep) * plotH,
+      3, 0, Math.PI * 2
+    );
+    ctx.fill();
+  }
+  
+  // Axes
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'center';
+  ctx.fillText('Geodesic Depth (proper time)', w / 2, h - 2);
+  ctx.textAlign = 'left';
+  ctx.fillText('Separation', pad, pad - 4);
+  ctx.textAlign = 'center';
+  ctx.fillText('Geodesic Bundle Deviation', w / 2, pad - 12);
+}
+
+document.getElementById('btn-geodesic-deviation').addEventListener('click', () => {
+  if (!currentSystem) {
+    const r = document.getElementById('geodev-result');
+    r.style.display = 'block';
+    r.textContent = 'Run evolution first.';
+    return;
+  }
+  
+  const data = measureGeodesicDeviation();
+  const resultEl = document.getElementById('geodev-result');
+  resultEl.style.display = 'block';
+  
+  if (!data || data.length === 0) {
+    resultEl.textContent = 'Not enough geodesic bundles to measure deviation. Try more evolution steps or a different preset.';
+    return;
+  }
+  
+  drawGeodevChart(data);
+  
+  const converging = data.filter(d => d.converging).length;
+  const diverging = data.filter(d => d.diverging).length;
+  const flat = data.length - converging - diverging;
+  const avgDev = data.reduce((s, d) => s + d.deviation, 0) / data.length;
+  
+  resultEl.innerHTML = `
+    <div>${data.length} geodesic bundles analyzed</div>
+    <div><span class="geodev-converging">Converging (gravity): ${converging}</span> | 
+         <span class="ricci-flat">Flat: ${flat}</span> | 
+         <span class="geodev-diverging">Diverging (expansion): ${diverging}</span></div>
+    <div>Avg deviation: <span class="ci-score">${avgDev.toFixed(3)}</span></div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:3px">${
+      avgDev < -0.15 ? 'Net convergence — geodesics focus. Gravity is present. The Jacobi field contracts.'
+      : avgDev > 0.15 ? 'Net divergence — geodesics spread. Space is expanding or curvature is negative.'
+      : 'Near-zero deviation — approximately flat spacetime in this region.'
+    }</div>
+  `;
+});
+
+
+// ─── TOPOLOGICAL OBSTRUCTION DETECTOR ───
+// Find state patterns that regenerate across evolution steps.
+// Self-sustaining tangles = matter in Wolfram's framework.
+
+function detectTopologicalObstructions() {
+  const sys = currentSystem;
+  if (!sys || sys.nodes.length < 5) return null;
+  
+  sys._ensureAdjacencyMaps();
+  
+  // Strategy: For each state, check if a similar state (substring match)
+  // appears in its descendants. Self-similar regeneration = tangle.
+  
+  const tangles = [];
+  const checkedStates = new Set();
+  
+  // For efficiency, only check states that appear multiple times or
+  // have descendants containing similar substrings
+  const stateNodes = new Map(); // state -> [nodeIds]
+  for (const node of sys.nodes) {
+    if (!stateNodes.has(node.state)) stateNodes.set(node.state, []);
+    stateNodes.get(node.state).push(node.id);
+  }
+  
+  // Find states that recur (exact match across steps = strong tangle)
+  for (const [state, nodeIds] of stateNodes) {
+    if (nodeIds.length < 2 || checkedStates.has(state)) continue;
+    checkedStates.add(state);
+    
+    // Check if this state appears at different steps
+    const steps = new Set(nodeIds.map(id => sys.nodes[id].step));
+    if (steps.size >= 2) {
+      const stepList = [...steps].sort((a, b) => a - b);
+      const span = stepList[stepList.length - 1] - stepList[0];
+      
+      // Verify causal connection: is there a path between occurrences?
+      let connected = false;
+      const earliestNode = nodeIds.find(id => sys.nodes[id].step === stepList[0]);
+      const latestNode = nodeIds.find(id => sys.nodes[id].step === stepList[stepList.length - 1]);
+      
+      if (earliestNode !== undefined && latestNode !== undefined) {
+        const descendants = sys.traceDescendants(earliestNode);
+        connected = descendants.has(latestNode);
+      }
+      
+      tangles.push({
+        type: 'exact',
+        state,
+        occurrences: nodeIds.length,
+        steps: stepList,
+        span,
+        connected,
+        nodeIds,
+        strength: connected ? (span * nodeIds.length) : (nodeIds.length * 0.5)
+      });
+    }
+  }
+  
+  // Find substring tangles: state A's core pattern appears in its descendants
+  // (approximate self-regeneration)
+  for (let i = 0; i < sys.nodes.length && i < 200; i++) {
+    const node = sys.nodes[i];
+    if (node.state.length < 2) continue;
+    
+    // Extract core pattern: most common 2-3 char substring
+    const core = extractCore(node.state);
+    if (!core || core.length < 2) continue;
+    
+    // Check descendants for core pattern
+    const children = sys._parentToChildren.get(node.id) || [];
+    let regenerations = 0;
+    const regenNodes = [node.id];
+    
+    // Look 1-3 steps ahead
+    let frontier = new Set(children);
+    for (let depth = 0; depth < 3; depth++) {
+      const nextFrontier = new Set();
+      for (const cid of frontier) {
+        const childNode = sys.nodes[cid];
+        if (childNode && childNode.state.includes(core)) {
+          regenerations++;
+          regenNodes.push(cid);
+        }
+        const grandchildren = sys._parentToChildren.get(cid) || [];
+        for (const gc of grandchildren) nextFrontier.add(gc);
+      }
+      frontier = nextFrontier;
+    }
+    
+    if (regenerations >= 2) {
+      tangles.push({
+        type: 'substring',
+        state: node.state,
+        core,
+        occurrences: regenerations,
+        steps: [...new Set(regenNodes.map(id => sys.nodes[id].step))].sort((a,b) => a - b),
+        span: regenNodes.length,
+        connected: true,
+        nodeIds: regenNodes,
+        strength: regenerations * 2
+      });
+    }
+  }
+  
+  // Sort by strength
+  tangles.sort((a, b) => b.strength - a.strength);
+  
+  // Deduplicate — remove substring tangles if an exact tangle covers the same nodes
+  const seen = new Set();
+  const unique = [];
+  for (const t of tangles) {
+    const key = t.type === 'exact' ? t.state : `${t.state}:${t.core}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(t);
+    }
+  }
+  
+  return unique.slice(0, 20); // Top 20
+}
+
+function extractCore(state) {
+  // Find the most repeated 2-char substring
+  if (state.length < 2) return null;
+  const counts = new Map();
+  for (let i = 0; i < state.length - 1; i++) {
+    const sub = state.substring(i, i + 2);
+    counts.set(sub, (counts.get(sub) || 0) + 1);
+  }
+  let bestSub = null, bestCount = 0;
+  for (const [sub, count] of counts) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestSub = sub;
+    }
+  }
+  return bestCount >= 2 ? bestSub : (state.length >= 2 ? state.substring(0, 2) : null);
+}
+
+document.getElementById('btn-detect-tangles').addEventListener('click', () => {
+  if (!currentSystem) {
+    document.getElementById('tangle-result').style.display = 'block';
+    document.getElementById('tangle-result').textContent = 'Run evolution first.';
+    return;
+  }
+  
+  tangleData = detectTopologicalObstructions();
+  const resultEl = document.getElementById('tangle-result');
+  const listEl = document.getElementById('tangle-list');
+  resultEl.style.display = 'block';
+  
+  if (!tangleData || tangleData.length === 0) {
+    resultEl.textContent = 'No topological obstructions detected. Try a growth-type rule or more evolution steps.';
+    listEl.style.display = 'none';
+    return;
+  }
+  
+  const exact = tangleData.filter(t => t.type === 'exact');
+  const substr = tangleData.filter(t => t.type === 'substring');
+  
+  resultEl.innerHTML = `
+    <div><span class="tangle-count">${tangleData.length} tangles</span> detected</div>
+    <div>Exact self-regeneration: ${exact.length} | Substring persistence: ${substr.length}</div>
+    <div>Causally connected: ${tangleData.filter(t => t.connected).length}</div>
+    <div style="color:rgba(255,255,255,0.3);margin-top:3px">${
+      exact.length > 0 && exact.some(t => t.connected) 
+        ? 'Self-regenerating tangles found — topological obstructions that persist across steps. These are candidate "matter" particles in the Wolfram framework.'
+        : substr.length > 0 
+          ? 'Approximate tangles found — structural patterns that partially persist. Proto-matter: not fully stable but resistant to dissolution.'
+          : 'Weak tangles only. The rule system may not support stable topological obstructions at this scale.'
+    }</div>
+  `;
+  
+  // Render tangle list
+  listEl.style.display = 'block';
+  listEl.innerHTML = '';
+  
+  for (let ti = 0; ti < Math.min(tangleData.length, 8); ti++) {
+    const t = tangleData[ti];
+    const item = document.createElement('div');
+    item.className = 'tangle-item';
+    item.dataset.tangleIdx = ti;
+    
+    const typeLabel = t.type === 'exact' ? '● Exact' : '◐ Substr';
+    const connLabel = t.connected ? '🔗 causal' : '⊘ acausal';
+    const stateDisplay = t.state.length > 20 ? t.state.substring(0, 20) + '…' : t.state;
+    
+    item.innerHTML = `
+      <div class="tangle-label">${typeLabel}: "${stateDisplay}"</div>
+      <div class="tangle-info">${t.occurrences} occurrences across steps [${t.steps.join(',')}] | ${connLabel} | strength: ${t.strength.toFixed(1)}</div>
+    `;
+    
+    // Click to highlight
+    item.addEventListener('click', () => {
+      if (!currentSystem || !currentNodePoints || !savedNodeColors) return;
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      
+      const highlightColor = new THREE.Color('#CCFF00');
+      const nc = nColors.array;
+      
+      for (const nodeId of t.nodeIds) {
+        const sceneIdx = sceneNodeData.findIndex(nd => nd.id === nodeId);
+        if (sceneIdx >= 0) {
+          const i3 = sceneIdx * 3;
+          nc[i3] = highlightColor.r;
+          nc[i3 + 1] = highlightColor.g;
+          nc[i3 + 2] = highlightColor.b;
+        }
+      }
+      nColors.needsUpdate = true;
+    });
+    
+    listEl.appendChild(item);
+  }
+});
+
+// Highlight all tangles on the 3D graph
+document.getElementById('btn-highlight-tangles').addEventListener('click', function() {
+  tangleHighlightEnabled = !tangleHighlightEnabled;
+  this.classList.toggle('active', tangleHighlightEnabled);
+  
+  if (!tangleHighlightEnabled || !tangleData || !currentNodePoints || !savedNodeColors) {
+    if (currentNodePoints && savedNodeColors) {
+      const nColors = currentNodePoints.geometry.getAttribute('color');
+      nColors.array.set(savedNodeColors);
+      nColors.needsUpdate = true;
+    }
+    return;
+  }
+  
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nc = nColors.array;
+  
+  // Color tangle nodes by strength
+  const tangleNodeMap = new Map(); // nodeId -> max strength
+  for (const t of tangleData) {
+    for (const nodeId of t.nodeIds) {
+      const existing = tangleNodeMap.get(nodeId) || 0;
+      if (t.strength > existing) tangleNodeMap.set(nodeId, t.strength);
+    }
+  }
+  
+  const maxStr = Math.max(...tangleNodeMap.values(), 1);
+  const tangleColor = new THREE.Color('#CCFF00');
+  const baseColor = new THREE.Color('#150820');
+  
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const str = tangleNodeMap.get(nd.id);
+    const i3 = i * 3;
+    
+    if (str !== undefined) {
+      const t = Math.min(str / maxStr, 1);
+      _hoverTmp.copy(baseColor).lerp(tangleColor, 0.3 + t * 0.7);
+      nc[i3] = _hoverTmp.r;
+      nc[i3 + 1] = _hoverTmp.g;
+      nc[i3 + 2] = _hoverTmp.b;
+    } else {
+      nc[i3] = baseColor.r;
+      nc[i3 + 1] = baseColor.g;
+      nc[i3 + 2] = baseColor.b;
+    }
+  }
+  nColors.needsUpdate = true;
+});
+
+
+// ─── HOOKS: Re-apply overlays on scene rebuild ───
+const _origBuildScene12 = buildScene;
+buildScene = function(sys, highlightSet) {
+  _origBuildScene12(sys, highlightSet);
+  // Re-apply Ricci overlay if enabled
+  if (ricciCurvatureEnabled) setTimeout(applyRicciOverlay, 50);
+};
+
+// Expose for testing
+window._computeRicciCurvature = computeRicciCurvature;
+window._measureGeodesicDeviation = measureGeodesicDeviation;
+window._detectTopologicalObstructions = detectTopologicalObstructions;
+
+
+
+// ═══════════════════════════════════════════════════════════
+// PART 13: WOLFRAM HYPERGRAPH REWRITING ENGINE + SPACETIME
+// Proper set-substitution on ordered relations.
+// Produces a spatial hypergraph whose large-scale limit → spacetime.
+// ═══════════════════════════════════════════════════════════
+
+// ─── SPACETIME PRESETS ───
+const ST_PRESETS = {
+  'dim27': {
+    label: 'dim ≈ 2.7',
+    lhs: [[0,1],[0,2]],    // {{x,y},{x,z}}
+    rhs: [[0,2],[0,3],[1,3],[2,3]], // {{x,z},{x,w},{y,w},{z,w}}
+    init: [[1,2],[1,3]],
+    steps: 8,
+    desc: 'Wolfram\'s canonical rule. Produces emergent ~2.7-dimensional space. The rule that launched the Physics Project.'
+  },
+  'chain27': {
+    label: 'Chain ≈ 2.7',
+    lhs: [[0,1],[1,2]],       // {{x,y},{y,z}}
+    rhs: [[3,1],[1,0],[0,3],[3,2]], // {{w,y},{y,x},{x,w},{w,z}}
+    init: [[0,1],[1,2],[2,3],[3,0]],
+    steps: 10,
+    desc: 'Chain rule with cycle seed. Produces robust ~2.7-dimensional space — same dimension as the canonical rule but grows faster.'
+  },
+  'flat2d': {
+    label: 'Flat 2D',
+    lhs: [[0,1],[1,2]],       // {{x,y},{y,z}}
+    rhs: [[0,2],[2,3],[3,0],[3,1]], // {{x,z},{z,w},{w,x},{w,y}}
+    init: [[0,1],[1,2],[2,0]],
+    steps: 8,
+    desc: 'Produces a growing 2D-like flat structure. The expansion rate is moderate — use more steps for larger spatial slices.'
+  },
+  'try3d': {
+    label: '3D surface',
+    lhs: [[0,1,2],[3,1,4]],  // {{x,y,z},{u,y,v}}
+    rhs: [[5,2,0],[2,5,3],[0,1,5]], // {{w,z,x},{z,w,u},{x,y,w}}
+    init: [[0,1,2],[2,3,0],[1,3,2],[0,2,3]],
+    steps: 8,
+    desc: 'Ternary rule from Wolfram\'s 2020 search. With richer seed, explores 3D-like structure.'
+  },
+  'sierpinski': {
+    label: 'Sierpiński',
+    lhs: [[0,1,2]],          // {{x,y,z}}
+    rhs: [[0,3,5],[1,4,3],[2,5,4]], // {{x,u,w},{y,v,u},{z,w,v}}
+    init: [[0,0,0]],
+    steps: 6,
+    desc: 'Produces Sierpiński-like fractal structure. Dimension → log₂(3) ≈ 1.58.'
+  }
+};
+
+// ─── HYPERGRAPH REWRITER ───
+class HypergraphRewriter {
+  constructor() {
+    this.edges = [];      // Array of arrays (hyperedges), e.g. [[1,2],[1,3]]
+    this.nextAtom = 0;    // Next fresh atom ID
+    this.events = [];     // Rewriting events: { id, step, matchedEdgeIndices, producedEdgeIndices, destroyedEdges, createdEdges }
+    this.causalEdges = []; // Causal relations between events
+    this.maxEdges = 8000;
+    this.truncated = false;
+  }
+
+  // Initialize from a set of hyperedges
+  init(initialEdges) {
+    this.edges = [];
+    this.nextAtom = 0;
+    this.events = [];
+    this.causalEdges = [];
+    this.truncated = false;
+
+    // Find max atom in initial edges
+    let maxAtom = -1;
+    for (const edge of initialEdges) {
+      for (const a of edge) {
+        if (a > maxAtom) maxAtom = a;
+      }
+    }
+    this.nextAtom = maxAtom + 1;
+
+    // Copy initial edges
+    for (const edge of initialEdges) {
+      this.edges.push([...edge]);
+    }
+  }
+
+  // Find all matches of lhs pattern in the current edges
+  findMatches(lhsPattern) {
+    const matches = [];
+    const numLhsEdges = lhsPattern.length;
+
+    if (numLhsEdges === 1) {
+      // Single-edge pattern
+      for (let i = 0; i < this.edges.length; i++) {
+        if (!this.edges[i]) continue;
+        const binding = this._matchEdge(lhsPattern[0], this.edges[i]);
+        if (binding) {
+          matches.push({ edgeIndices: [i], binding });
+        }
+      }
+    } else if (numLhsEdges === 2) {
+      // Two-edge pattern — find pairs
+      for (let i = 0; i < this.edges.length; i++) {
+        if (!this.edges[i]) continue;
+        for (let j = i + 1; j < this.edges.length; j++) {
+          if (!this.edges[j]) continue;
+          // Try both orderings
+          const b1 = this._matchPair(lhsPattern, [this.edges[i], this.edges[j]]);
+          if (b1) {
+            matches.push({ edgeIndices: [i, j], binding: b1 });
+            continue;
+          }
+          const b2 = this._matchPair(lhsPattern, [this.edges[j], this.edges[i]]);
+          if (b2) {
+            matches.push({ edgeIndices: [j, i], binding: b2 });
+          }
+        }
+      }
+    }
+
+    return matches;
+  }
+
+  // Match a single LHS edge pattern to an actual edge
+  _matchEdge(pattern, edge) {
+    if (pattern.length !== edge.length) return null;
+    const binding = {};
+    for (let k = 0; k < pattern.length; k++) {
+      const patVar = pattern[k]; // pattern variable index
+      const actual = edge[k];
+      if (patVar in binding) {
+        if (binding[patVar] !== actual) return null;
+      } else {
+        binding[patVar] = actual;
+      }
+    }
+    return binding;
+  }
+
+  // Match a pair of LHS patterns to a pair of actual edges
+  _matchPair(lhsPattern, edgePair) {
+    const binding = {};
+    for (let ei = 0; ei < lhsPattern.length; ei++) {
+      const pattern = lhsPattern[ei];
+      const edge = edgePair[ei];
+      if (pattern.length !== edge.length) return null;
+      for (let k = 0; k < pattern.length; k++) {
+        const patVar = pattern[k];
+        const actual = edge[k];
+        if (patVar in binding) {
+          if (binding[patVar] !== actual) return null;
+        } else {
+          binding[patVar] = actual;
+        }
+      }
+    }
+    return binding;
+  }
+
+  // Apply a match: destroy matched edges, create new ones
+  applyMatch(match, rhsPattern, maxNewVar) {
+    const { edgeIndices, binding } = match;
+
+    // Assign fresh atoms for new variables in RHS
+    const fullBinding = { ...binding };
+    for (const rhsEdge of rhsPattern) {
+      for (const v of rhsEdge) {
+        if (!(v in fullBinding)) {
+          fullBinding[v] = this.nextAtom++;
+        }
+      }
+    }
+
+    // Record destroyed edges
+    const destroyedEdges = edgeIndices.map(i => [...this.edges[i]]);
+
+    // Mark matched edges as deleted (null)
+    for (const idx of edgeIndices) {
+      this.edges[idx] = null;
+    }
+
+    // Create new edges from RHS
+    const createdEdges = [];
+    const createdIndices = [];
+    for (const rhsEdge of rhsPattern) {
+      const newEdge = rhsEdge.map(v => fullBinding[v]);
+      const newIdx = this.edges.length;
+      this.edges.push(newEdge);
+      createdEdges.push(newEdge);
+      createdIndices.push(newIdx);
+    }
+
+    return {
+      destroyedEdges,
+      createdEdges,
+      createdIndices,
+      binding: fullBinding
+    };
+  }
+
+  // Run evolution for N steps
+  evolve(lhsPattern, rhsPattern, initialEdges, maxSteps) {
+    this.init(initialEdges);
+
+    // Find max variable index in patterns
+    let maxVar = 0;
+    for (const e of lhsPattern) for (const v of e) if (v > maxVar) maxVar = v;
+    for (const e of rhsPattern) for (const v of e) if (v > maxVar) maxVar = v;
+
+    for (let step = 0; step < maxSteps; step++) {
+      if (this.getActiveEdges().length > this.maxEdges) {
+        this.truncated = true;
+        break;
+      }
+
+      const matches = this.findMatches(lhsPattern);
+      if (matches.length === 0) break;
+
+      // Apply ALL matches that don't conflict (non-overlapping)
+      const usedEdges = new Set();
+      const stepEvents = [];
+
+      for (const match of matches) {
+        // Check no overlap with already-used edges
+        let conflict = false;
+        for (const idx of match.edgeIndices) {
+          if (usedEdges.has(idx)) { conflict = true; break; }
+        }
+        if (conflict) continue;
+
+        // Mark edges as used
+        for (const idx of match.edgeIndices) usedEdges.add(idx);
+
+        // Apply
+        const result = this.applyMatch(match, rhsPattern, maxVar);
+
+        const eventId = this.events.length;
+        this.events.push({
+          id: eventId,
+          step,
+          matchedEdgeIndices: [...match.edgeIndices],
+          producedEdgeIndices: result.createdIndices,
+          destroyedEdges: result.destroyedEdges,
+          createdEdges: result.createdEdges
+        });
+
+        stepEvents.push(eventId);
+      }
+
+      // Build causal edges: event A → event B if A's output edges overlap B's input edges
+      // (checked at next step)
+      if (stepEvents.length > 0) {
+        for (const evtId of stepEvents) {
+          const evt = this.events[evtId];
+          // Look at previous events whose created edges were consumed by this event
+          for (let prevId = 0; prevId < evtId; prevId++) {
+            const prev = this.events[prevId];
+            for (const pIdx of prev.producedEdgeIndices) {
+              if (evt.matchedEdgeIndices.includes(pIdx)) {
+                this.causalEdges.push({ from: prevId, to: evtId });
+              }
+            }
+          }
+        }
+      }
+
+      // Compact: remove null edges periodically
+      if (step % 3 === 2) {
+        this._compact();
+      }
+    }
+
+    // Final compact
+    this._compact();
+
+    return {
+      edges: this.getActiveEdges(),
+      events: this.events,
+      causalEdges: this.causalEdges,
+      atomCount: this.nextAtom,
+      truncated: this.truncated
+    };
+  }
+
+  getActiveEdges() {
+    return this.edges.filter(e => e !== null);
+  }
+
+  _compact() {
+    // Re-index edges, update event references
+    const oldToNew = new Map();
+    const newEdges = [];
+    for (let i = 0; i < this.edges.length; i++) {
+      if (this.edges[i] !== null) {
+        oldToNew.set(i, newEdges.length);
+        newEdges.push(this.edges[i]);
+      }
+    }
+    this.edges = newEdges;
+
+    // Update event references
+    for (const evt of this.events) {
+      evt.matchedEdgeIndices = evt.matchedEdgeIndices.map(i => oldToNew.get(i) ?? -1);
+      evt.producedEdgeIndices = evt.producedEdgeIndices.map(i => oldToNew.get(i) ?? -1);
+    }
+  }
+}
+
+
+// ─── SPATIAL GRAPH EXTRACTION (Foliation) ───
+// Given the hypergraph at a particular "time" (after N events),
+// extract the spatial graph: nodes = atoms, edges = atom-pairs sharing a hyperedge
+
+function extractSpatialGraph(hyperedges) {
+  const atomSet = new Set();
+  const adjacency = new Map(); // atom -> Set of neighboring atoms
+
+  for (const edge of hyperedges) {
+    for (const atom of edge) {
+      atomSet.add(atom);
+      if (!adjacency.has(atom)) adjacency.set(atom, new Set());
+    }
+    // All atoms in the same hyperedge are spatially connected
+    for (let i = 0; i < edge.length; i++) {
+      for (let j = i + 1; j < edge.length; j++) {
+        adjacency.get(edge[i]).add(edge[j]);
+        adjacency.get(edge[j]).add(edge[i]);
+      }
+    }
+  }
+
+  return {
+    atoms: [...atomSet],
+    adjacency,
+    edgeCount: hyperedges.length
+  };
+}
+
+
+// ─── DIMENSION ESTIMATOR ───
+// Measure effective dimension via BFS ball growth: V(r) ~ r^d
+
+function estimateDimension(adjacency, atoms) {
+  if (atoms.length < 10) return { dimension: null, profile: [] };
+
+  // Sample nodes (use all if small, or random sample)
+  const sampleSize = Math.min(atoms.length, 50);
+  const sampleAtoms = atoms.length <= sampleSize ? atoms :
+    atoms.sort(() => Math.random() - 0.5).slice(0, sampleSize);
+
+  const maxR = Math.min(20, Math.floor(Math.sqrt(atoms.length)));
+  const volumeProfiles = []; // For each sample atom: V(r) array
+
+  for (const startAtom of sampleAtoms) {
+    const visited = new Set([startAtom]);
+    let frontier = new Set([startAtom]);
+    const volumes = [1]; // V(0) = 1
+
+    for (let r = 1; r <= maxR; r++) {
+      const nextFrontier = new Set();
+      for (const node of frontier) {
+        const nbrs = adjacency.get(node);
+        if (nbrs) {
+          for (const nb of nbrs) {
+            if (!visited.has(nb)) {
+              visited.add(nb);
+              nextFrontier.add(nb);
+            }
+          }
+        }
+      }
+      volumes.push(visited.size);
+      frontier = nextFrontier;
+      if (frontier.size === 0) break;
+    }
+    volumeProfiles.push(volumes);
+  }
+
+  // Average volume at each r
+  const avgVolume = [];
+  const maxLen = Math.max(...volumeProfiles.map(v => v.length));
+  for (let r = 0; r < maxLen; r++) {
+    let sum = 0, count = 0;
+    for (const profile of volumeProfiles) {
+      if (r < profile.length) { sum += profile[r]; count++; }
+    }
+    avgVolume.push(count > 0 ? sum / count : 0);
+  }
+
+  // Estimate dimension: d = Δlog(V) / Δlog(r)
+  // Use the middle range (avoid r=0,1 and near-max r)
+  const dimEstimates = [];
+  for (let r = 2; r < avgVolume.length - 1; r++) {
+    if (avgVolume[r] > avgVolume[r-1] && avgVolume[r-1] > 0) {
+      const logVr = Math.log(avgVolume[r]);
+      const logVr1 = Math.log(avgVolume[r-1]);
+      const logR = Math.log(r);
+      const logR1 = Math.log(r - 1);
+      if (logR > logR1) {
+        const d = (logVr - logVr1) / (logR - logR1);
+        dimEstimates.push({ r, d });
+      }
+    }
+  }
+
+  // Average dimension in the "good" range (middle 60%)
+  let dimension = null;
+  if (dimEstimates.length > 0) {
+    const start = Math.floor(dimEstimates.length * 0.2);
+    const end = Math.ceil(dimEstimates.length * 0.8);
+    const mid = dimEstimates.slice(start, end);
+    if (mid.length > 0) {
+      dimension = mid.reduce((s, d) => s + d.d, 0) / mid.length;
+    } else {
+      dimension = dimEstimates.reduce((s, d) => s + d.d, 0) / dimEstimates.length;
+    }
+  }
+
+  return {
+    dimension,
+    dimEstimates,
+    avgVolume,
+    profile: volumeProfiles
+  };
+}
+
+
+// ─── 3D FORCE-DIRECTED LAYOUT ───
+// Position atoms in 3D using a spring-electrical model
+
+function layoutSpatialGraph3D(atoms, adjacency, iterations = 80) {
+  const n = atoms.length;
+  if (n === 0) return new Map();
+
+  const atomIndex = new Map(); // atom -> index
+  atoms.forEach((a, i) => atomIndex.set(a, i));
+
+  // Initialize positions randomly on a sphere
+  const pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = 5 + Math.random() * 5;
+    pos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    pos[i*3+2] = r * Math.cos(phi);
+  }
+
+  const k = 2.0; // Ideal spring length
+  const repulsion = 50.0;
+  let temperature = 5.0;
+  const cooling = 0.95;
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const disp = new Float32Array(n * 3);
+
+    // Repulsive forces (all pairs) — use Barnes-Hut-like sampling for large graphs
+    const skip = n > 500 ? Math.ceil(n / 500) : 1;
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j += skip) {
+        const dx = pos[i*3] - pos[j*3];
+        const dy = pos[i*3+1] - pos[j*3+1];
+        const dz = pos[i*3+2] - pos[j*3+2];
+        const dist = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.01;
+        const force = repulsion / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        const fz = (dz / dist) * force;
+        disp[i*3] += fx; disp[i*3+1] += fy; disp[i*3+2] += fz;
+        disp[j*3] -= fx; disp[j*3+1] -= fy; disp[j*3+2] -= fz;
+      }
+    }
+
+    // Attractive forces (edges)
+    for (let i = 0; i < n; i++) {
+      const atom = atoms[i];
+      const nbrs = adjacency.get(atom);
+      if (!nbrs) continue;
+      for (const nb of nbrs) {
+        const j = atomIndex.get(nb);
+        if (j === undefined || j <= i) continue;
+        const dx = pos[j*3] - pos[i*3];
+        const dy = pos[j*3+1] - pos[i*3+1];
+        const dz = pos[j*3+2] - pos[i*3+2];
+        const dist = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.01;
+        const force = (dist - k) * 0.3;
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        const fz = (dz / dist) * force;
+        disp[i*3] += fx; disp[i*3+1] += fy; disp[i*3+2] += fz;
+        disp[j*3] -= fx; disp[j*3+1] -= fy; disp[j*3+2] -= fz;
+      }
+    }
+
+    // Apply displacement with temperature limiting
+    for (let i = 0; i < n; i++) {
+      const dx = disp[i*3], dy = disp[i*3+1], dz = disp[i*3+2];
+      const len = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.01;
+      const scale = Math.min(len, temperature) / len;
+      pos[i*3] += dx * scale;
+      pos[i*3+1] += dy * scale;
+      pos[i*3+2] += dz * scale;
+    }
+
+    temperature *= cooling;
+  }
+
+  // Center the layout
+  let cx = 0, cy = 0, cz = 0;
+  for (let i = 0; i < n; i++) {
+    cx += pos[i*3]; cy += pos[i*3+1]; cz += pos[i*3+2];
+  }
+  cx /= n; cy /= n; cz /= n;
+
+  const positions = new Map();
+  for (let i = 0; i < n; i++) {
+    positions.set(atoms[i], {
+      x: pos[i*3] - cx,
+      y: pos[i*3+1] - cy,
+      z: pos[i*3+2] - cz
+    });
+  }
+  return positions;
+}
+
+
+// ─── SPACETIME VISUALIZATION STATE ───
+let stRewriter = null;
+let stResult = null;
+let stSpatialGraph = null;
+let stPositions = null;
+let stDimData = null;
+let spacetimeGroup = new THREE.Group();
+scene.add(spacetimeGroup);
+spacetimeGroup.visible = false;
+
+let currentSTPreset = 'dim27';
+
+// ─── BUILD SPACETIME SCENE ───
+function buildSpacetimeScene() {
+  // Clear
+  while (spacetimeGroup.children.length > 0) {
+    const child = spacetimeGroup.children[0];
+    spacetimeGroup.remove(child);
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) child.material.dispose();
+  }
+
+  if (!stResult || !stSpatialGraph || !stPositions) return;
+
+  const { atoms, adjacency } = stSpatialGraph;
+  const n = atoms.length;
+  if (n === 0) return;
+
+  // Nodes
+  const nodeGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(n * 3);
+  const colors = new Float32Array(n * 3);
+  const sizes = new Float32Array(n);
+
+  // Dimension-based coloring: use BFS depth from center for "temperature"
+  const centerAtom = atoms[Math.floor(atoms.length / 2)];
+  const depths = new Map();
+  const bfsQ = [centerAtom];
+  depths.set(centerAtom, 0);
+  while (bfsQ.length > 0) {
+    const cur = bfsQ.shift();
+    const d = depths.get(cur);
+    const nbrs = adjacency.get(cur);
+    if (nbrs) {
+      for (const nb of nbrs) {
+        if (!depths.has(nb)) {
+          depths.set(nb, d + 1);
+          bfsQ.push(nb);
+        }
+      }
+    }
+  }
+  const maxDepth = Math.max(...depths.values(), 1);
+
+  const cyanColor = new THREE.Color('#00F0FF');
+  const purpleColor = new THREE.Color('#7000FF');
+  const limeColor = new THREE.Color('#CCFF00');
+
+  for (let i = 0; i < n; i++) {
+    const atom = atoms[i];
+    const pos = stPositions.get(atom);
+    if (!pos) continue;
+    positions[i*3] = pos.x;
+    positions[i*3+1] = pos.y;
+    positions[i*3+2] = pos.z;
+
+    const depth = depths.get(atom) || 0;
+    const t = depth / maxDepth;
+    const col = new THREE.Color().copy(cyanColor).lerp(purpleColor, t);
+    colors[i*3] = col.r;
+    colors[i*3+1] = col.g;
+    colors[i*3+2] = col.b;
+
+    const degree = adjacency.get(atom) ? adjacency.get(atom).size : 1;
+    sizes[i] = Math.min(1.0 + degree * 0.15, 3.0) * NODE_SIZE;
+  }
+
+  nodeGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  nodeGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  nodeGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  const nodeMat = new THREE.PointsMaterial({
+    vertexColors: true,
+    size: 0.6,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending
+  });
+  const nodePoints = new THREE.Points(nodeGeo, nodeMat);
+  spacetimeGroup.add(nodePoints);
+
+  // Edges
+  const edgePositions = [];
+  const edgeColors = [];
+  const edgeColor = new THREE.Color('rgba(0, 240, 255, 0.15)');
+  const atomIndex = new Map();
+  atoms.forEach((a, i) => atomIndex.set(a, i));
+
+  const drawnEdges = new Set();
+  for (const atom of atoms) {
+    const nbrs = adjacency.get(atom);
+    if (!nbrs) continue;
+    for (const nb of nbrs) {
+      const key = Math.min(atom, nb) + ',' + Math.max(atom, nb);
+      if (drawnEdges.has(key)) continue;
+      drawnEdges.add(key);
+
+      const ai = atomIndex.get(atom);
+      const bi = atomIndex.get(nb);
+      if (ai === undefined || bi === undefined) continue;
+
+      edgePositions.push(
+        positions[ai*3], positions[ai*3+1], positions[ai*3+2],
+        positions[bi*3], positions[bi*3+1], positions[bi*3+2]
+      );
+      edgeColors.push(
+        0, 0.6, 0.7,
+        0, 0.6, 0.7
+      );
+    }
+  }
+
+  if (edgePositions.length > 0) {
+    const edgeGeo = new THREE.BufferGeometry();
+    edgeGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3));
+    edgeGeo.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
+    const edgeMat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending
+    });
+    const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
+    spacetimeGroup.add(edgeLines);
+  }
+
+  // Camera auto-fit — frame the spatial graph comfortably
+  const box = new THREE.Box3().setFromBufferAttribute(nodeGeo.getAttribute('position'));
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  const size = box.getSize(new THREE.Vector3()).length();
+  const dist = Math.max(size * 0.5, 20); // Keep close enough to see structure
+  controls.target.copy(center);
+  camera.position.set(center.x, center.y + dist * 0.25, center.z + dist * 0.7);
+  camera.lookAt(center);
+  controls.update();
+}
+
+
+// ─── DIMENSION CHART ───
+function drawDimensionChart(dimData) {
+  const canvas = document.getElementById('dim-canvas');
+  if (!canvas || !dimData || !dimData.dimEstimates || dimData.dimEstimates.length === 0) return;
+
+  canvas.style.display = 'block';
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+
+  const w = rect.width, h = rect.height;
+  const pad = 30;
+  const plotW = w - 2 * pad, plotH = h - 2 * pad;
+
+  const estimates = dimData.dimEstimates;
+  const maxR = Math.max(...estimates.map(e => e.r), 1);
+  const maxD = Math.max(...estimates.map(e => e.d), 4);
+  const minD = Math.min(...estimates.map(e => e.d), 0);
+  const range = maxD - minD || 1;
+
+  // Grid lines for integer dimensions
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 5]);
+  for (let d = 1; d <= 3; d++) {
+    const y = pad + plotH - ((d - minD) / range) * plotH;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(pad + plotW, y);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = '8px Inter';
+    ctx.textAlign = 'left';
+    ctx.fillText(d + 'D', pad - 18, y + 3);
+  }
+  ctx.setLineDash([]);
+
+  // Plot dimension estimates
+  ctx.strokeStyle = '#00F0FF';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < estimates.length; i++) {
+    const x = pad + (estimates[i].r / maxR) * plotW;
+    const y = pad + plotH - ((estimates[i].d - minD) / range) * plotH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Dots
+  for (const est of estimates) {
+    const x = pad + (est.r / maxR) * plotW;
+    const y = pad + plotH - ((est.d - minD) / range) * plotH;
+    ctx.fillStyle = '#00F0FF';
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Mean line
+  if (dimData.dimension !== null) {
+    const meanY = pad + plotH - ((dimData.dimension - minD) / range) * plotH;
+    ctx.strokeStyle = 'rgba(204,255,0,0.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(pad, meanY);
+    ctx.lineTo(pad + plotW, meanY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(204,255,0,0.7)';
+    ctx.font = '9px JetBrains Mono';
+    ctx.textAlign = 'right';
+    ctx.fillText('d ≈ ' + dimData.dimension.toFixed(2), pad + plotW, meanY - 4);
+  }
+
+  // Axes
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '8px Inter';
+  ctx.textAlign = 'center';
+  ctx.fillText('Graph Distance r', w / 2, h - 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('Dimension Estimate Δlog(V)/Δlog(r)', w / 2, pad - 8);
+}
+
+
+// ─── EVOLVE SPACETIME ───
+function evolveSpacetime() {
+  const preset = ST_PRESETS[currentSTPreset];
+  if (!preset) return;
+
+  // Show computing state
+  const btn = document.getElementById('btn-st-evolve');
+  const origText = btn.textContent;
+  btn.textContent = 'Computing...';
+  btn.disabled = true;
+
+  // Use requestAnimationFrame so the button text updates before heavy computation
+  requestAnimationFrame(() => { setTimeout(() => { _doEvolveSpacetime(preset, btn, origText); }, 20); });
+}
+
+function _doEvolveSpacetime(preset, btn, origText) {
+  // Parse custom rules if edited
+  let lhs, rhs, init;
+  try {
+    lhs = JSON.parse(document.getElementById('st-lhs').value.replace(/\{/g, '[').replace(/\}/g, ']'));
+    rhs = JSON.parse(document.getElementById('st-rhs').value.replace(/\{/g, '[').replace(/\}/g, ']'));
+  } catch(e) {
+    lhs = preset.lhs;
+    rhs = preset.rhs;
+  }
+  init = preset.init;
+
+  const steps = parseInt(document.getElementById('sl-st-steps').value) || 8;
+
+  // Run rewriter
+  stRewriter = new HypergraphRewriter();
+  stResult = stRewriter.evolve(lhs, rhs, init, steps);
+
+  // Extract spatial graph
+  const activeEdges = stResult.edges;
+  stSpatialGraph = extractSpatialGraph(activeEdges);
+
+  // Estimate dimension
+  stDimData = estimateDimension(stSpatialGraph.adjacency, stSpatialGraph.atoms);
+
+  // Layout in 3D
+  const layoutIter = stSpatialGraph.atoms.length > 2000 ? 50 : 80;
+  stPositions = layoutSpatialGraph3D(stSpatialGraph.atoms, stSpatialGraph.adjacency, layoutIter);
+
+  // Build the scene
+  buildSpacetimeScene();
+
+  // Update UI
+  const dimValueEl = document.getElementById('st-dim-value');
+  const dimValueRightEl = document.getElementById('st-dim-value-right');
+  const readoutEl = document.getElementById('st-dim-readout');
+  const readoutRightEl = document.getElementById('st-dim-readout-right');
+  const statsEl = document.getElementById('st-stats');
+  const statsRightEl = document.getElementById('st-stats-right');
+  const sectionEl = document.getElementById('spatial-geom-section');
+
+  readoutEl.style.display = 'block';
+  readoutRightEl.style.display = 'block';
+  sectionEl.style.display = 'block';
+
+  const dimStr = stDimData.dimension !== null ? stDimData.dimension.toFixed(2) : '—';
+  dimValueEl.textContent = dimStr;
+  dimValueRightEl.textContent = dimStr;
+
+  const statsStr = `
+    <span>${stSpatialGraph.atoms.length}</span> atoms of space | 
+    <span>${stSpatialGraph.edgeCount}</span> hyperedges |
+    <span>${stResult.events.length}</span> rewriting events${stResult.truncated ? ' (truncated)' : ''}
+  `;
+  statsEl.innerHTML = statsStr;
+  statsRightEl.innerHTML = statsStr;
+
+  // Foliation slider
+  const sliceSlider = document.getElementById('sl-st-slice');
+  sliceSlider.max = stResult.events.length;
+  sliceSlider.value = stResult.events.length;
+  sliceSlider.disabled = false;
+  document.getElementById('st-slice-max').textContent = stResult.events.length;
+  document.getElementById('v-st-slice').textContent = stResult.events.length;
+
+  // Draw dimension chart
+  drawDimensionChart(stDimData);
+
+  // Update status bar
+  const statusEl = document.getElementById('status');
+  if (statusEl) {
+    statusEl.textContent = `${stSpatialGraph.atoms.length} atoms · ${stSpatialGraph.edgeCount} hyperedges · dim ≈ ${dimStr} · ${stResult.events.length} events`;
+  }
+
+  // Restore button
+  btn.textContent = origText;
+  btn.disabled = false;
+}
+
+
+// ─── FOLIATION: Replay spatial slices ───
+function updateFoliation(eventIndex) {
+  if (!stRewriter || !stResult) return;
+
+  // Re-run the rewriter up to eventIndex events, collecting the spatial state
+  const preset = ST_PRESETS[currentSTPreset];
+  if (!preset) return;
+
+  let lhs, rhs;
+  try {
+    lhs = JSON.parse(document.getElementById('st-lhs').value.replace(/\{/g, '[').replace(/\}/g, ']'));
+    rhs = JSON.parse(document.getElementById('st-rhs').value.replace(/\{/g, '[').replace(/\}/g, ']'));
+  } catch(e) {
+    lhs = preset.lhs;
+    rhs = preset.rhs;
+  }
+
+  // We replay: start from init, apply events in order up to eventIndex
+  const rewriter = new HypergraphRewriter();
+  rewriter.init(preset.init);
+
+  let eventsApplied = 0;
+  const steps = parseInt(document.getElementById('sl-st-steps').value) || 8;
+
+  for (let step = 0; step < steps && eventsApplied < eventIndex; step++) {
+    if (rewriter.getActiveEdges().length > rewriter.maxEdges) break;
+    const matches = rewriter.findMatches(lhs);
+    if (matches.length === 0) break;
+
+    const usedEdges = new Set();
+    for (const match of matches) {
+      if (eventsApplied >= eventIndex) break;
+      let conflict = false;
+      for (const idx of match.edgeIndices) {
+        if (usedEdges.has(idx)) { conflict = true; break; }
+      }
+      if (conflict) continue;
+      for (const idx of match.edgeIndices) usedEdges.add(idx);
+      rewriter.applyMatch(match, rhs, 0);
+      eventsApplied++;
+    }
+    if (step % 3 === 2) rewriter._compact();
+  }
+
+  rewriter._compact();
+
+  // Extract spatial graph at this foliation
+  const activeEdges = rewriter.getActiveEdges();
+  stSpatialGraph = extractSpatialGraph(activeEdges);
+  stDimData = estimateDimension(stSpatialGraph.adjacency, stSpatialGraph.atoms);
+  const layoutIter = stSpatialGraph.atoms.length > 2000 ? 40 : 60;
+  stPositions = layoutSpatialGraph3D(stSpatialGraph.atoms, stSpatialGraph.adjacency, layoutIter);
+
+  buildSpacetimeScene();
+
+  const dimStr = stDimData.dimension !== null ? stDimData.dimension.toFixed(2) : '—';
+  document.getElementById('st-dim-value').textContent = dimStr;
+  document.getElementById('st-dim-value-right').textContent = dimStr;
+
+  const statsStr = `
+    <span>${stSpatialGraph.atoms.length}</span> atoms | 
+    <span>${stSpatialGraph.edgeCount}</span> hyperedges |
+    Event <span>${eventIndex}</span> / ${stResult.events.length}
+  `;
+  document.getElementById('st-stats').innerHTML = statsStr;
+  document.getElementById('st-stats-right').innerHTML = statsStr;
+  drawDimensionChart(stDimData);
+}
+
+
+// ─── EVENT LISTENERS ───
+
+// View tab: show/hide spacetime controls
+document.querySelectorAll('.view-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.view === 'spacetime') {
+      document.getElementById('spacetime-controls').classList.add('active');
+      // Show spacetime group, hide others
+      spacetimeGroup.visible = true;
+      multiwayGroup.visible = false;
+      branchialGroup.visible = false;
+      causalGroup.visible = false;
+    } else {
+      document.getElementById('spacetime-controls').classList.remove('active');
+      spacetimeGroup.visible = false;
+    }
+  });
+});
+
+// Spacetime preset selection
+document.querySelectorAll('.st-preset-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.st-preset-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    currentSTPreset = this.dataset.stKey;
+    const preset = ST_PRESETS[currentSTPreset];
+    if (preset) {
+      // Format for display: convert arrays back to {{x,y,z}} notation
+      const varNames = 'xyzuvw'.split('');
+      const fmt = arr => '{{' + arr.map(e => e.map(v => varNames[v] || v).join(',')).join('},{') + '}}';
+      document.getElementById('st-lhs').value = fmt(preset.lhs);
+      document.getElementById('st-rhs').value = fmt(preset.rhs);
+      document.getElementById('sl-st-steps').value = preset.steps;
+      document.getElementById('v-st-steps').textContent = preset.steps;
+    }
+  });
+});
+
+// Steps slider
+document.getElementById('sl-st-steps').addEventListener('input', function() {
+  document.getElementById('v-st-steps').textContent = this.value;
+});
+
+// Evolve button
+document.getElementById('btn-st-evolve').addEventListener('click', evolveSpacetime);
+
+// Foliation slider
+document.getElementById('sl-st-slice').addEventListener('input', function() {
+  const val = parseInt(this.value);
+  document.getElementById('v-st-slice').textContent = val;
+  updateFoliation(val);
+});
+
+// Expose for testing
+window._HypergraphRewriter = HypergraphRewriter;
+window._evolveSpacetime = evolveSpacetime;
+window._extractSpatialGraph = extractSpatialGraph;
+window._estimateDimension = estimateDimension;
+window._stResult = () => stResult;
+window._stSpatialGraph = () => stSpatialGraph;
+window._stDimData = () => stDimData;
+
 // ─── INITIAL SETUP ───
 renderRuleEditor();
 renderPresetGallery();
@@ -5271,6 +8495,10 @@ window._measureEntanglementSpeed = measureEntanglementSpeed;
 window._measureObserverPersistence = measureObserverPersistence;
 window._computeBranchialDistances = computeBranchialDistances;
 window._findShortestPath = findShortestPath;
+window._zenoObserve = zenoObserve;
+window._detectTunneling = detectTunneling;
+window._measureBranchingAsymmetry = measureBranchingAsymmetry;
+window._measureHolographicBound = measureHolographicBound;
 
 </script>
 </body>
