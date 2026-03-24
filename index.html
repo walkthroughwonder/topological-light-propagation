@@ -395,7 +395,137 @@
     box-shadow: 0 0 12px rgba(204, 255, 0, 0.08);
   }
 
-  /* ─── COMPLETION LOG ─── */
+  /* ─── QUANTUM OBSERVER (Gorard coarse-graining) ─── */
+  #quantum-observer-panel {
+    margin-bottom: 20px;
+  }
+  .cg-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 6px;
+  }
+  .cg-slider-row input[type="range"] {
+    flex: 1;
+  }
+  .cg-slider-row .cg-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(112, 0, 255, 0.9);
+    min-width: 18px;
+    text-align: right;
+  }
+  .cg-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 12px;
+  }
+  .ci-gauge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 12px;
+  }
+  .ci-gauge-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ci-gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease, background 0.4s ease;
+  }
+  .ci-gauge-label {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(255,255,255,0.5);
+    min-width: 40px;
+    text-align: right;
+  }
+  .cg-completion-rules {
+    max-height: 120px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    line-height: 1.6;
+    color: rgba(112, 0, 255, 0.7);
+    background: rgba(112, 0, 255, 0.04);
+    border: 1px solid rgba(112, 0, 255, 0.1);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(112, 0, 255, 0.2) transparent;
+  }
+  .cg-completion-rules:empty {
+    display: none;
+  }
+  .cg-narrative {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.55;
+    margin: 8px 0;
+    padding: 8px 10px;
+    background: rgba(112, 0, 255, 0.04);
+    border-left: 2px solid rgba(112, 0, 255, 0.3);
+    border-radius: 0 4px 4px 0;
+  }
+  .cg-narrative strong {
+    color: rgba(112, 0, 255, 0.9);
+    font-weight: 500;
+  }
+  .cg-narrative em {
+    color: rgba(0, 240, 255, 0.7);
+  }
+  .cg-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    font-size: 10px;
+    margin: 8px 0;
+  }
+  .cg-stats .cg-stat-label {
+    color: rgba(255,255,255,0.4);
+  }
+  .cg-stats .cg-stat-value {
+    color: rgba(112, 0, 255, 0.8);
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+  }
+  .cg-edge-legend {
+    display: flex;
+    gap: 14px;
+    margin: 8px 0;
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+  }
+  .cg-edge-legend span::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+    border-radius: 1px;
+  }
+  .cg-edge-legend .legend-unitary::before {
+    background: rgba(0, 240, 255, 0.7);
+  }
+  .cg-edge-legend .legend-hermitian::before {
+    content: '';
+    background: repeating-linear-gradient(90deg, rgba(112, 0, 255, 0.7) 0px, rgba(112, 0, 255, 0.7) 3px, transparent 3px, transparent 5px);
+  }
+
+    /* ─── COMPLETION LOG ─── */
   #completion-log {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
@@ -1171,6 +1301,40 @@
 
   <!-- RIGHT PANEL: Results -->
   <div class="panel" id="right-panel">
+    <div class="section-title">Quantum Observer</div>
+    <div id="quantum-observer-panel">
+      <div class="tool-desc" style="margin-bottom: 4px;">
+        Gorard's observer model: you impose <strong style="color:rgba(112,0,255,0.8)">completion rules</strong> on the multiway graph by coarse-graining — treating branches that differ below your resolution as equivalent. This is formally equivalent to <em>wavefunction collapse</em>.
+      </div>
+
+      <div class="cg-slider-row">
+        <span style="font-size:9px;color:rgba(255,255,255,0.35)">Coarse-graining</span>
+        <input type="range" id="sl-coarsegrain" min="0" max="8" step="1" value="0">
+        <span class="cg-val" id="v-coarsegrain">0</span>
+      </div>
+      <div class="cg-labels">
+        <span>Full superposition</span>
+        <span>Classical</span>
+      </div>
+
+      <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:4px;letter-spacing:0.06em">CAUSAL INVARIANCE</div>
+      <div class="ci-gauge">
+        <div class="ci-gauge-bar">
+          <div class="ci-gauge-fill" id="ci-gauge-fill" style="width:50%;background:rgba(0,240,255,0.5)"></div>
+        </div>
+        <span class="ci-gauge-label" id="ci-gauge-label">—</span>
+      </div>
+
+      <div class="cg-edge-legend">
+        <span class="legend-unitary">Unitary (evolution)</span>
+        <span class="legend-hermitian">Hermitian (completion)</span>
+      </div>
+
+      <div class="cg-stats" id="cg-stats"></div>
+      <div class="cg-completion-rules" id="cg-completion-rules"></div>
+      <div class="cg-narrative" id="cg-narrative" style="display:none"></div>
+    </div>
+
     <div class="section-title">Observer</div>
     <div class="observer-section">
       <div class="observer-desc">Click any node in the 3D graph or branchial ring to highlight its full causal history.</div>
@@ -2052,6 +2216,166 @@ class MultiwaySystem {
     const root = this.nodes[0];
     if (!root) return 1;
     return (root.state.match(/X/g) || []).length;
+  }
+
+  // ─── COARSE-GRAINING ENGINE (Gorard's observer model) ───
+  // The observer "squints" at the multiway graph, treating branches that
+  // differ by less than `threshold` characters as equivalent. This generates
+  // completion rules (bidirectional equivalences) that model the observer's
+  // coarse-graining of the hypergraph — formally equivalent to Hermitian
+  // operators and wavefunction collapse.
+
+  /**
+   * Compute edit distance between two state strings.
+   * Uses character-by-character comparison + length difference.
+   */
+  _stateDistance(a, b) {
+    if (a === b) return 0;
+    const maxLen = Math.max(a.length, b.length);
+    if (maxLen === 0) return 0;
+    let diff = Math.abs(a.length - b.length);
+    const minLen = Math.min(a.length, b.length);
+    for (let i = 0; i < minLen; i++) {
+      if (a[i] !== b[i]) diff++;
+    }
+    return diff;
+  }
+
+  /**
+   * Check if two states are permutation-equivalent:
+   * same characters, just rearranged (Gorard's key example).
+   */
+  _isPermutationEquiv(a, b) {
+    if (a.length !== b.length) return false;
+    const sortA = [...a].sort().join('');
+    const sortB = [...b].sort().join('');
+    return sortA === sortB;
+  }
+
+  /**
+   * Apply coarse-graining at a given threshold.
+   * Returns a coarse-grained view of the multiway system:
+   * - equivalenceClasses: Map<canonicalId, Set<nodeId>>
+   * - completionRules: Array<{from: state, to: state, nodeIds: [id, id]}>
+   * - mergedGraph: { nodes, edges } (the collapsed graph)
+   * - causalInvarianceBefore: float (0-1)
+   * - causalInvarianceAfter: float (0-1) 
+   * - stats: { totalNodes, mergedNodes, completionRulesCount, branchesCollapsed }
+   */
+  coarseGrain(threshold = 0) {
+    if (threshold === 0) {
+      // No coarse-graining: full quantum superposition
+      return {
+        equivalenceClasses: new Map(),
+        completionRules: [],
+        mergedNodeMap: new Map(), // nodeId -> canonicalId (identity)
+        stats: { totalNodes: this.nodes.length, mergedNodes: 0, completionRulesCount: 0, branchesCollapsed: 0 },
+        causalInvarianceBefore: this.checkCausalInvariance().invariance,
+        causalInvarianceAfter: this.checkCausalInvariance().invariance
+      };
+    }
+
+    const equivalenceClasses = new Map(); // canonicalId -> Set<nodeId>
+    const mergedNodeMap = new Map(); // nodeId -> canonicalId
+    const completionRules = [];
+    let branchesCollapsed = 0;
+
+    // For each step, find states that are "close enough" to merge
+    for (let step = 0; step < this.stepStates.length; step++) {
+      const stepIds = this.stepStates[step] || [];
+      if (stepIds.length <= 1) {
+        // Only one state at this step — it's its own equivalence class
+        for (const id of stepIds) mergedNodeMap.set(id, id);
+        continue;
+      }
+
+      // Build pairs sorted by distance
+      const pairs = [];
+      for (let i = 0; i < stepIds.length; i++) {
+        for (let j = i + 1; j < stepIds.length; j++) {
+          const ni = this.nodes[stepIds[i]];
+          const nj = this.nodes[stepIds[j]];
+          const dist = this._stateDistance(ni.state, nj.state);
+          const isPerm = this._isPermutationEquiv(ni.state, nj.state);
+          // Permutation equivalence is always within threshold if threshold > 0
+          // Otherwise use edit distance
+          const effectiveDist = isPerm ? Math.min(dist, 1) : dist;
+          pairs.push({ i: stepIds[i], j: stepIds[j], dist: effectiveDist, isPerm });
+        }
+      }
+
+      // Union-Find for merging
+      const parent = new Map();
+      for (const id of stepIds) parent.set(id, id);
+      function find(x) {
+        while (parent.get(x) !== x) {
+          parent.set(x, parent.get(parent.get(x)));
+          x = parent.get(x);
+        }
+        return x;
+      }
+      function union(a, b) {
+        const ra = find(a), rb = find(b);
+        if (ra !== rb) {
+          // Keep the one with higher weight as canonical
+          parent.set(rb, ra);
+          return true;
+        }
+        return false;
+      }
+
+      // Merge states within threshold
+      pairs.sort((a, b) => a.dist - b.dist);
+      for (const p of pairs) {
+        if (p.dist <= threshold) {
+          if (union(p.i, p.j)) {
+            branchesCollapsed++;
+            completionRules.push({
+              from: this.nodes[p.i].state,
+              to: this.nodes[p.j].state,
+              nodeIds: [p.i, p.j],
+              step: step,
+              distance: p.dist,
+              isPermutation: p.isPerm
+            });
+          }
+        }
+      }
+
+      // Record canonical mappings
+      for (const id of stepIds) {
+        const canonical = find(id);
+        mergedNodeMap.set(id, canonical);
+        if (!equivalenceClasses.has(canonical)) equivalenceClasses.set(canonical, new Set());
+        equivalenceClasses.get(canonical).add(id);
+      }
+    }
+
+    // Compute how many distinct equivalence classes remain vs original
+    const mergedNodes = this.nodes.length - equivalenceClasses.size -
+      (this.nodes.length - [...mergedNodeMap.values()].length);
+
+    // Estimate causal invariance improvement
+    // After coarse-graining, branches that were divergent may now be confluent
+    const ciBefore = this.checkCausalInvariance();
+    // Approximate: each collapsed branch pair removes one divergence
+    const adjustedDivergent = Math.max(0, ciBefore.divergent - branchesCollapsed);
+    const adjustedTotal = ciBefore.confluent + adjustedDivergent;
+    const ciAfter = adjustedTotal > 0 ? (ciBefore.confluent + branchesCollapsed) / adjustedTotal : 1.0;
+
+    return {
+      equivalenceClasses,
+      completionRules,
+      mergedNodeMap,
+      stats: {
+        totalNodes: this.nodes.length,
+        mergedNodes: branchesCollapsed,
+        completionRulesCount: completionRules.length,
+        branchesCollapsed
+      },
+      causalInvarianceBefore: ciBefore.invariance,
+      causalInvarianceAfter: Math.min(ciAfter, 1.0)
+    };
   }
 
   getTotalSteps() {
@@ -6728,6 +7052,238 @@ clearObserver = function() {
 window._zenoObserve = zenoObserve;
 window._detectTunneling = detectTunneling;
 window._measureBranchingAsymmetry = measureBranchingAsymmetry;
+
+// ═══════════════════════════════════════════════════════════════
+// PART 14: QUANTUM OBSERVER — COARSE-GRAINING & COMPLETION RULES
+// (Based on Jonathan Gorard's derivation of QM from Wolfram Physics)
+// ═══════════════════════════════════════════════════════════════
+
+let _coarseGrainResult = null;
+let _coarseGrainThreshold = 0;
+let _completionEdgeGroup = new THREE.Group();
+_completionEdgeGroup.name = 'completionEdges';
+scene.add(_completionEdgeGroup);
+
+// Merged node glow rings group
+let _mergedGlowGroup = new THREE.Group();
+_mergedGlowGroup.name = 'mergedGlows';
+scene.add(_mergedGlowGroup);
+
+function applyCoarseGraining(threshold) {
+  _coarseGrainThreshold = threshold;
+  if (!currentSystem || currentSystem.nodes.length === 0) return;
+
+  _coarseGrainResult = currentSystem.coarseGrain(threshold);
+  updateCoarseGrainUI(_coarseGrainResult);
+  updateCoarseGrainVisuals(_coarseGrainResult);
+}
+
+function updateCoarseGrainUI(result) {
+  const statsEl = document.getElementById('cg-stats');
+  const rulesEl = document.getElementById('cg-completion-rules');
+  const narrativeEl = document.getElementById('cg-narrative');
+  const gaugeFill = document.getElementById('ci-gauge-fill');
+  const gaugeLabel = document.getElementById('ci-gauge-label');
+
+  if (!result || _coarseGrainThreshold === 0) {
+    // No coarse-graining: full quantum state
+    statsEl.innerHTML = '';
+    rulesEl.textContent = '';
+    narrativeEl.style.display = 'none';
+
+    const ci = currentSystem ? currentSystem.checkCausalInvariance() : { invariance: 1 };
+    const pct = (ci.invariance * 100).toFixed(0);
+    gaugeFill.style.width = pct + '%';
+    gaugeFill.style.background = ci.invariance > 0.8
+      ? 'rgba(204,255,0,0.6)' : ci.invariance > 0.5
+      ? 'rgba(255,200,0,0.6)' : 'rgba(255,80,80,0.6)';
+    gaugeLabel.textContent = pct + '%';
+
+    narrativeEl.style.display = 'block';
+    narrativeEl.innerHTML = 'The observer is <strong>not coarse-graining</strong> — every branch of the multiway system is fully resolved. This is the <em>pure quantum state</em>: all superpositions are visible, and the system is maximally non-classical.';
+    return;
+  }
+
+  const s = result.stats;
+
+  // Stats grid
+  statsEl.innerHTML = `
+    <span class="cg-stat-label">Branches collapsed</span>
+    <span class="cg-stat-value">${s.branchesCollapsed}</span>
+    <span class="cg-stat-label">Completion rules</span>
+    <span class="cg-stat-value">${s.completionRulesCount}</span>
+  `;
+
+  // Completion rules list
+  if (result.completionRules.length > 0) {
+    const ruleLines = result.completionRules.slice(0, 15).map(r => {
+      const fromShort = r.from.length > 20 ? r.from.substring(0, 20) + '…' : r.from;
+      const toShort = r.to.length > 20 ? r.to.substring(0, 20) + '…' : r.to;
+      const tag = r.isPermutation ? ' [perm]' : ` [d=${r.distance}]`;
+      return `${fromShort} ↔ ${toShort}${tag}`;
+    });
+    if (result.completionRules.length > 15) {
+      ruleLines.push(`... +${result.completionRules.length - 15} more`);
+    }
+    rulesEl.textContent = ruleLines.join('\n');
+  } else {
+    rulesEl.textContent = '';
+  }
+
+  // Causal invariance gauge
+  const ciBefore = result.causalInvarianceBefore;
+  const ciAfter = result.causalInvarianceAfter;
+  const pctAfter = (ciAfter * 100).toFixed(0);
+  gaugeFill.style.width = pctAfter + '%';
+  gaugeFill.style.background = ciAfter > 0.8
+    ? 'rgba(204,255,0,0.6)' : ciAfter > 0.5
+    ? 'rgba(255,200,0,0.6)' : 'rgba(255,80,80,0.6)';
+  gaugeLabel.textContent = pctAfter + '%';
+
+  // Narrative
+  narrativeEl.style.display = 'block';
+  const pctBefore = (ciBefore * 100).toFixed(0);
+  const deltaCI = ciAfter - ciBefore;
+
+  if (_coarseGrainThreshold <= 2) {
+    narrativeEl.innerHTML = `The observer is <strong>lightly squinting</strong> — equating branches that differ by ≤${_coarseGrainThreshold} character${_coarseGrainThreshold > 1 ? 's' : ''}. ` +
+      `<strong>${s.branchesCollapsed}</strong> branch pairs are now treated as identical, generating <strong>${s.completionRulesCount} completion rules</strong> (Hermitian operators). ` +
+      `Causal invariance: ${pctBefore}% → <strong>${pctAfter}%</strong>` +
+      (deltaCI > 0.01 ? ` — the observer is <em>imposing</em> causal invariance through coarse-graining.` : '.');
+  } else if (_coarseGrainThreshold <= 5) {
+    narrativeEl.innerHTML = `The observer is <strong>heavily coarse-graining</strong> — treating branches within edit distance ${_coarseGrainThreshold} as equivalent. ` +
+      `This collapses <strong>${s.branchesCollapsed} branch pairs</strong> and generates <strong>${s.completionRulesCount} completion rules</strong>. ` +
+      `Causal invariance rises from ${pctBefore}% to <strong>${pctAfter}%</strong>. ` +
+      `The multiway graph is approaching a <em>classical</em> description — fewer superpositions remain.`;
+  } else {
+    narrativeEl.innerHTML = `The observer is <strong>maximally coarse-graining</strong> — almost all branches are equivalent. ` +
+      `<strong>${s.branchesCollapsed} branch pairs</strong> collapsed, <strong>${s.completionRulesCount} completion rules</strong> generated. ` +
+      `Causal invariance: <strong>${pctAfter}%</strong>. ` +
+      `This is the <em>classical limit</em> — the observer sees a single deterministic timeline. ` +
+      `The completion rules <strong>are</strong> the wavefunction collapse.`;
+  }
+}
+
+function updateCoarseGrainVisuals(result) {
+  // Clear previous completion edges and glow rings
+  _completionEdgeGroup.clear();
+  _mergedGlowGroup.clear();
+
+  if (!result || _coarseGrainThreshold === 0) return;
+  if (!currentNodePoints || currentView === 'spacetime') return;
+
+  // Draw purple dashed lines between merged node pairs
+  const positions = [];
+  const colors = [];
+  for (const rule of result.completionRules) {
+    const [idA, idB] = rule.nodeIds;
+    const nodeA = currentSystem.nodes[idA];
+    const nodeB = currentSystem.nodes[idB];
+    if (!nodeA || !nodeB) continue;
+
+    const xA = nodeA.x * sceneSpreadScale;
+    const yA = nodeA.y * STEP_SPACING;
+    const xB = nodeB.x * sceneSpreadScale;
+    const yB = nodeB.y * STEP_SPACING;
+
+    // Create dashed segments for the completion edge
+    const segments = 8;
+    for (let s = 0; s < segments; s += 2) {
+      const t1 = s / segments;
+      const t2 = (s + 1) / segments;
+      positions.push(
+        xA + (xB - xA) * t1, yA + (yB - yA) * t1, 0,
+        xA + (xB - xA) * t2, yA + (yB - yA) * t2, 0
+      );
+      colors.push(0.44, 0, 1, 0.44, 0, 1); // purple
+    }
+  }
+
+  if (positions.length > 0) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    const mat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const lines = new THREE.LineSegments(geo, mat);
+    _completionEdgeGroup.add(lines);
+  }
+
+  // Add glow rings around merged (non-canonical) nodes
+  const mergedNodes = new Set();
+  for (const [canonical, members] of result.equivalenceClasses) {
+    if (members.size > 1) {
+      for (const id of members) mergedNodes.add(id);
+    }
+  }
+
+  if (mergedNodes.size > 0 && currentNodePoints) {
+    const posAttr = currentNodePoints.geometry.getAttribute('position');
+    const colorAttr = currentNodePoints.geometry.getAttribute('color');
+    
+    // Tint merged nodes purple in the point cloud
+    for (const id of mergedNodes) {
+      if (id < posAttr.count) {
+        // Blend toward purple
+        const r = colorAttr.getX(id);
+        const g = colorAttr.getY(id);
+        const b = colorAttr.getZ(id);
+        colorAttr.setXYZ(id,
+          r * 0.4 + 0.44 * 0.6,
+          g * 0.3,
+          b * 0.4 + 1.0 * 0.6
+        );
+      }
+    }
+    colorAttr.needsUpdate = true;
+  }
+
+  // Ensure completion edges are visible in current view
+  _completionEdgeGroup.visible = currentView !== 'spacetime';
+  _mergedGlowGroup.visible = currentView !== 'spacetime';
+}
+
+// ─── UI BINDINGS ───
+
+document.getElementById('sl-coarsegrain').addEventListener('input', e => {
+  const val = parseInt(e.target.value);
+  document.getElementById('v-coarsegrain').textContent = val;
+  applyCoarseGraining(val);
+});
+
+// Hook: re-apply coarse-graining after each evolution
+const _origBuildScene14 = buildScene;
+buildScene = function(sys, highlightSet) {
+  _origBuildScene14(sys, highlightSet);
+  // Re-apply coarse-graining if slider is > 0
+  if (_coarseGrainThreshold > 0 && currentSystem) {
+    setTimeout(() => applyCoarseGraining(_coarseGrainThreshold), 50);
+  } else if (currentSystem) {
+    // Update the gauge even at threshold 0
+    updateCoarseGrainUI(null);
+  }
+};
+
+// Hook: update completion edge visibility on view switch
+const _origViewSwitch14 = updateViewVisibility;
+updateViewVisibility = function() {
+  _origViewSwitch14();
+  if (_completionEdgeGroup) {
+    _completionEdgeGroup.visible = currentView !== 'spacetime';
+    _mergedGlowGroup.visible = currentView !== 'spacetime';
+  }
+};
+
+// Initialize gauge on first load
+setTimeout(() => {
+  if (currentSystem) updateCoarseGrainUI(null);
+}, 2000);
+
 window._measureHolographicBound = measureHolographicBound;
 
 
@@ -8602,9 +9158,11 @@ window._findShortestPath = findShortestPath;
 window._zenoObserve = zenoObserve;
 window._detectTunneling = detectTunneling;
 window._measureBranchingAsymmetry = measureBranchingAsymmetry;
-window._measureHolographicBound = measureHolographicBound;
+
 window._camAnimating = () => _camAnimating;
 window._smoothCameraTo = smoothCameraTo;
+window._applyCoarseGraining = applyCoarseGraining;
+window._coarseGrainResult = () => _coarseGrainResult;
 
 </script>
 </body>
