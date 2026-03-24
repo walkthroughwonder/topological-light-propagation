@@ -28,7 +28,7 @@
   html, body {
     width: 100%; height: 100%;
     overflow: hidden;
-    background: #06060e;
+    background: #0e0e10;
     font-family: 'Inter', system-ui, sans-serif;
     color: #e8e8f0;
     -webkit-font-smoothing: antialiased;
@@ -55,7 +55,7 @@
   #center {
     position: relative;
     overflow: hidden;
-    background: #08080f;
+    background: #111113;
   }
   #center canvas { display: block; width: 100%; height: 100%; }
 
@@ -355,7 +355,7 @@
     transform: translateX(-50%);
     display: flex;
     gap: 2px;
-    background: rgba(8, 8, 15, 0.7);
+    background: rgba(14, 14, 16, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.08);
@@ -2755,13 +2755,13 @@ const centerEl = document.getElementById('center');
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
 renderer.setSize(centerEl.clientWidth, centerEl.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x08080f, 1);
+renderer.setClearColor(0x111113, 1);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 centerEl.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x08080f, 0.015);
+scene.fog = new THREE.FogExp2(0x111113, 0.012);
 
 const camera = new THREE.PerspectiveCamera(50, centerEl.clientWidth / centerEl.clientHeight, 0.1, 500);
 camera.position.set(0, 2, 30);
@@ -3149,7 +3149,7 @@ function buildScene(sys, highlightSet) {
   currentEdgeLines = edgeLines;
   savedEdgeOpacity = edgeOpacity;
 
-  // BRANCHIAL GRAPH
+  // BRANCHIAL GRAPH — Force-directed layout revealing Hilbert space topology
   let finalStep = 0;
   for (let s = sys.stepStates.length - 1; s >= 0; s--) {
     if (sys.stepStates[s] && sys.stepStates[s].length > 0) { finalStep = s; break; }
@@ -3159,12 +3159,106 @@ function buildScene(sys, highlightSet) {
   const branchialColors = new Float32Array(finalIds.length * 3);
   const branchialSizes = new Float32Array(finalIds.length);
 
+  // Build adjacency for force layout
+  const bIdToIdx = new Map();
+  for (let i = 0; i < finalIds.length; i++) bIdToIdx.set(finalIds[i], i);
+  
+  const bAdj = [];
+  for (let i = 0; i < finalIds.length; i++) bAdj.push([]);
+  for (const be of sys.branchialEdges) {
+    const i = bIdToIdx.get(be.from);
+    const j = bIdToIdx.get(be.to);
+    if (i !== undefined && j !== undefined) {
+      bAdj[i].push(j);
+      bAdj[j].push(i);
+    }
+  }
+  
+  // Force-directed layout — starts from ring, relaxes via spring+repulsion
   const bRadius = Math.max(finalIds.length * 0.15, 3);
+  const bPosX = new Float32Array(finalIds.length);
+  const bPosY = new Float32Array(finalIds.length);
+  
+  // Initialize positions: ring (preserves sorted order as starting point)
   for (let i = 0; i < finalIds.length; i++) {
     const angle = (i / finalIds.length) * Math.PI * 2 - Math.PI / 2;
+    bPosX[i] = Math.cos(angle) * bRadius;
+    bPosY[i] = Math.sin(angle) * bRadius;
+  }
+  
+  // Run force simulation (quick — ~40 iterations, enough for topology to emerge)
+  if (finalIds.length > 1 && sys.branchialEdges.length > 0) {
+    const n = finalIds.length;
+    const idealDist = bRadius * 2 / Math.sqrt(n);
+    const forceIters = Math.min(60, Math.max(30, Math.floor(200 / Math.sqrt(n))));
+    
+    for (let iter = 0; iter < forceIters; iter++) {
+      const temp = 0.3 * bRadius * (1 - iter / forceIters); // cooling
+      const fX = new Float32Array(n);
+      const fY = new Float32Array(n);
+      
+      // Repulsion (Coulomb) — only sample for large graphs
+      const sampleStep = n > 200 ? Math.max(1, Math.floor(n / 100)) : 1;
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j += (j === i + 1 ? 1 : sampleStep)) {
+          let dx = bPosX[i] - bPosX[j];
+          let dy = bPosY[i] - bPosY[j];
+          let dist = Math.sqrt(dx * dx + dy * dy) + 0.01;
+          let force = (idealDist * idealDist) / dist;
+          let fx = (dx / dist) * force;
+          let fy = (dy / dist) * force;
+          fX[i] += fx; fY[i] += fy;
+          fX[j] -= fx; fY[j] -= fy;
+        }
+      }
+      
+      // Attraction (spring) along branchial edges
+      for (const be of sys.branchialEdges) {
+        const i = bIdToIdx.get(be.from);
+        const j = bIdToIdx.get(be.to);
+        if (i === undefined || j === undefined) continue;
+        let dx = bPosX[i] - bPosX[j];
+        let dy = bPosY[i] - bPosY[j];
+        let dist = Math.sqrt(dx * dx + dy * dy) + 0.01;
+        let force = (dist * dist) / idealDist;
+        let fx = (dx / dist) * force;
+        let fy = (dy / dist) * force;
+        fX[i] -= fx; fY[i] -= fy;
+        fX[j] += fx; fY[j] += fy;
+      }
+      
+      // Apply forces with cooling
+      for (let i = 0; i < n; i++) {
+        let fLen = Math.sqrt(fX[i] * fX[i] + fY[i] * fY[i]) + 0.01;
+        let capped = Math.min(fLen, temp);
+        bPosX[i] += (fX[i] / fLen) * capped;
+        bPosY[i] += (fY[i] / fLen) * capped;
+      }
+    }
+    
+    // Center the layout
+    let cx = 0, cy = 0;
+    for (let i = 0; i < n; i++) { cx += bPosX[i]; cy += bPosY[i]; }
+    cx /= n; cy /= n;
+    for (let i = 0; i < n; i++) { bPosX[i] -= cx; bPosY[i] -= cy; }
+    
+    // Scale to fit within bRadius
+    let maxR = 0;
+    for (let i = 0; i < n; i++) {
+      let r = Math.sqrt(bPosX[i] * bPosX[i] + bPosY[i] * bPosY[i]);
+      if (r > maxR) maxR = r;
+    }
+    if (maxR > 0.01) {
+      const scale = bRadius / maxR;
+      for (let i = 0; i < n; i++) { bPosX[i] *= scale; bPosY[i] *= scale; }
+    }
+  }
+  
+  // Write positions
+  for (let i = 0; i < finalIds.length; i++) {
     const i3 = i * 3;
-    branchialPositions[i3]     = Math.cos(angle) * bRadius;
-    branchialPositions[i3 + 1] = Math.sin(angle) * bRadius;
+    branchialPositions[i3]     = bPosX[i];
+    branchialPositions[i3 + 1] = bPosY[i];
     branchialPositions[i3 + 2] = 0;
 
     const node = sys.nodes[finalIds[i]];
@@ -3630,7 +3724,62 @@ function drawBranchialPlot(sys, highlightNodeId) {
     ancestrySet = sys.traceAncestry(highlightNodeId);
   }
 
-  // Draw branchial edges
+  // Force-directed layout for 2D canvas (matches 3D branchial view)
+  const bIdToIdx2d = new Map();
+  for (let i = 0; i < finalIds.length; i++) bIdToIdx2d.set(finalIds[i], i);
+  const bPosX2d = new Float32Array(finalIds.length);
+  const bPosY2d = new Float32Array(finalIds.length);
+  for (let i = 0; i < finalIds.length; i++) {
+    const angle = (i / finalIds.length) * Math.PI * 2 - Math.PI / 2;
+    bPosX2d[i] = Math.cos(angle) * radius;
+    bPosY2d[i] = Math.sin(angle) * radius;
+  }
+  if (finalIds.length > 1 && sys.branchialEdges.length > 0) {
+    const n2d = finalIds.length;
+    const bAdj2d = [];
+    for (let i = 0; i < n2d; i++) bAdj2d.push([]);
+    for (const be of sys.branchialEdges) {
+      const ai = bIdToIdx2d.get(be.from), aj = bIdToIdx2d.get(be.to);
+      if (ai !== undefined && aj !== undefined) { bAdj2d[ai].push(aj); bAdj2d[aj].push(ai); }
+    }
+    const ideal2d = radius * 2 / Math.sqrt(n2d);
+    const iters2d = Math.min(40, Math.max(20, Math.floor(150 / Math.sqrt(n2d))));
+    for (let iter = 0; iter < iters2d; iter++) {
+      const temp = 0.3 * radius * (1 - iter / iters2d);
+      const fX2d = new Float32Array(n2d), fY2d = new Float32Array(n2d);
+      const ss = n2d > 200 ? Math.max(1, Math.floor(n2d / 80)) : 1;
+      for (let i = 0; i < n2d; i++) {
+        for (let j = i + 1; j < n2d; j += (j === i + 1 ? 1 : ss)) {
+          let dx = bPosX2d[i] - bPosX2d[j], dy = bPosY2d[i] - bPosY2d[j];
+          let d = Math.sqrt(dx*dx+dy*dy)+0.01;
+          let f = (ideal2d*ideal2d)/d, fx = (dx/d)*f, fy = (dy/d)*f;
+          fX2d[i]+=fx; fY2d[i]+=fy; fX2d[j]-=fx; fY2d[j]-=fy;
+        }
+      }
+      for (const be of sys.branchialEdges) {
+        const ai = bIdToIdx2d.get(be.from), aj = bIdToIdx2d.get(be.to);
+        if (ai===undefined||aj===undefined) continue;
+        let dx = bPosX2d[ai]-bPosX2d[aj], dy = bPosY2d[ai]-bPosY2d[aj];
+        let d = Math.sqrt(dx*dx+dy*dy)+0.01;
+        let f = (d*d)/ideal2d, fx = (dx/d)*f, fy = (dy/d)*f;
+        fX2d[ai]-=fx; fY2d[ai]-=fy; fX2d[aj]+=fx; fY2d[aj]+=fy;
+      }
+      for (let i = 0; i < n2d; i++) {
+        let fl = Math.sqrt(fX2d[i]*fX2d[i]+fY2d[i]*fY2d[i])+0.01;
+        let cap = Math.min(fl, temp);
+        bPosX2d[i]+=(fX2d[i]/fl)*cap; bPosY2d[i]+=(fY2d[i]/fl)*cap;
+      }
+    }
+    let mcx=0,mcy=0;
+    for(let i=0;i<n2d;i++){mcx+=bPosX2d[i];mcy+=bPosY2d[i];}
+    mcx/=n2d;mcy/=n2d;
+    for(let i=0;i<n2d;i++){bPosX2d[i]-=mcx;bPosY2d[i]-=mcy;}
+    let mr=0;
+    for(let i=0;i<n2d;i++){let r2=Math.sqrt(bPosX2d[i]*bPosX2d[i]+bPosY2d[i]*bPosY2d[i]);if(r2>mr)mr=r2;}
+    if(mr>0.01){let sc=radius*0.9/mr;for(let i=0;i<n2d;i++){bPosX2d[i]*=sc;bPosY2d[i]*=sc;}}
+  }
+
+  // Draw branchial edges using force-directed positions
   const idToIdx = new Map();
   for (let i = 0; i < finalIds.length; i++) idToIdx.set(finalIds[i], i);
 
@@ -3639,8 +3788,6 @@ function drawBranchialPlot(sys, highlightNodeId) {
     const fi = idToIdx.get(e.from);
     const fj = idToIdx.get(e.to);
     if (fi === undefined || fj === undefined) continue;
-    const a1 = (fi / finalIds.length) * Math.PI * 2 - Math.PI / 2;
-    const a2 = (fj / finalIds.length) * Math.PI * 2 - Math.PI / 2;
 
     if (ancestrySet) {
       const highlighted = ancestrySet.has(e.from) && ancestrySet.has(e.to);
@@ -3650,18 +3797,17 @@ function drawBranchialPlot(sys, highlightNodeId) {
     }
 
     ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(a1) * radius, cy + Math.sin(a1) * radius);
-    ctx.lineTo(cx + Math.cos(a2) * radius, cy + Math.sin(a2) * radius);
+    ctx.moveTo(cx + bPosX2d[fi], cy + bPosY2d[fi]);
+    ctx.lineTo(cx + bPosX2d[fj], cy + bPosY2d[fj]);
     ctx.stroke();
   }
 
   // Draw nodes
   for (let i = 0; i < finalIds.length; i++) {
-    const angle = (i / finalIds.length) * Math.PI * 2 - Math.PI / 2;
     const node = sys.nodes[finalIds[i]];
     const wNorm = node.weight / maxWeight;
-    const nx = cx + Math.cos(angle) * radius;
-    const ny = cy + Math.sin(angle) * radius;
+    const nx = cx + bPosX2d[i];
+    const ny = cy + bPosY2d[i];
     const size = 2 + wNorm * 4;
 
     const isSelected = highlightNodeId === finalIds[i];
