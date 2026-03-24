@@ -2483,6 +2483,54 @@ renderer.domElement.addEventListener('mousedown', (e) => {
 setSpacetimeControls();
 controls.target.set(0, -5, 0);
 
+// ─── SMOOTH CAMERA TRANSITIONS ───
+// All camera moves go through this to avoid jarring jumps
+let _camAnim = null; // current animation handle
+
+let _camAnimating = false; // true while smoothCameraTo is interpolating
+
+function smoothCameraTo(targetPos, targetLookAt, duration = 600) {
+  // Cancel any in-flight animation
+  if (_camAnim) {
+    cancelAnimationFrame(_camAnim);
+    _camAnim = null;
+    _camAnimating = false;
+    controls.enabled = true;
+  }
+
+  const startPos = camera.position.clone();
+  const startTarget = controls.target.clone();
+  const endPos = targetPos.clone();
+  const endTarget = targetLookAt.clone();
+  const t0 = performance.now();
+
+  // Disable controls during animation so damping doesn't fight our lerp
+  controls.enabled = false;
+  _camAnimating = true;
+
+  function tick() {
+    const elapsed = performance.now() - t0;
+    const t = Math.min(elapsed / duration, 1);
+    // Ease-in-out cubic — gentle acceleration and deceleration
+    const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    camera.position.lerpVectors(startPos, endPos, ease);
+    controls.target.lerpVectors(startTarget, endTarget, ease);
+    camera.lookAt(controls.target);
+
+    if (t < 1) {
+      _camAnim = requestAnimationFrame(tick);
+    } else {
+      _camAnim = null;
+      _camAnimating = false;
+      // Re-enable controls and sync internal state to final position
+      controls.enabled = true;
+      controls.update();
+    }
+  }
+  _camAnim = requestAnimationFrame(tick);
+}
+
 // Post-processing
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -2543,6 +2591,7 @@ let savedEdgeOpacity = 0.35;
 let hoverHighlightNodeId = null; // currently hover-highlighted node ID
 
 // ─── Build the 3D scene from a MultiwaySystem ───
+let _suppressFitCamera = false; // set by navigateToNode to prevent instant camera jumps
 function buildScene(sys, highlightSet) {
   multiwayGroup.clear();
   branchialGroup.clear();
@@ -3057,7 +3106,8 @@ function buildScene(sys, highlightSet) {
   }
 
   updateViewVisibility();
-  fitCamera(sys);
+  // Skip camera jump when navigateToNode will do its own smooth animation
+  if (!_suppressFitCamera) fitCamera(sys, true);
 
   // Save original colors/sizes for hover highlight restore
   if (currentNodePoints) {
@@ -3072,25 +3122,33 @@ function buildScene(sys, highlightSet) {
   }
 }
 
-function fitCamera(sys) {
+function fitCamera(sys, instant) {
   if (!sys) return;
   const totalSteps = sys.getTotalSteps();
   const centerY = -(totalSteps * STEP_SPACING) / 2;
 
+  let endTarget, endPos;
   if (currentView === 'branchial') {
-    controls.target.set(branchialGroup.position.x, branchialGroup.position.y, 0);
-    camera.position.set(branchialGroup.position.x, branchialGroup.position.y, 25);
+    endTarget = new THREE.Vector3(branchialGroup.position.x, branchialGroup.position.y, 0);
+    endPos = new THREE.Vector3(branchialGroup.position.x, branchialGroup.position.y, 25);
   } else if (currentView === 'causal') {
-    // Focus on causal graph layer (z=3 offset)
-    controls.target.set(0, centerY, 3);
-    camera.position.set(0, centerY + 5, 38);
+    endTarget = new THREE.Vector3(0, centerY, 3);
+    endPos = new THREE.Vector3(0, centerY + 5, 38);
   } else if (currentView === 'both') {
     const midX = branchialGroup.position.x / 2;
-    controls.target.set(midX, centerY, 1.5);
-    camera.position.set(midX, centerY + 5, 50);
+    endTarget = new THREE.Vector3(midX, centerY, 1.5);
+    endPos = new THREE.Vector3(midX, centerY + 5, 50);
   } else {
-    controls.target.set(0, centerY, 0);
-    camera.position.set(0, centerY + 5, 35);
+    endTarget = new THREE.Vector3(0, centerY, 0);
+    endPos = new THREE.Vector3(0, centerY + 5, 35);
+  }
+
+  if (instant) {
+    camera.position.copy(endPos);
+    controls.target.copy(endTarget);
+    controls.update();
+  } else {
+    smoothCameraTo(endPos, endTarget, 500);
   }
 }
 
@@ -3593,33 +3651,20 @@ function navigateToNode(nodeId) {
   const node = currentSystem.nodes[nodeId];
   if (!node) return;
 
-  // Select the node (full observer analysis + highlighting)
+  // Suppress the instant fitCamera inside buildScene — we'll animate instead
+  _suppressFitCamera = true;
   selectCausalHistory(nodeId);
+  _suppressFitCamera = false;
 
   // Smooth-pan camera to center on the selected node
   const targetX = node.x * sceneSpreadScale;
   const targetY = node.y * STEP_SPACING;
   const camZ = camera.position.z;
-
-  // Animate camera + controls.target over ~300ms
   const startTarget = controls.target.clone();
   const startPos = camera.position.clone();
   const endTarget = new THREE.Vector3(targetX, targetY, startTarget.z);
   const endPos = new THREE.Vector3(targetX, targetY + (startPos.y - startTarget.y), camZ);
-  const duration = 300;
-  const t0 = performance.now();
-
-  function animateNav() {
-    const elapsed = performance.now() - t0;
-    const t = Math.min(elapsed / duration, 1);
-    // Ease-out cubic
-    const ease = 1 - Math.pow(1 - t, 3);
-    controls.target.lerpVectors(startTarget, endTarget, ease);
-    camera.position.lerpVectors(startPos, endPos, ease);
-    controls.update();
-    if (t < 1) requestAnimationFrame(animateNav);
-  }
-  animateNav();
+  smoothCameraTo(endPos, endTarget, 500);
 }
 
 function getKeyboardNeighbor(direction) {
@@ -4539,7 +4584,8 @@ window.addEventListener('resize', onResize);
 let animTime = 0;
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
+  // Skip controls.update during smooth camera animation — damping would fight our lerp
+  if (!_camAnimating) controls.update();
   animTime += 0.016;
 
   // Pulse current-step nodes in interactive mode
@@ -8179,10 +8225,9 @@ function buildSpacetimeScene() {
   box.getCenter(center);
   const size = box.getSize(new THREE.Vector3()).length();
   const dist = Math.max(size * 0.5, 20); // Keep close enough to see structure
-  controls.target.copy(center);
-  camera.position.set(center.x, center.y + dist * 0.25, center.z + dist * 0.7);
-  camera.lookAt(center);
-  controls.update();
+  const endTarget = center.clone();
+  const endPos = new THREE.Vector3(center.x, center.y + dist * 0.25, center.z + dist * 0.7);
+  smoothCameraTo(endPos, endTarget, 600);
 }
 
 
@@ -8541,6 +8586,8 @@ window._zenoObserve = zenoObserve;
 window._detectTunneling = detectTunneling;
 window._measureBranchingAsymmetry = measureBranchingAsymmetry;
 window._measureHolographicBound = measureHolographicBound;
+window._camAnimating = () => _camAnimating;
+window._smoothCameraTo = smoothCameraTo;
 
 </script>
 </body>
