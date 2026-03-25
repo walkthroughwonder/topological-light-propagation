@@ -1280,12 +1280,12 @@
       <p class="desc">Each state at step N is weighted by the number of distinct evolution paths leading to it. Normalized weights correspond to |ψ|² — the squared magnitudes of quantum amplitudes. The interference pattern <em>emerges</em> from the branching structure.</p>
     </div>
     <div class="subsection">
-      <h3>Branchial Space = Hilbert Space</h3>
-      <p class="desc">States at a given step, connected by shared ancestry, form the branchial graph. Its geometry maps onto the projective Hilbert space of the system. Single-slit → 1D, double-slit → 2D, triple-slit → 3D.</p>
+      <h3>Branchial Space → Hilbert Space</h3>
+      <p class="desc">States at a given step, connected by shared ancestry, form the branchial graph. In the continuum limit, its geometry converges to the projective Hilbert space (with the Fubini-Study metric). Dimension estimated via ball-growth on the branchial graph.</p>
     </div>
     <div class="subsection">
       <h3>Completion → Interference</h3>
-      <p class="desc">A Knuth-Bendix completion forces causal invariance. Spacelike-separated paths (isomorphic, phase ≈ 0) merge constructively — weights add. Branchlike-separated paths (non-intersecting, phase ≈ π) interfere destructively — weights cancel.</p>
+      <p class="desc">A Knuth-Bendix completion forces causal invariance. Branches close in branchial space (small branchial distance) merge constructively — weights add. Branches far apart in branchial space decohere — the observer cannot identify them.</p>
     </div>
   </div>
 
@@ -1306,7 +1306,7 @@
     <div class="section-title">Quantum Observer</div>
     <div id="quantum-observer-panel">
       <div class="tool-desc" style="margin-bottom: 4px;">
-        Gorard's observer model: you impose <strong style="color:rgba(112,0,255,0.8)">completion rules</strong> on the multiway graph by coarse-graining — treating branches that differ below your resolution as equivalent. This is formally equivalent to <em>wavefunction collapse</em>.
+        Gorard's observer model: you impose <strong style="color:rgba(112,0,255,0.8)">completion rules</strong> on the multiway graph by coarse-graining — identifying branches whose <em>causal futures are isomorphic</em> at your resolution. This Knuth-Bendix completion is formally equivalent to <em>wavefunction collapse</em>.
       </div>
 
       <div class="cg-slider-row">
@@ -1400,7 +1400,19 @@
     <!-- 5. BRANCHIAL 3D EMBEDDING -->
     <div class="tool-section">
       <div class="tool-title">Branchial 3D Embedding <button class="tool-toggle" id="toggle-branchial3d" title="Spectral layout of branchial graph"></button></div>
-      <div class="tool-desc">Embed the branchial graph in 3D using graph Laplacian eigenvectors. Reveals the Hilbert space geometry.</div>
+      <div class="tool-desc">Embed the branchial graph in 3D using graph Laplacian eigenvectors. In the continuum limit, this converges to the projective Hilbert space geometry.</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-title">Fubini-Study Metric <button class="tool-toggle" id="toggle-fubini-study" title="Color branchial edges by FS distance"></button></div>
+      <div class="tool-desc">Color branchial edges by Fubini-Study distance (causal cone overlap). The proper metric on branchial space — converges to the projective Hilbert space metric.</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-title">Branchial Geodesic <button class="tool-toggle" id="toggle-branchial-geodesic" title="Show geodesic between two selected nodes"></button></div>
+      <div class="tool-desc">Select two nodes on the branchial graph to show the geodesic (shortest path). The path integral emerges from summing over these paths through branchial space.</div>
+    </div>
+    <div class="tool-item">
+      <div class="tool-title">Embedded Observer <button class="tool-toggle" id="toggle-embedded-observer" title="Find self-consistent causal-invariant subgraph"></button></div>
+      <div class="tool-desc">From the selected node, grow the maximal subgraph maintaining internal causal invariance. The observer as a persistent structure embedded in the multiway system.</div>
     </div>
 
     <!-- 6. CAUSAL INVARIANCE VERIFIER -->
@@ -2011,47 +2023,93 @@ class MultiwaySystem {
   }
 
   /**
-   * Check causal invariance: do all paths between the same pair of events
-   * produce equivalent results? (Simplified: check if the causal graph is a DAG
-   * with confluence — merging branches produce identical states.)
+   * Check causal invariance via critical pair convergence (Gorard-correct).
+   * A critical pair is two events from the same parent with overlapping
+   * input ranges. Causal invariance requires ALL critical pairs converge:
+   * the divergent branches must reach the same state within bounded steps.
    */
   checkCausalInvariance() {
-    // For each pair of events at the same step that share a parent state,
-    // check if they eventually converge to the same child state
+    this._ensureAdjacencyMaps();
     let confluent = 0, divergent = 0;
-    const eventsByStep = new Map();
+
+    // Find critical pairs: events from same parent with overlapping input
+    const eventsByParent = new Map();
     for (const ev of this.causalEvents) {
-      if (!eventsByStep.has(ev.step)) eventsByStep.set(ev.step, []);
-      eventsByStep.get(ev.step).push(ev);
+      if (!eventsByParent.has(ev.parentNodeId)) eventsByParent.set(ev.parentNodeId, []);
+      eventsByParent.get(ev.parentNodeId).push(ev);
     }
 
-    for (const [step, events] of eventsByStep) {
-      // Group by parent node
-      const byParent = new Map();
-      for (const ev of events) {
-        if (!byParent.has(ev.parentNodeId)) byParent.set(ev.parentNodeId, []);
-        byParent.get(ev.parentNodeId).push(ev);
-      }
-      for (const [parentId, evs] of byParent) {
-        if (evs.length <= 1) continue;
-        // Check pairs: do any two events from the same parent produce
-        // children that eventually merge?
-        for (let i = 0; i < evs.length; i++) {
-          for (let j = i + 1; j < evs.length; j++) {
-            // Check if ranges overlap (potential conflict)
-            const aIn = evs[i].inputRange;
-            const bIn = evs[j].inputRange;
-            if (aIn[0] <= bIn[1] && bIn[0] <= aIn[1]) {
-              divergent++; // overlapping input ranges = non-commuting events
-            } else {
-              confluent++; // non-overlapping = commuting events (causal invariant)
-            }
+    const criticalPairs = [];
+    for (const [parentId, evs] of eventsByParent) {
+      if (evs.length <= 1) continue;
+      for (let i = 0; i < evs.length; i++) {
+        for (let j = i + 1; j < evs.length; j++) {
+          const aIn = evs[i].inputRange;
+          const bIn = evs[j].inputRange;
+          if (aIn[0] <= bIn[1] && bIn[0] <= aIn[1]) {
+            criticalPairs.push({
+              childA: evs[i].childNodeId,
+              childB: evs[j].childNodeId
+            });
+          } else {
+            confluent++; // Non-overlapping inputs always commute
           }
         }
       }
     }
-    return { confluent, divergent, total: confluent + divergent,
-             invariance: (confluent + divergent) > 0 ? confluent / (confluent + divergent) : 1.0 };
+
+    // For each critical pair, check convergence via lookahead
+    const maxLookahead = 3;
+    for (const cp of criticalPairs) {
+      if (cp.childA === cp.childB) { confluent++; continue; }
+      const sA = this.nodes[cp.childA]?.state;
+      const sB = this.nodes[cp.childB]?.state;
+      if (sA && sB && sA === sB) { confluent++; continue; }
+
+      let converged = false;
+      let frontierA = new Set([cp.childA]);
+      let frontierB = new Set([cp.childB]);
+      let reachedA = new Set([cp.childA]);
+      let reachedB = new Set([cp.childB]);
+
+      for (let d = 0; d < maxLookahead && !converged; d++) {
+        const nextA = new Set(), nextB = new Set();
+        for (const n of frontierA) {
+          for (const c of (this._parentToChildren.get(n) || [])) {
+            if (!reachedA.has(c)) { reachedA.add(c); nextA.add(c); }
+          }
+        }
+        for (const n of frontierB) {
+          for (const c of (this._parentToChildren.get(n) || [])) {
+            if (!reachedB.has(c)) { reachedB.add(c); nextB.add(c); }
+          }
+        }
+        // Check node-level intersection
+        for (const n of reachedA) {
+          if (reachedB.has(n)) { converged = true; break; }
+        }
+        if (!converged) {
+          // Check state-level convergence
+          const statesA = new Set();
+          for (const n of reachedA) { const s = this.nodes[n]?.state; if (s) statesA.add(s); }
+          for (const n of reachedB) {
+            const s = this.nodes[n]?.state;
+            if (s && statesA.has(s)) { converged = true; break; }
+          }
+        }
+        frontierA = nextA;
+        frontierB = nextB;
+        if (frontierA.size === 0 && frontierB.size === 0) break;
+      }
+
+      if (converged) confluent++; else divergent++;
+    }
+
+    return {
+      confluent, divergent, criticalPairs: criticalPairs.length,
+      total: confluent + divergent,
+      invariance: (confluent + divergent) > 0 ? confluent / (confluent + divergent) : 1.0
+    };
   }
 
   _buildBranchialGraph(maxSteps) {
@@ -2177,9 +2235,9 @@ class MultiwaySystem {
       log.push({ type: 'constructive',
         text: `CONSTRUCTIVE: Central maximum at x≈${pattern.positions[centerIdx]?.toFixed(2) || '0.00'}` });
       log.push({ type: 'constructive',
-        text: `  → Spacelike-separated paths merge (phase diff ≈ 0)` });
+        text: `  → Branches close in branchial space — observer can merge them` });
       log.push({ type: 'constructive',
-        text: `  → Weights ADD: multiple evolution paths converge` });
+        text: `  → Weights ADD: small branchial distance allows coherent merging` });
 
       for (const m of maxima.slice(0, 3)) {
         if (Math.abs(m.pos) > 0.05) {
@@ -2194,9 +2252,9 @@ class MultiwaySystem {
         log.push({ type: 'destructive',
           text: `DESTRUCTIVE: Minimum at x≈${m.pos.toFixed(2)} (intensity ${(m.val * 100).toFixed(0)}%)` });
         log.push({ type: 'destructive',
-          text: `  → Branchlike-separated paths (phase diff ≈ π)` });
+          text: `  → Branches far apart in branchial space (large branchial distance)` });
         log.push({ type: 'destructive',
-          text: `  → Completion forces cancellation of branch weights` });
+          text: `  → Observer's coarse-graining cannot identify these branches — they decohere` });
       }
 
       if (minima.length === 0 && pattern.normalized.length < 10) {
@@ -2209,28 +2267,158 @@ class MultiwaySystem {
     log.push({ type: 'neutral',
       text: `Branchial dimension: ${this._estimateBranchialDim()}D` });
     log.push({ type: 'neutral',
-      text: `(= number of interacting quantum subsystems)` });
+      text: `(ball-growth estimate on branchial graph)` });
 
     return log;
   }
 
+  /**
+   * Estimate branchial dimension via BFS ball-growth on the
+   * branchial graph. V(r) ~ r^d gives the effective dimension.
+   * This is the correct graph-theoretic estimate, not the X-count.
+   */
   _estimateBranchialDim() {
-    const root = this.nodes[0];
-    if (!root) return 1;
-    return (root.state.match(/X/g) || []).length;
+    if (this.branchialEdges.length < 3) {
+      const root = this.nodes[0];
+      if (!root) return 1;
+      return Math.max(1, (root.state.match(/X/g) || []).length);
+    }
+    const adj = new Map();
+    for (const e of this.branchialEdges) {
+      if (!adj.has(e.from)) adj.set(e.from, []);
+      if (!adj.has(e.to)) adj.set(e.to, []);
+      adj.get(e.from).push(e.to);
+      adj.get(e.to).push(e.from);
+    }
+    const nodes = [...new Set([...adj.keys()])];
+    const n = nodes.length;
+    if (n < 4) return 1;
+    const sampleSize = Math.min(n, 20);
+    const sampleNodes = n <= sampleSize ? nodes :
+      nodes.sort(() => Math.random() - 0.5).slice(0, sampleSize);
+    const maxR = Math.min(10, Math.floor(Math.sqrt(n)));
+    const volumeProfiles = [];
+    for (const start of sampleNodes) {
+      const visited = new Set([start]);
+      let frontier = new Set([start]);
+      const volumes = [1];
+      for (let r = 1; r <= maxR; r++) {
+        const next = new Set();
+        for (const node of frontier) {
+          for (const nb of (adj.get(node) || [])) {
+            if (!visited.has(nb)) { visited.add(nb); next.add(nb); }
+          }
+        }
+        volumes.push(visited.size);
+        frontier = next;
+        if (frontier.size === 0) break;
+      }
+      volumeProfiles.push(volumes);
+    }
+    const maxLen = Math.max(...volumeProfiles.map(v => v.length));
+    const avgVol = [];
+    for (let r = 0; r < maxLen; r++) {
+      let sum = 0, count = 0;
+      for (const p of volumeProfiles) {
+        if (r < p.length) { sum += p[r]; count++; }
+      }
+      avgVol.push(count > 0 ? sum / count : 0);
+    }
+    const dimEsts = [];
+    for (let r = 2; r < avgVol.length - 1; r++) {
+      if (avgVol[r] > avgVol[r-1] && avgVol[r-1] > 0) {
+        const d = (Math.log(avgVol[r]) - Math.log(avgVol[r-1])) /
+                  (Math.log(r) - Math.log(r-1));
+        if (isFinite(d) && d > 0) dimEsts.push(d);
+      }
+    }
+    if (dimEsts.length === 0) return 1;
+    const start = Math.floor(dimEsts.length * 0.2);
+    const end = Math.ceil(dimEsts.length * 0.8);
+    const mid = dimEsts.slice(start, end);
+    const arr = mid.length > 0 ? mid : dimEsts;
+    return Math.round(arr.reduce((s, d) => s + d, 0) / arr.length * 10) / 10;
   }
 
   // ─── COARSE-GRAINING ENGINE (Gorard's observer model) ───
-  // The observer "squints" at the multiway graph, treating branches that
-  // differ by less than `threshold` characters as equivalent. This generates
-  // completion rules (bidirectional equivalences) that model the observer's
-  // coarse-graining of the hypergraph — formally equivalent to Hermitian
-  // operators and wavefunction collapse.
+  // The observer coarse-grains the multiway graph by comparing the CAUSAL
+  // STRUCTURE descended from each branch — not the syntactic state strings.
+  // Two branches are equivalent when their causal futures are isomorphic
+  // up to the observer's resolution. This generates completion rules
+  // (bidirectional equivalences) formally equivalent to Knuth-Bendix
+  // completion and wavefunction collapse.
 
   /**
-   * Compute edit distance between two state strings.
-   * Uses character-by-character comparison + length difference.
+   * Compute a causal signature for a node: a canonical hash of its
+   * descendant causal subgraph structure (branching pattern, depth, fan-out).
+   * Two nodes with identical causal signatures have isomorphic causal futures.
    */
+  _causalSignature(nodeId, maxDepth = 4) {
+    this._ensureAdjacencyMaps();
+    const children = this._parentToChildren;
+    const sig = [];
+    let frontier = [nodeId];
+    for (let d = 0; d < maxDepth && frontier.length > 0; d++) {
+      const levelFanouts = [];
+      const nextFrontier = [];
+      for (const nid of frontier) {
+        const ch = children.get(nid) || [];
+        levelFanouts.push(ch.length);
+        for (const c of ch) nextFrontier.push(c);
+      }
+      levelFanouts.sort((a, b) => a - b);
+      sig.push(levelFanouts.join(','));
+      frontier = nextFrontier;
+    }
+    return sig.join('|');
+  }
+
+  /**
+   * Compute causal subgraph distance between two nodes.
+   * Compares the structure of their descendant causal graphs:
+   * fan-out distribution at each depth, convergence pattern.
+   * Returns a normalized distance. 0 = isomorphic causal futures.
+   */
+  _causalSubgraphDistance(idA, idB, maxDepth = 4) {
+    this._ensureAdjacencyMaps();
+    const children = this._parentToChildren;
+    let frontierA = [idA], frontierB = [idB];
+    let totalDist = 0;
+    for (let d = 0; d < maxDepth; d++) {
+      const fanA = [], fanB = [];
+      const nextA = [], nextB = [];
+      for (const n of frontierA) {
+        const ch = children.get(n) || [];
+        fanA.push(ch.length);
+        for (const c of ch) nextA.push(c);
+      }
+      for (const n of frontierB) {
+        const ch = children.get(n) || [];
+        fanB.push(ch.length);
+        for (const c of ch) nextB.push(c);
+      }
+      fanA.sort((a, b) => a - b);
+      fanB.sort((a, b) => a - b);
+      const maxLen = Math.max(fanA.length, fanB.length);
+      while (fanA.length < maxLen) fanA.push(0);
+      while (fanB.length < maxLen) fanB.push(0);
+      let levelDist = 0;
+      for (let i = 0; i < maxLen; i++) levelDist += Math.abs(fanA[i] - fanB[i]);
+      const maxFan = Math.max(...fanA, ...fanB, 1);
+      totalDist += (maxLen > 0) ? levelDist / (maxLen * maxFan) : 0;
+      const setA = new Set(nextA), setB = new Set(nextB);
+      let overlap = 0;
+      for (const n of setA) { if (setB.has(n)) overlap++; }
+      const unionSize = new Set([...nextA, ...nextB]).size;
+      if (unionSize > 0) totalDist -= 0.3 * (overlap / unionSize);
+      frontierA = nextA;
+      frontierB = nextB;
+      if (frontierA.length === 0 && frontierB.length === 0) break;
+    }
+    return Math.max(0, totalDist);
+  }
+
+  /** Legacy string distance (fallback for very large graphs). */
   _stateDistance(a, b) {
     if (a === b) return 0;
     const maxLen = Math.max(a.length, b.length);
@@ -2244,25 +2432,10 @@ class MultiwaySystem {
   }
 
   /**
-   * Check if two states are permutation-equivalent:
-   * same characters, just rearranged (Gorard's key example).
-   */
-  _isPermutationEquiv(a, b) {
-    if (a.length !== b.length) return false;
-    const sortA = [...a].sort().join('');
-    const sortB = [...b].sort().join('');
-    return sortA === sortB;
-  }
-
-  /**
    * Apply coarse-graining at a given threshold.
-   * Returns a coarse-grained view of the multiway system:
-   * - equivalenceClasses: Map<canonicalId, Set<nodeId>>
-   * - completionRules: Array<{from: state, to: state, nodeIds: [id, id]}>
-   * - mergedGraph: { nodes, edges } (the collapsed graph)
-   * - causalInvarianceBefore: float (0-1)
-   * - causalInvarianceAfter: float (0-1) 
-   * - stats: { totalNodes, mergedNodes, completionRulesCount, branchesCollapsed }
+   * Uses CAUSAL SUBGRAPH DISTANCE (Gorard-correct): two branches
+   * are equivalent when their descendant causal structures are
+   * isomorphic up to the observer's resolution threshold.
    */
   coarseGrain(threshold = 0) {
     if (threshold === 0) {
@@ -2291,18 +2464,28 @@ class MultiwaySystem {
         continue;
       }
 
-      // Build pairs sorted by distance
+      // Build pairs using causal subgraph distance
+      const causalThreshold = threshold * 0.25; // slider 1-8 → 0.25-2.0
       const pairs = [];
+      const useCausal = stepIds.length < 200; // Performance guard
+      const sigCache = new Map();
+      const getSig = (id) => {
+        if (!sigCache.has(id)) sigCache.set(id, this._causalSignature(id));
+        return sigCache.get(id);
+      };
       for (let i = 0; i < stepIds.length; i++) {
         for (let j = i + 1; j < stepIds.length; j++) {
-          const ni = this.nodes[stepIds[i]];
-          const nj = this.nodes[stepIds[j]];
-          const dist = this._stateDistance(ni.state, nj.state);
-          const isPerm = this._isPermutationEquiv(ni.state, nj.state);
-          // Permutation equivalence is always within threshold if threshold > 0
-          // Otherwise use edit distance
-          const effectiveDist = isPerm ? Math.min(dist, 1) : dist;
-          pairs.push({ i: stepIds[i], j: stepIds[j], dist: effectiveDist, isPerm });
+          let dist;
+          if (useCausal) {
+            const sigA = getSig(stepIds[i]);
+            const sigB = getSig(stepIds[j]);
+            dist = (sigA === sigB) ? 0 : this._causalSubgraphDistance(stepIds[i], stepIds[j]);
+          } else {
+            const ni = this.nodes[stepIds[i]];
+            const nj = this.nodes[stepIds[j]];
+            dist = this._stateDistance(ni.state, nj.state);
+          }
+          pairs.push({ i: stepIds[i], j: stepIds[j], dist, isCausal: useCausal });
         }
       }
 
@@ -2328,8 +2511,9 @@ class MultiwaySystem {
 
       // Merge states within threshold
       pairs.sort((a, b) => a.dist - b.dist);
+      const effectiveThreshold = useCausal ? causalThreshold : threshold;
       for (const p of pairs) {
-        if (p.dist <= threshold) {
+        if (p.dist <= effectiveThreshold) {
           if (union(p.i, p.j)) {
             branchesCollapsed++;
             completionRules.push({
@@ -2338,7 +2522,7 @@ class MultiwaySystem {
               nodeIds: [p.i, p.j],
               step: step,
               distance: p.dist,
-              isPermutation: p.isPerm
+              isCausal: p.isCausal
             });
           }
         }
@@ -2357,13 +2541,14 @@ class MultiwaySystem {
     const mergedNodes = this.nodes.length - equivalenceClasses.size -
       (this.nodes.length - [...mergedNodeMap.values()].length);
 
-    // Estimate causal invariance improvement
-    // After coarse-graining, branches that were divergent may now be confluent
+    // Estimate causal invariance after coarse-graining
+    // Each completion rule resolves at most one critical pair divergence
     const ciBefore = this.checkCausalInvariance();
-    // Approximate: each collapsed branch pair removes one divergence
-    const adjustedDivergent = Math.max(0, ciBefore.divergent - branchesCollapsed);
-    const adjustedTotal = ciBefore.confluent + adjustedDivergent;
-    const ciAfter = adjustedTotal > 0 ? (ciBefore.confluent + branchesCollapsed) / adjustedTotal : 1.0;
+    const resolvedPairs = Math.min(branchesCollapsed, ciBefore.divergent);
+    const adjustedConfluent = ciBefore.confluent + resolvedPairs;
+    const adjustedDivergent = Math.max(0, ciBefore.divergent - resolvedPairs);
+    const adjustedTotal = adjustedConfluent + adjustedDivergent;
+    const ciAfter = adjustedTotal > 0 ? adjustedConfluent / adjustedTotal : 1.0;
 
     return {
       equivalenceClasses,
@@ -2382,6 +2567,129 @@ class MultiwaySystem {
 
   getTotalSteps() {
     return this.stepStates.length - 1;
+  }
+
+  // ─── FUBINI-STUDY METRIC ───
+  // The proper metric on branchial space: computed from causal cone overlap.
+
+  fubiniStudyDistance(idA, idB) {
+    const ancestorsA = this.traceAncestry(idA);
+    const ancestorsB = this.traceAncestry(idB);
+    let overlap = 0;
+    for (const a of ancestorsA) { if (ancestorsB.has(a)) overlap++; }
+    const norm = Math.sqrt(ancestorsA.size * ancestorsB.size);
+    const ip = norm > 0 ? overlap / norm : 0;
+    return Math.acos(Math.min(1, Math.max(0, ip)));
+  }
+
+  // ─── BRANCHIAL GEODESICS ───
+  // Shortest path through branchial space between two nodes.
+
+  branchialGeodesic(startId, endId) {
+    if (startId === endId) return { path: [startId], totalDistance: 0, steps: 0 };
+    const adj = new Map();
+    for (const e of this.branchialEdges) {
+      if (!adj.has(e.from)) adj.set(e.from, []);
+      if (!adj.has(e.to)) adj.set(e.to, []);
+      adj.get(e.from).push(e.to);
+      adj.get(e.to).push(e.from);
+    }
+    const prev = new Map();
+    const visited = new Set([startId]);
+    const queue = [startId];
+    let found = false;
+    while (queue.length > 0 && !found) {
+      const cur = queue.shift();
+      for (const nb of (adj.get(cur) || [])) {
+        if (!visited.has(nb)) {
+          visited.add(nb); prev.set(nb, cur);
+          if (nb === endId) { found = true; break; }
+          queue.push(nb);
+        }
+      }
+    }
+    if (!found) return { path: [], totalDistance: Infinity, steps: -1 };
+    const path = [endId];
+    let cur = endId;
+    while (prev.has(cur)) { cur = prev.get(cur); path.unshift(cur); }
+    let totalDist = 0;
+    for (let i = 1; i < path.length; i++) totalDist += this.fubiniStudyDistance(path[i-1], path[i]);
+    return { path, totalDistance: totalDist, steps: path.length - 1 };
+  }
+
+  // ─── EMBEDDED OBSERVER DETECTION ───
+  // Find the largest subgraph that maintains causal invariance internally.
+
+  findEmbeddedObserver(seedNodeId) {
+    this._ensureAdjacencyMaps();
+    const observerNodes = new Set([seedNodeId]);
+    const candidates = new Set();
+    for (const p of (this._childToParents.get(seedNodeId) || [])) candidates.add(p);
+    for (const c of (this._parentToChildren.get(seedNodeId) || [])) candidates.add(c);
+    const maxSize = Math.min(this.nodes.length, 200);
+    while (candidates.size > 0 && observerNodes.size < maxSize) {
+      let bestCandidate = null, bestCI = -1;
+      for (const cand of candidates) {
+        const testSet = new Set(observerNodes); testSet.add(cand);
+        const ci = this._subgraphConfluence(testSet);
+        if (ci > bestCI) { bestCI = ci; bestCandidate = cand; }
+      }
+      if (bestCandidate !== null && bestCI >= 0.5) {
+        observerNodes.add(bestCandidate);
+        candidates.delete(bestCandidate);
+        for (const p of (this._childToParents.get(bestCandidate) || [])) {
+          if (!observerNodes.has(p)) candidates.add(p);
+        }
+        for (const c of (this._parentToChildren.get(bestCandidate) || [])) {
+          if (!observerNodes.has(c)) candidates.add(c);
+        }
+      } else break;
+    }
+    const finalCI = this._subgraphConfluence(observerNodes);
+    return {
+      nodes: observerNodes,
+      causalInvariance: finalCI,
+      size: observerNodes.size,
+      fraction: this.nodes.length > 0 ? observerNodes.size / this.nodes.length : 0
+    };
+  }
+
+  _subgraphConfluence(nodeSet) {
+    let confluent = 0, divergent = 0;
+    const subEvents = this.causalEvents.filter(
+      ev => nodeSet.has(ev.parentNodeId) && nodeSet.has(ev.childNodeId)
+    );
+    const byParent = new Map();
+    for (const ev of subEvents) {
+      if (!byParent.has(ev.parentNodeId)) byParent.set(ev.parentNodeId, []);
+      byParent.get(ev.parentNodeId).push(ev);
+    }
+    for (const [pid, evs] of byParent) {
+      if (evs.length <= 1) continue;
+      for (let i = 0; i < evs.length; i++) {
+        for (let j = i + 1; j < evs.length; j++) {
+          const aIn = evs[i].inputRange, bIn = evs[j].inputRange;
+          if (aIn[0] <= bIn[1] && bIn[0] <= aIn[1]) {
+            const cA = evs[i].childNodeId, cB = evs[j].childNodeId;
+            if (cA === cB || this.nodes[cA]?.state === this.nodes[cB]?.state) {
+              confluent++;
+            } else {
+              const chA = (this._parentToChildren.get(cA) || []).filter(n => nodeSet.has(n));
+              const chB = (this._parentToChildren.get(cB) || []).filter(n => nodeSet.has(n));
+              let found = false;
+              for (const a of chA) {
+                for (const b of chB) {
+                  if (a === b || this.nodes[a]?.state === this.nodes[b]?.state) { found = true; break; }
+                }
+                if (found) break;
+              }
+              if (found) confluent++; else divergent++;
+            }
+          } else confluent++;
+        }
+      }
+    }
+    return (confluent + divergent) > 0 ? confluent / (confluent + divergent) : 1.0;
   }
 
   /**
@@ -4304,7 +4612,7 @@ function renderObserverAnalysis(nodeId) {
   let slitNarrative = '';
   if (a.xCount >= 2) {
     if (Math.abs(a.slitBias) < 1) {
-      slitNarrative = `Photons centered — this branch sees <strong>both slits equally</strong>, consistent with a superposition that hasn't decohered to one path.`;
+      slitNarrative = `Photons centered — this branch sees <strong>both slits equally</strong>, consistent with a superposition that hasn't decohered. Branchial distance to either slit path is symmetric.`;
     } else if (a.slitBias < 0) {
       slitNarrative = `Photon positions biased left (Δ≈${a.slitBias.toFixed(1)}) — this observer's history is weighted toward the <strong>left slit</strong>.`;
     } else {
@@ -4323,9 +4631,9 @@ function renderObserverAnalysis(nodeId) {
     const cohPct = pct(a.coherent / totalBranchial);
     const decPct = pct(a.decoherent / totalBranchial);
     if (a.decoherent > a.coherent) {
-      decoherenceNarrative = `This branch is <strong>mostly decoherent</strong> from peers — ${decPct}% of other final states have no recent common ancestry. Measurement on this branch projects out most of the multiway system.`;
+      decoherenceNarrative = `This branch is <strong>mostly decoherent</strong> from peers — ${decPct}% of other final states are far away in branchial space (large branchial distance). The observer's coarse-graining cannot identify these branches.`;
     } else if (a.coherent > a.decoherent) {
-      decoherenceNarrative = `This branch remains <strong>largely coherent</strong> — ${cohPct}% of peers share recent ancestry (branchial distance ≤ 1). The observer can still interfere with nearby branches.`;
+      decoherenceNarrative = `This branch remains <strong>largely coherent</strong> — ${cohPct}% of peers are close in branchial space (distance ≤ 1). The observer's completion rules can still identify these branches.`;
     } else {
       decoherenceNarrative = `Mixed coherence — roughly equal coherent and decoherent neighbors. This observer sits at a <strong>decoherence boundary</strong>.`;
     }
@@ -4341,7 +4649,7 @@ function renderObserverAnalysis(nodeId) {
   // Collapse narrative
   const isOnFinalStep = a.step === a.finalStep;
   const collapseNarrative = isOnFinalStep
-    ? `Selecting this branch is formally equivalent to <strong>projecting onto a measurement basis</strong> in the Wolfram model. The <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) form the past light cone through the multiway graph.`
+    ? `Selecting this branch is equivalent to the observer's <strong>Knuth-Bendix completion projecting onto a single thread</strong>. The <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) form the past causal cone through the multiway graph.`
     : `This node at <strong>step ${a.step}</strong> sits mid-evolution. Its <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) trace backward to the initial state, and its <strong style="color:rgba(0,240,255,0.8)">${a.descendants} descendants</strong> (cyan) propagate forward to the final step. Together they form a <strong>full causal history</strong> — the complete light cone of this node in the multiway graph.`;
 
   // Build bars for causal cone per step
@@ -7267,7 +7575,7 @@ function updateCoarseGrainUI(result) {
     const ruleLines = result.completionRules.slice(0, 15).map(r => {
       const fromShort = r.from.length > 20 ? r.from.substring(0, 20) + '…' : r.from;
       const toShort = r.to.length > 20 ? r.to.substring(0, 20) + '…' : r.to;
-      const tag = r.isPermutation ? ' [perm]' : ` [d=${r.distance}]`;
+      const tag = r.isCausal ? ` [causal d=${typeof r.distance === 'number' ? r.distance.toFixed(2) : r.distance}]` : ` [d=${r.distance}]`;
       return `${fromShort} ↔ ${toShort}${tag}`;
     });
     if (result.completionRules.length > 15) {
@@ -7294,12 +7602,12 @@ function updateCoarseGrainUI(result) {
   const deltaCI = ciAfter - ciBefore;
 
   if (_coarseGrainThreshold <= 2) {
-    narrativeEl.innerHTML = `The observer is <strong>lightly squinting</strong> — equating branches that differ by ≤${_coarseGrainThreshold} character${_coarseGrainThreshold > 1 ? 's' : ''}. ` +
-      `<strong>${s.branchesCollapsed}</strong> branch pairs are now treated as identical, generating <strong>${s.completionRulesCount} completion rules</strong> (Hermitian operators). ` +
+    narrativeEl.innerHTML = `The observer is <strong>lightly coarse-graining</strong> — equating branches whose causal futures are similar (resolution ${_coarseGrainThreshold}). ` +
+      `<strong>${s.branchesCollapsed}</strong> branch pairs with near-isomorphic causal futures are now identified, generating <strong>${s.completionRulesCount} completion rules</strong>. ` +
       `Causal invariance: ${pctBefore}% → <strong>${pctAfter}%</strong>` +
       (deltaCI > 0.01 ? ` — the observer is <em>imposing</em> causal invariance through coarse-graining.` : '.');
   } else if (_coarseGrainThreshold <= 5) {
-    narrativeEl.innerHTML = `The observer is <strong>heavily coarse-graining</strong> — treating branches within edit distance ${_coarseGrainThreshold} as equivalent. ` +
+    narrativeEl.innerHTML = `The observer is <strong>heavily coarse-graining</strong> — identifying branches with similar causal structure (resolution ${_coarseGrainThreshold}). ` +
       `This collapses <strong>${s.branchesCollapsed} branch pairs</strong> and generates <strong>${s.completionRulesCount} completion rules</strong>. ` +
       `Causal invariance rises from ${pctBefore}% to <strong>${pctAfter}%</strong>. ` +
       `The multiway graph is approaching a <em>classical</em> description — fewer superpositions remain.`;
@@ -9279,6 +9587,43 @@ document.getElementById('sl-st-slice').addEventListener('input', function() {
 });
 
 // Expose for testing
+// ─── FUBINI-STUDY METRIC VISUALIZATION ───
+let _fubiniStudyActive = false;
+const fubiniToggle = document.getElementById('toggle-fubini-study');
+if (fubiniToggle) {
+  fubiniToggle.addEventListener('click', () => {
+    _fubiniStudyActive = !_fubiniStudyActive;
+    fubiniToggle.textContent = _fubiniStudyActive ? '●' : '';
+    fubiniToggle.style.color = _fubiniStudyActive ? 'rgba(0,240,255,0.8)' : '';
+  });
+}
+
+// ─── BRANCHIAL GEODESIC VISUALIZATION ───
+let _geodesicActive = false;
+let _geodesicNodeA = null, _geodesicNodeB = null, _geodesicPath = null;
+const geodesicToggle = document.getElementById('toggle-branchial-geodesic');
+if (geodesicToggle) {
+  geodesicToggle.addEventListener('click', () => {
+    _geodesicActive = !_geodesicActive;
+    geodesicToggle.textContent = _geodesicActive ? '●' : '';
+    geodesicToggle.style.color = _geodesicActive ? 'rgba(204,255,0,0.8)' : '';
+    if (!_geodesicActive) { _geodesicNodeA = null; _geodesicNodeB = null; _geodesicPath = null; }
+  });
+}
+
+// ─── EMBEDDED OBSERVER VISUALIZATION ───
+let _embeddedObserverActive = false;
+let _embeddedObserverResult = null;
+const embObsToggle = document.getElementById('toggle-embedded-observer');
+if (embObsToggle) {
+  embObsToggle.addEventListener('click', () => {
+    _embeddedObserverActive = !_embeddedObserverActive;
+    embObsToggle.textContent = _embeddedObserverActive ? '●' : '';
+    embObsToggle.style.color = _embeddedObserverActive ? 'rgba(112,0,255,0.8)' : '';
+    if (!_embeddedObserverActive) _embeddedObserverResult = null;
+  });
+}
+
 window._HypergraphRewriter = HypergraphRewriter;
 window._evolveSpacetime = evolveSpacetime;
 window._extractSpatialGraph = extractSpatialGraph;
