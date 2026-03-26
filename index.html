@@ -452,6 +452,126 @@
     box-shadow: 0 0 12px rgba(204, 255, 0, 0.08);
   }
 
+
+  /* ─── SCENES DROPDOWN ─── */
+  #scenes-dropdown-wrap {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 11;
+    pointer-events: auto;
+  }
+  #scenes-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(204, 255, 0, 0.85);
+    background: rgba(14, 14, 16, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(204, 255, 0, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+  #scenes-btn:hover {
+    background: rgba(204, 255, 0, 0.08);
+    border-color: rgba(204, 255, 0, 0.3);
+    color: rgba(204, 255, 0, 1);
+  }
+  #scenes-btn .chevron {
+    font-size: 8px;
+    transition: transform 0.2s ease;
+    opacity: 0.6;
+  }
+  #scenes-btn.open .chevron {
+    transform: rotate(180deg);
+  }
+  #scenes-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 340px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: rgba(14, 14, 16, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 6px;
+    display: none;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  #scenes-panel.open { display: block; }
+  #scenes-panel::-webkit-scrollbar { width: 4px; }
+  #scenes-panel::-webkit-scrollbar-track { background: transparent; }
+  #scenes-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+  .scene-card {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+    margin-bottom: 2px;
+    color: rgba(255,255,255,0.75);
+  }
+  .scene-card:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+  }
+  .scene-card.active {
+    background: rgba(204, 255, 0, 0.06);
+    border-color: rgba(204, 255, 0, 0.15);
+  }
+  .scene-card .scene-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 3px;
+  }
+  .scene-card .scene-tag {
+    display: inline-block;
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .scene-tag.st { background: rgba(204,255,0,0.12); color: rgba(204,255,0,0.8); }
+  .scene-tag.mw { background: rgba(0,240,255,0.12); color: rgba(0,240,255,0.8); }
+  .scene-tag.ca { background: rgba(255,140,0,0.12); color: rgba(255,140,0,0.8); }
+  .scene-card .scene-desc {
+    font-size: 10px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.45);
+    margin-top: 3px;
+  }
+  .scene-divider {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    padding: 10px 12px 4px;
+  }
+
   /* ─── QUANTUM OBSERVER (Gorard coarse-graining) ─── */
   #quantum-observer-panel {
     margin-bottom: 20px;
@@ -1442,6 +1562,11 @@
       <button class="view-tab active" data-view="spacetime">Spacetime</button>
     </div>
     <div id="status-bar"></div>
+
+    <div id="scenes-dropdown-wrap">
+      <button id="scenes-btn">Scenes <span class="chevron">▼</span></button>
+      <div id="scenes-panel"></div>
+    </div>
   </div>
 
   <!-- RIGHT PANEL: Results -->
@@ -10742,6 +10867,257 @@ window._smoothCameraTo = smoothCameraTo;
 window._applyCoarseGraining = applyCoarseGraining;
 window._coarseGrainResult = () => _coarseGrainResult;
 
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// SCENES DROPDOWN: Curated preset configurations
+// ═══════════════════════════════════════════════════════════════
+
+const SCENES = [
+  // ── Spacetime Essentials ──
+  { group: 'Spacetime',
+    id: 'scene-birth-of-space',
+    name: 'Birth of Space',
+    tag: 'st', tagLabel: 'Spacetime',
+    desc: 'Wolfram\'s canonical rule — the one that launched the Physics Project. Watch 2.7-dimensional space emerge from nothing.',
+    stPreset: 'dim27', steps: 10, view: 'spacetime' },
+  { group: 'Spacetime',
+    id: 'scene-flat-universe',
+    name: 'Flat Universe',
+    tag: 'st', tagLabel: 'Spacetime',
+    desc: 'A 2D spatial hypergraph growing from a triangle seed. Minimal curvature — a tabletop cosmos.',
+    stPreset: 'flat2d', steps: 10, view: 'spacetime' },
+  { group: 'Spacetime',
+    id: 'scene-cosmic-web',
+    name: 'Cosmic Web',
+    tag: 'st', tagLabel: 'Spacetime',
+    desc: 'Chain rule with a 4-cycle seed. Grows fast into a dense, web-like 2.7D structure — dimension heatmap recommended.',
+    stPreset: 'chain27', steps: 12, view: 'spacetime', features: ['dimheat'] },
+  { group: 'Spacetime',
+    id: 'scene-fractal-dust',
+    name: 'Fractal Dust',
+    tag: 'st', tagLabel: 'Spacetime',
+    desc: 'Sierpiński-like fractal from ternary rules. Dimension ≈ 1.58 — space that\'s less than 2D. A universe of holes.',
+    stPreset: 'sierpinski', steps: 7, view: 'spacetime', features: ['dimheat'] },
+  { group: 'Spacetime',
+    id: 'scene-3d-manifold',
+    name: '3D Manifold',
+    tag: 'st', tagLabel: 'Spacetime',
+    desc: 'Ternary hyperedge rule exploring 3D-like spatial structure. Richer geometry from a tetrahedral seed.',
+    stPreset: 'try3d', steps: 8, view: 'spacetime' },
+
+  // ── Quantum Interference ──
+  { group: 'Quantum',
+    id: 'scene-double-slit',
+    name: 'Double Slit Experiment',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'Two photons scatter left and right through branching rewrite paths. The interference pattern emerges from path weights.',
+    mwPreset: 'double', view: 'multiway' },
+  { group: 'Quantum',
+    id: 'scene-single-slit',
+    name: 'Single Photon Diffraction',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'One photon in a potential well. Diffraction envelope only — no fringes. The simplest quantum signature.',
+    mwPreset: 'single-small', view: 'multiway' },
+  { group: 'Quantum',
+    id: 'scene-triple-slit',
+    name: 'Triple Slit Grating',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'Three photons yield a 3D branchial space. Grating-like intensity pattern with sharp fringe peaks.',
+    mwPreset: 'triple', view: 'multiway' },
+  { group: 'Quantum',
+    id: 'scene-st-doubleslit',
+    name: 'Wavefront Through Slits',
+    tag: 'st', tagLabel: 'Spacetime',
+    desc: 'A hypergraph barrier with two gaps. The rewriting wavefront splits, passes through, and interferes on the far side.',
+    stPreset: 'doubleslit', steps: 8, view: 'spacetime' },
+
+  // ── Branching & Growth ──
+  { group: 'Branching',
+    id: 'scene-fibonacci',
+    name: 'Fibonacci Multiverse',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'L-system producing Fibonacci words. Each branch splits into golden-ratio structure — the multiway graph is self-similar.',
+    mwPreset: 'fibonacci', view: 'multiway' },
+  { group: 'Branching',
+    id: 'scene-thue-morse',
+    name: 'Thue-Morse Aperiodic',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'Aperiodic substitution system. Fractal branchial connectivity with no repeating pattern — like a non-repeating universe.',
+    mwPreset: 'thue-morse', view: 'multiway' },
+  { group: 'Branching',
+    id: 'scene-explosive-split',
+    name: 'Exponential Splitting',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'Each X splits into two. Tree-like explosion of possibilities — the multiway graph is a pure binary tree.',
+    mwPreset: 'split', view: 'multiway' },
+  { group: 'Branching',
+    id: 'scene-binary-cascade',
+    name: 'Binary Cascade',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'Three symbols each expand into two others. Dense branching tests geodesic deviation — the branchial graph is wild.',
+    mwPreset: 'binary-cascade', view: 'branchial' },
+
+  // ── Causal Structure ──
+  { group: 'Causal',
+    id: 'scene-proto-matter',
+    name: 'Proto-Matter',
+    tag: 'ca', tagLabel: 'Causal',
+    desc: 'Growth + rearrangement creates dense causal tangles. Persistent regions = proto-particles. The beginning of matter.',
+    mwPreset: 'wolfram-3', view: 'causal' },
+  { group: 'Causal',
+    id: 'scene-particle-decay',
+    name: 'Particle Decay & Growth',
+    tag: 'ca', tagLabel: 'Causal',
+    desc: 'Decay competes with growth. Stable tangles = topological obstructions — a test bed for emergent mass.',
+    mwPreset: 'wolfram-4', view: 'causal' },
+  { group: 'Causal',
+    id: 'scene-time-asymmetry',
+    name: 'Time Asymmetry',
+    tag: 'mw', tagLabel: 'Multiway',
+    desc: 'Only rightward scattering. No completion — breaks time-reversal symmetry. An arrow of time from a simple rule.',
+    mwPreset: 'one-way', view: 'multiway' },
+  { group: 'Causal',
+    id: 'scene-annihilation',
+    name: 'Sort & Annihilate',
+    tag: 'ca', tagLabel: 'Causal',
+    desc: 'Particles sort and annihilate on collision. Paths die naturally — destructive interference without an observer.',
+    mwPreset: 'sort-annihilate', view: 'causal' },
+];
+
+// Render scenes panel
+function renderScenesPanel() {
+  const panel = document.getElementById('scenes-panel');
+  let html = '';
+  let lastGroup = '';
+  for (const sc of SCENES) {
+    if (sc.group !== lastGroup) {
+      html += `<div class="scene-divider">${sc.group}</div>`;
+      lastGroup = sc.group;
+    }
+    html += `<button class="scene-card" data-scene="${sc.id}">
+      <div class="scene-name"><span class="scene-tag ${sc.tag}">${sc.tagLabel}</span> ${sc.name}</div>
+      <div class="scene-desc">${sc.desc}</div>
+    </button>`;
+  }
+  panel.innerHTML = html;
+  
+  // Card click handlers
+  panel.querySelectorAll('.scene-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const scene = SCENES.find(s => s.id === card.dataset.scene);
+      if (scene) applyScene(scene);
+    });
+  });
+}
+
+function applyScene(scene) {
+  // Close the panel
+  document.getElementById('scenes-panel').classList.remove('open');
+  document.getElementById('scenes-btn').classList.remove('open');
+  
+  // Mark active card
+  document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
+  const activeCard = document.querySelector(`.scene-card[data-scene="${scene.id}"]`);
+  if (activeCard) activeCard.classList.add('active');
+  
+  // Switch view
+  const targetView = scene.view || 'spacetime';
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  const viewBtn = document.querySelector(`.view-tab[data-view="${targetView}"]`);
+  if (viewBtn) {
+    viewBtn.classList.add('active');
+    viewBtn.click();
+  }
+  
+  if (scene.stPreset) {
+    // Spacetime scene
+    currentSTPreset = scene.stPreset;
+    const preset = ST_PRESETS[currentSTPreset];
+    if (preset) {
+      // Update UI
+      document.querySelectorAll('.st-preset-chip').forEach(c => c.classList.remove('active'));
+      const stChip = document.querySelector(`.st-preset-chip[data-st-key="${scene.stPreset}"]`);
+      if (stChip) stChip.classList.add('active');
+      
+      const varNames = 'xyzuvw'.split('');
+      const fmt = arr => '{{' + arr.map(e => e.map(v => varNames[v] || v).join(',')).join('},{') + '}}';
+      document.getElementById('st-lhs').value = fmt(preset.lhs);
+      document.getElementById('st-rhs').value = fmt(preset.rhs);
+      const steps = scene.steps || preset.steps;
+      document.getElementById('sl-st-steps').value = steps;
+      document.getElementById('v-st-steps').textContent = steps;
+      
+      // Clear any active spacetime features first
+      _stLightConeActive = false;
+      _stDimHeatActive = false;
+      _stEntangleActive = false;
+      const lcToggle = document.getElementById('toggle-st-lightcone');
+      const dhToggle = document.getElementById('toggle-st-dimheat');
+      const etToggle = document.getElementById('toggle-st-entangle');
+      if (lcToggle) { lcToggle.textContent = ''; lcToggle.style.color = ''; }
+      if (dhToggle) { dhToggle.textContent = ''; dhToggle.style.color = ''; }
+      if (etToggle) { etToggle.textContent = ''; etToggle.style.color = ''; }
+      // Hide info elements
+      const coneInfo = document.getElementById('st-cone-info');
+      const dimLegend = document.getElementById('st-dimheat-legend');
+      const entInfo = document.getElementById('st-entangle-info');
+      if (coneInfo) coneInfo.style.display = 'none';
+      if (dimLegend) dimLegend.style.display = 'none';
+      if (entInfo) entInfo.style.display = 'none';
+      
+      // Evolve
+      evolveSpacetime();
+      
+      // Enable recommended features after evolve
+      if (scene.features) {
+        setTimeout(() => {
+          for (const feat of scene.features) {
+            if (feat === 'dimheat') {
+              _stDimHeatActive = true;
+              if (dhToggle) { dhToggle.textContent = '●'; dhToggle.style.color = 'rgba(204,255,0,0.8)'; }
+              if (typeof applyDimensionHeatmap === 'function') applyDimensionHeatmap();
+            } else if (feat === 'lightcone') {
+              _stLightConeActive = true;
+              if (lcToggle) { lcToggle.textContent = '●'; lcToggle.style.color = 'rgba(204,255,0,0.8)'; }
+            } else if (feat === 'entangle') {
+              _stEntangleActive = true;
+              if (etToggle) { etToggle.textContent = '●'; etToggle.style.color = 'rgba(204,255,0,0.8)'; }
+              if (typeof showEntanglementThreads === 'function') showEntanglementThreads();
+            }
+          }
+        }, 500);
+      }
+    }
+  } else if (scene.mwPreset) {
+    // Multiway scene
+    const preset = PRESET_MAP[scene.mwPreset];
+    if (preset) {
+      loadPreset(preset);
+    }
+  }
+}
+
+// Toggle dropdown
+document.getElementById('scenes-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = document.getElementById('scenes-panel');
+  const btn = document.getElementById('scenes-btn');
+  panel.classList.toggle('open');
+  btn.classList.toggle('open');
+});
+
+// Close when clicking outside
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('scenes-dropdown-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('scenes-panel').classList.remove('open');
+    document.getElementById('scenes-btn').classList.remove('open');
+  }
+});
+
+renderScenesPanel();
 
 // ═══════════════════════════════════════════════════════════════
 // JOBS/IVE REDESIGN: Progressive Disclosure (Collapsible Sections)
