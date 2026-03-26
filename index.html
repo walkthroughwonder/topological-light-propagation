@@ -3493,12 +3493,18 @@ function buildScene(sys, highlightSet) {
     `,
     fragmentShader: `
       varying vec3 vColor;
+      uniform float uTime;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.1, d);
-        gl_FragColor = vec4(vColor * 1.2, alpha * 0.85);
+        // Core: sharp bright center
+        float core = smoothstep(0.5, 0.08, d);
+        // Glow: soft halo
+        float glow = exp(-d * 5.0) * 0.4;
+        float alpha = core * 0.85 + glow;
+        vec3 col = vColor * (1.1 + glow * 0.3);
+        gl_FragColor = vec4(col, alpha);
       }
     `
   });
@@ -3561,11 +3567,54 @@ function buildScene(sys, highlightSet) {
   const edgeGeo = new THREE.BufferGeometry();
   edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgeVerts, 3));
   edgeGeo.setAttribute('color', new THREE.BufferAttribute(edgeColors, 3));
+  // Edge progress attribute for animated flow (0.0 at start, 1.0 at end of each segment)
+  const edgeProgress = new Float32Array(sys.edges.length * 2);
+  for (let i = 0; i < sys.edges.length; i++) {
+    edgeProgress[i * 2] = 0.0;     // from vertex
+    edgeProgress[i * 2 + 1] = 1.0; // to vertex
+  }
+  edgeGeo.setAttribute('edgeProgress', new THREE.BufferAttribute(edgeProgress, 1));
   const edgeOpacity = highlightSet ? 0.5 : 0.35;
-  const edgeMat = new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, opacity: edgeOpacity,
-    blending: THREE.AdditiveBlending, depthWrite: false
+  // Animated flow shader — dashed lines with moving offset
+  const edgeMat = new THREE.ShaderMaterial({
+    vertexColors: true,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      uTime: { value: 0.0 },
+      uOpacity: { value: edgeOpacity },
+      uFlow: { value: 1.0 },  // 1.0 = flow animation on, 0.0 = off
+      uDashScale: { value: 0.08 } // dash frequency
+    },
+    vertexShader: `
+      attribute float edgeProgress;
+      varying vec3 vColor;
+      varying float vProgress;
+      void main() {
+        vColor = color;
+        vProgress = edgeProgress;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform float uOpacity;
+      uniform float uFlow;
+      uniform float uDashScale;
+      varying vec3 vColor;
+      varying float vProgress;
+      void main() {
+        // Animated dash pattern — flows along edge direction
+        float flow = fract(vProgress * 12.0 - uTime * 0.5 * uFlow);
+        float dash = smoothstep(0.0, 0.15, flow) * smoothstep(0.6, 0.45, flow);
+        float alpha = mix(0.25, 0.25 + dash * 0.75, uFlow);
+        gl_FragColor = vec4(vColor, alpha * uOpacity);
+      }
+    `
   });
+  // Store reference for uTime updates
+  edgeMat._isFlowMaterial = true;
   const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
   multiwayGroup.add(edgeLines);
   currentEdgeLines = edgeLines;
@@ -3735,12 +3784,18 @@ function buildScene(sys, highlightSet) {
     `,
     fragmentShader: `
       varying vec3 vColor;
+      uniform float uTime;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.1, d);
-        gl_FragColor = vec4(vColor * 1.2, alpha * 0.85);
+        // Core: sharp bright center
+        float core = smoothstep(0.5, 0.08, d);
+        // Glow: soft halo
+        float glow = exp(-d * 5.0) * 0.4;
+        float alpha = core * 0.85 + glow;
+        vec3 col = vColor * (1.1 + glow * 0.3);
+        gl_FragColor = vec4(col, alpha);
       }
     `
   });
@@ -4881,6 +4936,7 @@ function runEvolution() {
 
     clearObserver();
     buildScene(sys);
+    triggerEvolveAnimation();
     drawIntensityPlot(sys, getCurrentAnalytical());
     drawBranchialPlot(sys);
     updateStats(sys);
@@ -5491,11 +5547,67 @@ window.addEventListener('resize', onResize);
 
 // Animation loop with pulse for current-step nodes in interactive mode
 let animTime = 0;
+
+// Smooth evolution fade-in animation state
+const _evolveAnim = { active: false, elapsed: 0, duration: 0.8 };
+function triggerEvolveAnimation() {
+  _evolveAnim.active = true;
+  _evolveAnim.elapsed = 0;
+  multiwayGroup.scale.setScalar(0.85);
+}
 function animate() {
   requestAnimationFrame(animate);
   // Skip controls.update during smooth camera animation — damping would fight our lerp
   if (!_camAnimating) controls.update();
   animTime += 0.016;
+
+  // ─── Update uTime on all flow/glow shader materials ───
+  const groups = [multiwayGroup, branchialGroup, causalGroup];
+  if (typeof spacetimeGroup !== 'undefined') groups.push(spacetimeGroup);
+  for (const group of groups) {
+    group.traverse(child => {
+      if (child.material && child.material.uniforms && child.material.uniforms.uTime) {
+        child.material.uniforms.uTime.value = animTime;
+      }
+    });
+  }
+
+  // ─── Smooth evolution fade-in animation ───
+  if (_evolveAnim.active) {
+    _evolveAnim.elapsed += 0.016;
+    const t = Math.min(_evolveAnim.elapsed / _evolveAnim.duration, 1.0);
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
+    
+    // Fade in nodes
+    if (currentNodePoints) {
+      const mat = currentNodePoints.material;
+      if (mat.uniforms && mat.uniforms.uTime) {
+        // ShaderMaterial — handled by shader itself
+      } else if (mat.opacity !== undefined) {
+        mat.opacity = ease * 0.85;
+      }
+      // Scale up from center
+      multiwayGroup.scale.setScalar(0.85 + 0.15 * ease);
+    }
+
+    // Fade in spacetime
+    if (typeof spacetimeGroup !== 'undefined' && spacetimeGroup.visible) {
+      spacetimeGroup.scale.setScalar(0.9 + 0.1 * ease);
+      spacetimeGroup.traverse(child => {
+        if (child.material) {
+          if (child.material.uniforms && child.material.uniforms.uOpacity) {
+            child.material.uniforms.uOpacity.value = ease * (child.material._targetOpacity || 0.4);
+          }
+        }
+      });
+    }
+
+    if (t >= 1.0) {
+      _evolveAnim.active = false;
+      multiwayGroup.scale.setScalar(1.0);
+      if (typeof spacetimeGroup !== 'undefined') spacetimeGroup.scale.setScalar(1.0);
+    }
+  }
 
   // Pulse current-step nodes in interactive mode
   if (interactiveMode && currentNodePoints && currentSystem && !ancestryHighlightSet) {
@@ -5992,12 +6104,18 @@ function buildBranchial3d() {
     `,
     fragmentShader: `
       varying vec3 vColor;
+      uniform float uTime;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float d = length(uv);
         if (d > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.1, d);
-        gl_FragColor = vec4(vColor * 1.2, alpha * 0.85);
+        // Core: sharp bright center
+        float core = smoothstep(0.5, 0.08, d);
+        // Glow: soft halo
+        float glow = exp(-d * 5.0) * 0.4;
+        float alpha = core * 0.85 + glow;
+        vec3 col = vColor * (1.1 + glow * 0.3);
+        gl_FragColor = vec4(col, alpha);
       }
     `
   });
@@ -9320,14 +9438,51 @@ function buildSpacetimeScene() {
   nodeGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   nodeGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-  const nodeMat = new THREE.PointsMaterial({
-    vertexColors: true,
-    size: 0.6,
-    sizeAttenuation: true,
+  // Glow shader for spacetime nodes — soft circle with energy halo
+  const nodeMat = new THREE.ShaderMaterial({
     transparent: true,
-    opacity: 0.95,
-    blending: THREE.AdditiveBlending
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    uniforms: {
+      uPixelRatio: { value: renderer.getPixelRatio() },
+      uTime: { value: 0.0 }
+    },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      varying float vSize;
+      uniform float uPixelRatio;
+      void main() {
+        vColor = color;
+        vSize = size;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * uPixelRatio * (150.0 / -mvPos.z);
+        gl_PointSize = clamp(gl_PointSize, 2.0, 64.0);
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      varying float vSize;
+      uniform float uTime;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        // Core: bright center
+        float core = smoothstep(0.5, 0.05, d);
+        // Glow: soft outer halo
+        float glow = exp(-d * 4.0) * 0.6;
+        // Pulse: subtle breathing for high-degree nodes
+        float pulse = 1.0 + 0.08 * sin(uTime * 2.0 + vSize * 3.0);
+        float alpha = (core * 0.9 + glow) * pulse;
+        vec3 col = vColor * (1.0 + glow * 0.5); // brighten near core
+        gl_FragColor = vec4(col, alpha);
+      }
+    `
   });
+  nodeMat._isGlowMaterial = true;
   const nodePoints = new THREE.Points(nodeGeo, nodeMat);
   spacetimeGroup.add(nodePoints);
 
@@ -9366,12 +9521,50 @@ function buildSpacetimeScene() {
     const edgeGeo = new THREE.BufferGeometry();
     edgeGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3));
     edgeGeo.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
-    const edgeMat = new THREE.LineBasicMaterial({
+    // Edge progress for flow animation
+    const stEdgeProgress = new Float32Array(edgePositions.length / 3);
+    for (let i = 0; i < stEdgeProgress.length; i += 2) {
+      stEdgeProgress[i] = 0.0;
+      stEdgeProgress[i + 1] = 1.0;
+    }
+    edgeGeo.setAttribute('edgeProgress', new THREE.Float32BufferAttribute(stEdgeProgress, 1));
+    const edgeMat = new THREE.ShaderMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.35,
-      blending: THREE.AdditiveBlending
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: { value: 0.0 },
+        uOpacity: { value: 0.40 },
+        uFlow: { value: 1.0 },
+        uDashScale: { value: 0.06 }
+      },
+      vertexShader: `
+        attribute float edgeProgress;
+        varying vec3 vColor;
+        varying float vProgress;
+        void main() {
+          vColor = color;
+          vProgress = edgeProgress;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform float uOpacity;
+        uniform float uFlow;
+        uniform float uDashScale;
+        varying vec3 vColor;
+        varying float vProgress;
+        void main() {
+          float flow = fract(vProgress * 8.0 - uTime * 0.3 * uFlow);
+          float dash = smoothstep(0.0, 0.2, flow) * smoothstep(0.7, 0.5, flow);
+          float alpha = mix(0.3, 0.3 + dash * 0.7, uFlow);
+          gl_FragColor = vec4(vColor, alpha * uOpacity);
+        }
+      `
     });
+    edgeMat._isFlowMaterial = true;
     const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
     spacetimeGroup.add(edgeLines);
   }
@@ -9652,6 +9845,7 @@ document.querySelectorAll('.view-tab').forEach(tab => {
     if (tab.dataset.view === 'spacetime') {
       document.getElementById('spacetime-controls').classList.add('active');
       spacetimeGroup.visible = true;
+  triggerEvolveAnimation();
       multiwayGroup.visible = false;
       branchialGroup.visible = false;
       causalGroup.visible = false;
@@ -9756,6 +9950,7 @@ if (currentView === 'spacetime') {
   branchialGroup.visible = false;
   causalGroup.visible = false;
   spacetimeGroup.visible = true;
+  triggerEvolveAnimation();
   // Auto-evolve the default spacetime preset on load
   setTimeout(() => { evolveSpacetime(); }, 200);
 }
