@@ -12323,8 +12323,7 @@ renderScenesPanel();
 
   // Detect system preference or saved preference
   function getPreferredTheme() {
-    const saved = localStorage.getItem('wolfram-theme');
-    if (saved) return saved;
+    try { const saved = localStorage.getItem('wolfram-theme'); if (saved) return saved; } catch(e) {}
     // Default to dark mode
     return 'dark';
   }
@@ -12332,7 +12331,7 @@ renderScenesPanel();
   function applyTheme(theme) {
     html.setAttribute('data-theme', theme);
     icon.textContent = theme === 'dark' ? '☀️' : '🌙';
-    localStorage.setItem('wolfram-theme', theme);
+    try { localStorage.setItem('wolfram-theme', theme); } catch(e) {}
 
     // Notify canvas renderers to update text colors
     window._currentTheme = theme;
