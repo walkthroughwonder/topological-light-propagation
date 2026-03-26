@@ -1254,6 +1254,49 @@
     margin-top: 8px;
     margin-bottom: 2px;
   }
+
+  /* ─── Spacetime Feature Tools ─── */
+  .st-feature-tools {
+    margin-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 10px;
+  }
+  .st-feature-tools .tool-section { margin-bottom: 10px; }
+  .st-feature-tools .tool-title { font-size: 10px; letter-spacing: 0.06em; }
+
+  .st-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 8px;
+    color: rgba(255,255,255,0.35);
+  }
+  .st-legend .swatch {
+    width: 10px; height: 10px; border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .st-gradient-bar {
+    height: 8px;
+    border-radius: 3px;
+    margin-top: 6px;
+    background: linear-gradient(to right, #7000FF, #00F0FF, #CCFF00);
+  }
+  .st-gradient-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 2px;
+  }
+  .cone-info {
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .cone-info span { color: rgba(204,255,0,0.7); font-weight: 500; }
+
 </style>
 </head>
 <body>
@@ -1570,6 +1613,35 @@
         <div class="st-dim-value" id="st-dim-value-right">—</div>
         <div class="st-dim-label">Emergent Dimension (spatial hypergraph)</div>
         <div class="st-stats" id="st-stats-right"></div>
+      </div>
+    </div>
+
+
+    <!-- SPACETIME FEATURE TOOLS -->
+    <div class="st-feature-tools">
+      <div class="tool-section">
+        <div class="tool-title">Light Cone Projection <button class="tool-toggle" id="toggle-st-lightcone" title="Click an atom to show its causal light cone"></button></div>
+        <div class="tool-desc">Click any atom of space to project its forward (future) and backward (past) causal light cone. Atoms outside the cone dim out. Past = lime, Future = cyan.</div>
+        <div id="st-cone-info" class="cone-info" style="display:none"></div>
+      </div>
+
+      <div class="tool-section">
+        <div class="tool-title">Dimension Heatmap <button class="tool-toggle" id="toggle-st-dimheat" title="Color atoms by local Hausdorff dimension"></button></div>
+        <div class="tool-desc">Color each atom by its local dimension estimate — how fast BFS balls grow around it. Reveals where space is 2D, 3D, or higher.</div>
+        <div id="st-dimheat-legend" style="display:none">
+          <div class="st-gradient-bar"></div>
+          <div class="st-gradient-labels">
+            <span>~1.5D</span>
+            <span>~2.5D</span>
+            <span>~3.5D+</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-section">
+        <div class="tool-title">Entanglement Threads <button class="tool-toggle" id="toggle-st-entangle" title="Show spatially distant but topologically close connections"></button></div>
+        <div class="tool-desc">Glowing filaments between atoms that share a hyperedge but are far apart in the spatial graph (BFS distance ≥ 4). These are "shortcuts" through space — discrete wormholes.</div>
+        <div id="st-entangle-info" class="cone-info" style="display:none"></div>
       </div>
     </div>
 
@@ -9990,6 +10062,643 @@ window._estimateDimension = estimateDimension;
 window._stResult = () => stResult;
 window._stSpatialGraph = () => stSpatialGraph;
 window._stDimData = () => stDimData;
+window._showLightCone = (atomId) => showLightCone(atomId);
+window._applyDimensionHeatmap = () => applyDimensionHeatmap();
+window._showEntanglementThreads = () => showEntanglementThreads();
+
+// ═══════════════════════════════════════════════════════════════
+// SPACETIME FEATURE: LIGHT CONE PROJECTION
+// ═══════════════════════════════════════════════════════════════
+let _stLightConeActive = false;
+let _stLightConeGroup = null;  // THREE.Group for cone visuals
+let _stSelectedAtom = null;    // Currently selected atom index
+
+const stLightConeToggle = document.getElementById('toggle-st-lightcone');
+if (stLightConeToggle) {
+  stLightConeToggle.addEventListener('click', () => {
+    _stLightConeActive = !_stLightConeActive;
+    stLightConeToggle.textContent = _stLightConeActive ? '●' : '';
+    stLightConeToggle.style.color = _stLightConeActive ? 'rgba(204,255,0,0.8)' : '';
+    if (!_stLightConeActive) {
+      clearLightCone();
+    }
+  });
+}
+
+function clearLightCone() {
+  if (_stLightConeGroup) {
+    while (_stLightConeGroup.children.length > 0) {
+      const c = _stLightConeGroup.children[0];
+      _stLightConeGroup.remove(c);
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+    }
+    spacetimeGroup.remove(_stLightConeGroup);
+    _stLightConeGroup = null;
+  }
+  _stSelectedAtom = null;
+  document.getElementById('st-cone-info').style.display = 'none';
+  // Restore node colors/opacity
+  if (spacetimeGroup.children.length > 0) {
+    buildSpacetimeScene();
+  }
+}
+
+function showLightCone(atomId) {
+  if (!stSpatialGraph || !stResult || !stPositions) return;
+
+  const { atoms, adjacency } = stSpatialGraph;
+  const atomIndex = new Map();
+  atoms.forEach((a, i) => atomIndex.set(a, i));
+  
+  if (!atomIndex.has(atomId)) return;
+  _stSelectedAtom = atomId;
+
+  // Find which events involve this atom (created or consumed edges containing it)
+  const atomEvents = new Set();
+  for (let i = 0; i < stResult.events.length; i++) {
+    const evt = stResult.events[i];
+    // Check if any destroyed or created edge mentions this atom
+    for (const edge of evt.destroyedEdges) {
+      if (edge.includes(atomId)) { atomEvents.add(i); break; }
+    }
+    for (const edge of evt.createdEdges) {
+      if (edge.includes(atomId)) { atomEvents.add(i); break; }
+    }
+  }
+
+  // Build causal adjacency from causal edges
+  const causalForward = new Map();  // event -> [downstream events]
+  const causalBackward = new Map(); // event -> [upstream events]
+  for (const ce of stResult.causalEdges) {
+    if (!causalForward.has(ce.from)) causalForward.set(ce.from, []);
+    causalForward.get(ce.from).push(ce.to);
+    if (!causalBackward.has(ce.to)) causalBackward.set(ce.to, []);
+    causalBackward.get(ce.to).push(ce.from);
+  }
+
+  // BFS forward (future light cone): from atom's events, follow causal edges forward
+  const futureCone = new Set();
+  const bfsForward = [...atomEvents];
+  for (const e of bfsForward) futureCone.add(e);
+  let qi = 0;
+  while (qi < bfsForward.length) {
+    const cur = bfsForward[qi++];
+    const next = causalForward.get(cur) || [];
+    for (const n of next) {
+      if (!futureCone.has(n)) {
+        futureCone.add(n);
+        bfsForward.push(n);
+      }
+    }
+  }
+
+  // BFS backward (past light cone): from atom's events, follow causal edges backward
+  const pastCone = new Set();
+  const bfsBackward = [...atomEvents];
+  for (const e of bfsBackward) pastCone.add(e);
+  qi = 0;
+  while (qi < bfsBackward.length) {
+    const cur = bfsBackward[qi++];
+    const prev = causalBackward.get(cur) || [];
+    for (const p of prev) {
+      if (!pastCone.has(p)) {
+        pastCone.add(p);
+        bfsBackward.push(p);
+      }
+    }
+  }
+
+  // Map events back to atoms: which atoms are touched by cone events?
+  const futureAtoms = new Set();
+  const pastAtoms = new Set();
+  for (const evtId of futureCone) {
+    const evt = stResult.events[evtId];
+    for (const edge of evt.createdEdges) {
+      for (const a of edge) futureAtoms.add(a);
+    }
+    for (const edge of evt.destroyedEdges) {
+      for (const a of edge) futureAtoms.add(a);
+    }
+  }
+  for (const evtId of pastCone) {
+    const evt = stResult.events[evtId];
+    for (const edge of evt.createdEdges) {
+      for (const a of edge) pastAtoms.add(a);
+    }
+    for (const edge of evt.destroyedEdges) {
+      for (const a of edge) pastAtoms.add(a);
+    }
+  }
+
+  // Now recolor the spacetime nodes
+  const nodePoints = spacetimeGroup.children.find(c => c.isPoints);
+  if (!nodePoints) return;
+
+  const geo = nodePoints.geometry;
+  const colorAttr = geo.attributes.color;
+  const sizeAttr = geo.attributes.size;
+  
+  const cyanCol = new THREE.Color('#00F0FF');
+  const limeCol = new THREE.Color('#CCFF00');
+  const whiteCol = new THREE.Color('#FFFFFF');
+  const dimCol = new THREE.Color('#0D0E10');
+
+  for (let i = 0; i < atoms.length; i++) {
+    const atom = atoms[i];
+    const inFuture = futureAtoms.has(atom);
+    const inPast = pastAtoms.has(atom);
+    const isSelected = atom === atomId;
+
+    let col, size;
+    if (isSelected) {
+      col = whiteCol;
+      size = 4.0 * NODE_SIZE;
+    } else if (inPast && inFuture) {
+      // In both cones — blend
+      col = new THREE.Color().copy(limeCol).lerp(cyanCol, 0.5);
+      size = 2.0 * NODE_SIZE;
+    } else if (inPast) {
+      col = limeCol.clone().multiplyScalar(0.7);
+      size = 1.8 * NODE_SIZE;
+    } else if (inFuture) {
+      col = cyanCol.clone().multiplyScalar(0.7);
+      size = 1.8 * NODE_SIZE;
+    } else {
+      // Outside cone — very dim
+      col = dimCol;
+      size = 0.6 * NODE_SIZE;
+    }
+
+    colorAttr.array[i*3] = col.r;
+    colorAttr.array[i*3+1] = col.g;
+    colorAttr.array[i*3+2] = col.b;
+    sizeAttr.array[i] = size;
+  }
+  colorAttr.needsUpdate = true;
+  sizeAttr.needsUpdate = true;
+
+  // Also dim edges not in cone
+  const edgeLines = spacetimeGroup.children.find(c => c.isLineSegments);
+  if (edgeLines && edgeLines.material.uniforms) {
+    edgeLines.material.uniforms.uOpacity.value = 0.12;
+  }
+
+  // Update info
+  const infoEl = document.getElementById('st-cone-info');
+  infoEl.style.display = 'block';
+  infoEl.innerHTML = `Atom <span>${atomId}</span> · Past cone: <span>${pastAtoms.size}</span> atoms · Future cone: <span>${futureAtoms.size}</span> atoms · <span>${pastCone.size + futureCone.size}</span> causal events`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// SPACETIME FEATURE: DIMENSION HEATMAP
+// ═══════════════════════════════════════════════════════════════
+let _stDimHeatActive = false;
+
+const stDimHeatToggle = document.getElementById('toggle-st-dimheat');
+if (stDimHeatToggle) {
+  stDimHeatToggle.addEventListener('click', () => {
+    _stDimHeatActive = !_stDimHeatActive;
+    stDimHeatToggle.textContent = _stDimHeatActive ? '●' : '';
+    stDimHeatToggle.style.color = _stDimHeatActive ? 'rgba(0,240,255,0.8)' : '';
+    document.getElementById('st-dimheat-legend').style.display = _stDimHeatActive ? 'block' : 'none';
+    if (_stDimHeatActive) {
+      applyDimensionHeatmap();
+    } else {
+      buildSpacetimeScene(); // Reset colors
+    }
+  });
+}
+
+function computeLocalDimension(atom, adjacency, maxR) {
+  // BFS ball growth from this atom
+  const visited = new Set([atom]);
+  let frontier = new Set([atom]);
+  const volumes = [1];
+
+  for (let r = 1; r <= maxR; r++) {
+    const next = new Set();
+    for (const node of frontier) {
+      const nbrs = adjacency.get(node);
+      if (nbrs) {
+        for (const nb of nbrs) {
+          if (!visited.has(nb)) {
+            visited.add(nb);
+            next.add(nb);
+          }
+        }
+      }
+    }
+    volumes.push(visited.size);
+    frontier = next;
+    if (frontier.size === 0) break;
+  }
+
+  // Estimate local dimension: average Δlog(V)/Δlog(r) for r >= 2
+  const dims = [];
+  for (let r = 2; r < volumes.length; r++) {
+    if (volumes[r] > volumes[r-1] && volumes[r-1] > 0) {
+      const d = (Math.log(volumes[r]) - Math.log(volumes[r-1])) / (Math.log(r) - Math.log(r-1));
+      dims.push(d);
+    }
+  }
+  if (dims.length === 0) return 2.0; // default
+  return dims.reduce((s, d) => s + d, 0) / dims.length;
+}
+
+function applyDimensionHeatmap() {
+  if (!stSpatialGraph || !stPositions) return;
+
+  const { atoms, adjacency } = stSpatialGraph;
+  const n = atoms.length;
+  
+  // Compute local dimension for each atom (sample for large graphs)
+  const maxR = Math.min(6, Math.floor(Math.sqrt(n) / 2));
+  const localDims = new Float32Array(n);
+  
+  // For performance: sample if > 500 atoms, interpolate for others
+  const sampleEvery = n > 500 ? Math.ceil(n / 200) : 1;
+  const sampledDims = new Map();
+  
+  for (let i = 0; i < n; i += sampleEvery) {
+    const dim = computeLocalDimension(atoms[i], adjacency, maxR);
+    sampledDims.set(i, dim);
+    localDims[i] = dim;
+  }
+  
+  // Interpolate unsampled atoms by averaging nearest sampled neighbors
+  if (sampleEvery > 1) {
+    for (let i = 0; i < n; i++) {
+      if (sampledDims.has(i)) continue;
+      const nbrs = adjacency.get(atoms[i]);
+      if (!nbrs) { localDims[i] = 2.0; continue; }
+      let sum = 0, count = 0;
+      // BFS up to distance 3 looking for sampled atoms
+      const vis = new Set([atoms[i]]);
+      let front = [atoms[i]];
+      outer:
+      for (let d = 0; d < 3; d++) {
+        const nextFront = [];
+        for (const node of front) {
+          const nnbrs = adjacency.get(node);
+          if (!nnbrs) continue;
+          for (const nb of nnbrs) {
+            if (vis.has(nb)) continue;
+            vis.add(nb);
+            nextFront.push(nb);
+            const idx = atoms.indexOf(nb);
+            if (idx >= 0 && sampledDims.has(idx)) {
+              sum += sampledDims.get(idx);
+              count++;
+            }
+          }
+        }
+        front = nextFront;
+        if (count >= 3) break;
+      }
+      localDims[i] = count > 0 ? sum / count : 2.0;
+    }
+  }
+
+  // Color map: dim ~1.5 → purple, ~2.5 → cyan, ~3.5+ → lime
+  const nodePoints = spacetimeGroup.children.find(c => c.isPoints);
+  if (!nodePoints) return;
+
+  const colorAttr = nodePoints.geometry.attributes.color;
+  const sizeAttr = nodePoints.geometry.attributes.size;
+  
+  const purpleCol = new THREE.Color('#7000FF');
+  const cyanCol = new THREE.Color('#00F0FF');
+  const limeCol = new THREE.Color('#CCFF00');
+
+  for (let i = 0; i < n; i++) {
+    const dim = localDims[i];
+    let col;
+    if (dim < 2.5) {
+      // Purple → Cyan
+      const t = Math.max(0, Math.min(1, (dim - 1.0) / 1.5));
+      col = new THREE.Color().copy(purpleCol).lerp(cyanCol, t);
+    } else {
+      // Cyan → Lime
+      const t = Math.max(0, Math.min(1, (dim - 2.5) / 1.5));
+      col = new THREE.Color().copy(cyanCol).lerp(limeCol, t);
+    }
+    
+    // Brighter for more extreme values
+    const intensity = 0.6 + 0.4 * Math.abs(dim - 2.5) / 2.0;
+    col.multiplyScalar(intensity);
+
+    colorAttr.array[i*3] = col.r;
+    colorAttr.array[i*3+1] = col.g;
+    colorAttr.array[i*3+2] = col.b;
+
+    // Size slightly larger for higher dimension
+    const degree = adjacency.get(atoms[i]) ? adjacency.get(atoms[i]).size : 1;
+    sizeAttr.array[i] = Math.min(1.0 + degree * 0.15, 3.0) * NODE_SIZE * (0.8 + dim * 0.15);
+  }
+  colorAttr.needsUpdate = true;
+  sizeAttr.needsUpdate = true;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// SPACETIME FEATURE: ENTANGLEMENT THREADS
+// ═══════════════════════════════════════════════════════════════
+let _stEntangleActive = false;
+let _stEntangleGroup = null;
+
+const stEntangleToggle = document.getElementById('toggle-st-entangle');
+if (stEntangleToggle) {
+  stEntangleToggle.addEventListener('click', () => {
+    _stEntangleActive = !_stEntangleActive;
+    stEntangleToggle.textContent = _stEntangleActive ? '●' : '';
+    stEntangleToggle.style.color = _stEntangleActive ? 'rgba(112,0,255,0.8)' : '';
+    if (_stEntangleActive) {
+      showEntanglementThreads();
+    } else {
+      clearEntanglementThreads();
+    }
+  });
+}
+
+function clearEntanglementThreads() {
+  if (_stEntangleGroup) {
+    while (_stEntangleGroup.children.length > 0) {
+      const c = _stEntangleGroup.children[0];
+      _stEntangleGroup.remove(c);
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+    }
+    spacetimeGroup.remove(_stEntangleGroup);
+    _stEntangleGroup = null;
+  }
+  document.getElementById('st-entangle-info').style.display = 'none';
+}
+
+function showEntanglementThreads() {
+  clearEntanglementThreads();
+  if (!stSpatialGraph || !stPositions || !stResult) return;
+
+  const { atoms, adjacency } = stSpatialGraph;
+  const n = atoms.length;
+  if (n < 10) return;
+
+  // Find pairs that share a hyperedge but are far apart in the spatial BFS graph
+  // Build atom→hyperedge membership
+  const activeEdges = stResult.edges;
+  const atomToEdges = new Map();
+  for (let ei = 0; ei < activeEdges.length; ei++) {
+    const edge = activeEdges[ei];
+    for (const a of edge) {
+      if (!atomToEdges.has(a)) atomToEdges.set(a, []);
+      atomToEdges.get(a).push(ei);
+    }
+  }
+
+  // For each pair sharing a hyperedge, compute BFS distance
+  const threads = []; // { from: atom, to: atom, bfsDist }
+  const checkedPairs = new Set();
+  const MIN_BFS_DIST = Math.min(4, Math.max(2, Math.floor(Math.sqrt(n) / 3)));
+
+  for (const edge of activeEdges) {
+    for (let i = 0; i < edge.length; i++) {
+      for (let j = i + 1; j < edge.length; j++) {
+        const a = edge[i], b = edge[j];
+        const key = Math.min(a, b) + ',' + Math.max(a, b);
+        if (checkedPairs.has(key)) continue;
+        checkedPairs.add(key);
+
+        // BFS from a to b in spatial graph (with cutoff)
+        const maxDist = MIN_BFS_DIST + 3;
+        const visited = new Map([[a, 0]]);
+        const q = [a];
+        let found = false;
+        let dist = maxDist + 1;
+        let qi = 0;
+        while (qi < q.length) {
+          const cur = q[qi++];
+          const curD = visited.get(cur);
+          if (curD >= maxDist) continue;
+          const nbrs = adjacency.get(cur);
+          if (!nbrs) continue;
+          for (const nb of nbrs) {
+            if (!visited.has(nb)) {
+              visited.set(nb, curD + 1);
+              if (nb === b) { dist = curD + 1; found = true; break; }
+              q.push(nb);
+            }
+          }
+          if (found) break;
+        }
+
+        if (!found) dist = maxDist + 1; // unreachable within cutoff
+
+        if (dist >= MIN_BFS_DIST) {
+          threads.push({ from: a, to: b, bfsDist: dist });
+        }
+      }
+    }
+  }
+
+  if (threads.length === 0) {
+    document.getElementById('st-entangle-info').style.display = 'block';
+    document.getElementById('st-entangle-info').innerHTML = 'No entanglement threads found (spatial graph too small or uniform).';
+    return;
+  }
+
+  // Cap to 200 threads for performance, sorted by distance (longest first)
+  threads.sort((a, b) => b.bfsDist - a.bfsDist);
+  const maxThreads = Math.min(200, threads.length);
+  const displayThreads = threads.slice(0, maxThreads);
+
+  // Build curves — catenary-like arcs between endpoints
+  _stEntangleGroup = new THREE.Group();
+  
+  const threadPositions = [];
+  const threadColors = [];
+  const threadProgress = [];
+  
+  const purpleCol = new THREE.Color('#7000FF');
+  const magentaCol = new THREE.Color('#FF00FF');
+
+  for (const thread of displayThreads) {
+    const posA = stPositions.get(thread.from);
+    const posB = stPositions.get(thread.to);
+    if (!posA || !posB) continue;
+
+    // Create a curved arc: midpoint lifted perpendicular to the line
+    const ax = posA.x, ay = posA.y, az = posA.z;
+    const bx = posB.x, by = posB.y, bz = posB.z;
+    const mx = (ax + bx) / 2, my = (ay + by) / 2, mz = (az + bz) / 2;
+    
+    // Lift midpoint outward from center
+    const midLen = Math.sqrt(mx*mx + my*my + mz*mz) + 0.01;
+    const lift = Math.sqrt((bx-ax)**2 + (by-ay)**2 + (bz-az)**2) * 0.25;
+    const lx = mx + (mx / midLen) * lift;
+    const ly = my + (my / midLen) * lift;
+    const lz = mz + (mz / midLen) * lift;
+
+    // 8-segment Bezier-like arc
+    const segments = 8;
+    for (let s = 0; s < segments; s++) {
+      const t0 = s / segments;
+      const t1 = (s + 1) / segments;
+      
+      // Quadratic bezier: P(t) = (1-t)²A + 2(1-t)t·mid + t²B
+      const p0x = (1-t0)*(1-t0)*ax + 2*(1-t0)*t0*lx + t0*t0*bx;
+      const p0y = (1-t0)*(1-t0)*ay + 2*(1-t0)*t0*ly + t0*t0*by;
+      const p0z = (1-t0)*(1-t0)*az + 2*(1-t0)*t0*lz + t0*t0*bz;
+      const p1x = (1-t1)*(1-t1)*ax + 2*(1-t1)*t1*lx + t1*t1*bx;
+      const p1y = (1-t1)*(1-t1)*ay + 2*(1-t1)*t1*ly + t1*t1*by;
+      const p1z = (1-t1)*(1-t1)*az + 2*(1-t1)*t1*lz + t1*t1*bz;
+
+      threadPositions.push(p0x, p0y, p0z, p1x, p1y, p1z);
+      
+      // Color: purple for short entanglement, magenta for long
+      const distNorm = Math.min(1, (thread.bfsDist - MIN_BFS_DIST) / 4);
+      const col = new THREE.Color().copy(purpleCol).lerp(magentaCol, distNorm);
+      threadColors.push(col.r, col.g, col.b, col.r, col.g, col.b);
+      threadProgress.push(t0, t1);
+    }
+  }
+
+  if (threadPositions.length > 0) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(threadPositions, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(threadColors, 3));
+    geo.setAttribute('edgeProgress', new THREE.Float32BufferAttribute(threadProgress, 1));
+
+    const mat = new THREE.ShaderMaterial({
+      vertexColors: true,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: { value: 0.0 },
+        uOpacity: { value: 0.55 },
+        uFlow: { value: 1.0 },
+        uDashScale: { value: 0.1 }
+      },
+      vertexShader: `
+        attribute float edgeProgress;
+        varying vec3 vColor;
+        varying float vProgress;
+        void main() {
+          vColor = color;
+          vProgress = edgeProgress;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform float uOpacity;
+        uniform float uFlow;
+        uniform float uDashScale;
+        varying vec3 vColor;
+        varying float vProgress;
+        void main() {
+          // Pulsing flow along thread
+          float flow = fract(vProgress * 6.0 - uTime * 0.8 * uFlow);
+          float dash = smoothstep(0.0, 0.2, flow) * smoothstep(0.6, 0.4, flow);
+          // Fade at endpoints for soft connection
+          float endFade = smoothstep(0.0, 0.15, vProgress) * smoothstep(1.0, 0.85, vProgress);
+          float alpha = (0.15 + dash * 0.85) * endFade;
+          gl_FragColor = vec4(vColor * 1.3, alpha * uOpacity);
+        }
+      `
+    });
+    mat._isFlowMaterial = true;
+
+    const lines = new THREE.LineSegments(geo, mat);
+    _stEntangleGroup.add(lines);
+    spacetimeGroup.add(_stEntangleGroup);
+
+    // Register for uTime updates in the material cache
+    _stShaderMaterials.push(mat);
+  }
+
+  // Update info
+  const infoEl = document.getElementById('st-entangle-info');
+  infoEl.style.display = 'block';
+  infoEl.innerHTML = `<span>${displayThreads.length}</span> entanglement threads found (BFS distance ≥ ${MIN_BFS_DIST})`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// SPACETIME RAYCASTING: Handle atom clicks for light cone
+// ═══════════════════════════════════════════════════════════════
+renderer.domElement.addEventListener('click', (e) => {
+  if (!_stLightConeActive || !stSpatialGraph || !stPositions) return;
+  if (currentView !== 'spacetime' || !spacetimeGroup.visible) return;
+
+  // Check if this was a drag (not a click)
+  const dx = e.clientX - mouseDownPos.x;
+  const dy = e.clientY - mouseDownPos.y;
+  if (Math.sqrt(dx * dx + dy * dy) > 5) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  const mx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  const my = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  // Find closest atom using THREE.Raycaster on the spacetime Points object
+  const nodePoints = spacetimeGroup.children.find(c => c.isPoints);
+  if (!nodePoints) { window.__lcDebug.push('BAIL:noPoints'); return; }
+
+  const { atoms } = stSpatialGraph;
+  // Use raycaster with a generous threshold for Points
+  const _lcRay = new THREE.Raycaster();
+  _lcRay.params.Points.threshold = 5.0; // world-space units
+  _lcRay.setFromCamera(new THREE.Vector2(mx, my), camera);
+  const intersects = _lcRay.intersectObject(nodePoints);
+  
+  if (intersects.length > 0) {
+    const bestIdx = intersects[0].index;
+    const atomId = atoms[bestIdx];
+    // Rebuild scene to reset colors, then apply cone
+    buildSpacetimeScene();
+    showLightCone(atomId);
+  }
+});
+
+
+// ═══════════════════════════════════════════════════════════════
+// HOOKS: Clear features on spacetime scene rebuild
+// ═══════════════════════════════════════════════════════════════
+const _origBuildSTScene = buildSpacetimeScene;
+buildSpacetimeScene = function() {
+  // Clear feature overlays before rebuild
+  if (_stLightConeGroup) {
+    while (_stLightConeGroup.children.length > 0) {
+      const c = _stLightConeGroup.children[0];
+      _stLightConeGroup.remove(c);
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+    }
+    // Don't remove from spacetimeGroup — it will be cleared by the inner build
+    _stLightConeGroup = null;
+  }
+  if (_stEntangleGroup) {
+    while (_stEntangleGroup.children.length > 0) {
+      const c = _stEntangleGroup.children[0];
+      _stEntangleGroup.remove(c);
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+    }
+    _stEntangleGroup = null;
+  }
+  _stSelectedAtom = null;
+  
+  _origBuildSTScene();
+  
+  // Re-apply active features after rebuild
+  if (_stDimHeatActive && stSpatialGraph) {
+    setTimeout(applyDimensionHeatmap, 50);
+  }
+  if (_stEntangleActive && stSpatialGraph) {
+    setTimeout(showEntanglementThreads, 100);
+  }
+};
 
 // ─── INITIAL SETUP ───
 renderRuleEditor();
