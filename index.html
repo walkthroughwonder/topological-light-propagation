@@ -3355,10 +3355,20 @@ let hoverHighlightNodeId = null; // currently hover-highlighted node ID
 
 // ─── Build the 3D scene from a MultiwaySystem ───
 let _suppressFitCamera = false; // set by navigateToNode to prevent instant camera jumps
+function _disposeGroup(group) {
+  group.traverse(child => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      if (child.material.map) child.material.map.dispose();
+      child.material.dispose();
+    }
+  });
+  group.clear();
+}
 function buildScene(sys, highlightSet) {
-  multiwayGroup.clear();
-  branchialGroup.clear();
-  causalGroup.clear();
+  _disposeGroup(multiwayGroup);
+  _disposeGroup(branchialGroup);
+  _disposeGroup(causalGroup);
   sceneNodeData = [];
   sceneCausalData = [];
   currentNodePoints = null;
@@ -3619,6 +3629,15 @@ function buildScene(sys, highlightSet) {
   multiwayGroup.add(edgeLines);
   currentEdgeLines = edgeLines;
   savedEdgeOpacity = edgeOpacity;
+
+  // Cache shader materials for animate() — avoids traverse() every frame
+  _shaderMaterials.length = 0;
+  _cachedMaxWeight = maxWeight;
+  multiwayGroup.traverse(child => {
+    if (child.material && child.material.uniforms && child.material.uniforms.uTime) {
+      _shaderMaterials.push(child.material);
+    }
+  });
 
   // BRANCHIAL GRAPH — Force-directed layout revealing Hilbert space topology
   let finalStep = 0;
@@ -5138,8 +5157,10 @@ document.querySelectorAll('.view-tab').forEach(tab => {
 // 3D raycasting — debounced on mouse move
 renderer.domElement.addEventListener('mousemove', (e) => {
   const now = performance.now();
-  if (now - lastMouseMoveTime < 30) return; // debounce ~30ms
+  if (now - lastMouseMoveTime < 50) return; // debounce ~50ms (perf optimization)
   lastMouseMoveTime = now;
+  // Skip raycasting during camera animation — unnecessary and expensive
+  if (_camAnimating) return;
 
   const rect = renderer.domElement.getBoundingClientRect();
   mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -5547,6 +5568,14 @@ window.addEventListener('resize', onResize);
 
 // Animation loop with pulse for current-step nodes in interactive mode
 let animTime = 0;
+let _lastFrameTime = 0;
+
+// Cached shader material references — populated by buildScene, avoids traverse() per frame
+const _shaderMaterials = [];
+// Cached spacetime shader materials — for evolve animation opacity fade
+const _stShaderMaterials = [];
+// Pre-computed max weight — avoids O(n) allocation per frame
+let _cachedMaxWeight = 1;
 
 // Smooth evolution fade-in animation state
 const _evolveAnim = { active: false, elapsed: 0, duration: 0.8 };
@@ -5555,26 +5584,27 @@ function triggerEvolveAnimation() {
   _evolveAnim.elapsed = 0;
   multiwayGroup.scale.setScalar(0.85);
 }
-function animate() {
+function animate(timestamp) {
   requestAnimationFrame(animate);
   // Skip controls.update during smooth camera animation — damping would fight our lerp
   if (!_camAnimating) controls.update();
-  animTime += 0.016;
+  // Use real delta time for smoother animation (capped to avoid jumps on tab switch)
+  const dt = _lastFrameTime ? Math.min((timestamp - _lastFrameTime) / 1000, 0.05) : 0.016;
+  _lastFrameTime = timestamp;
+  animTime += dt;
 
-  // ─── Update uTime on all flow/glow shader materials ───
-  const groups = [multiwayGroup, branchialGroup, causalGroup];
-  if (typeof spacetimeGroup !== 'undefined') groups.push(spacetimeGroup);
-  for (const group of groups) {
-    group.traverse(child => {
-      if (child.material && child.material.uniforms && child.material.uniforms.uTime) {
-        child.material.uniforms.uTime.value = animTime;
-      }
-    });
+  // ─── Update uTime on cached shader materials (no traverse!) ───
+  for (let i = 0; i < _shaderMaterials.length; i++) {
+    _shaderMaterials[i].uniforms.uTime.value = animTime;
+  }
+  // Also update spacetime materials (separate cache)
+  for (let i = 0; i < _stShaderMaterials.length; i++) {
+    _stShaderMaterials[i].uniforms.uTime.value = animTime;
   }
 
   // ─── Smooth evolution fade-in animation ───
   if (_evolveAnim.active) {
-    _evolveAnim.elapsed += 0.016;
+    _evolveAnim.elapsed += dt;
     const t = Math.min(_evolveAnim.elapsed / _evolveAnim.duration, 1.0);
     const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
     
@@ -5593,13 +5623,12 @@ function animate() {
     // Fade in spacetime
     if (typeof spacetimeGroup !== 'undefined' && spacetimeGroup.visible) {
       spacetimeGroup.scale.setScalar(0.9 + 0.1 * ease);
-      spacetimeGroup.traverse(child => {
-        if (child.material) {
-          if (child.material.uniforms && child.material.uniforms.uOpacity) {
-            child.material.uniforms.uOpacity.value = ease * (child.material._targetOpacity || 0.4);
-          }
+      for (let i = 0; i < _stShaderMaterials.length; i++) {
+        const mat = _stShaderMaterials[i];
+        if (mat.uniforms.uOpacity) {
+          mat.uniforms.uOpacity.value = ease * (mat._targetOpacity || 0.4);
         }
-      });
+      }
     }
 
     if (t >= 1.0) {
@@ -5619,7 +5648,7 @@ function animate() {
       let needsUpdate = false;
       for (let i = 0; i < sceneNodeData.length; i++) {
         if (sceneNodeData[i].step === currentStep) {
-          const wNorm = sceneNodeData[i].weight / Math.max(...currentSystem.nodes.map(n => n.weight), 1);
+          const wNorm = sceneNodeData[i].weight / _cachedMaxWeight;
           const baseSize = (1.5 + wNorm * 4.0) * NODE_SIZE * 1.3;
           sizes.array[i] = baseSize * pulse;
           needsUpdate = true;
@@ -8808,6 +8837,16 @@ buildScene = function(sys, highlightSet) {
   _origBuildScene12(sys, highlightSet);
   // Re-apply Ricci overlay if enabled
   if (ricciCurvatureEnabled) setTimeout(applyRicciOverlay, 50);
+  // Rebuild cached shader material list from ALL groups (perf optimization)
+  _shaderMaterials.length = 0;
+  const _scanGroups = [multiwayGroup, branchialGroup, causalGroup];
+  for (const g of _scanGroups) {
+    g.traverse(child => {
+      if (child.material && child.material.uniforms && child.material.uniforms.uTime) {
+        _shaderMaterials.push(child.material);
+      }
+    });
+  }
 };
 
 // Expose for testing
@@ -9371,13 +9410,27 @@ let currentSTPreset = 'dim27';
 
 // ─── BUILD SPACETIME SCENE ───
 function buildSpacetimeScene() {
+  _buildSpacetimeSceneInner();
+  // Cache spacetime shader materials for animate() — avoids traverse() per frame
+  _stShaderMaterials.length = 0;
+  spacetimeGroup.traverse(child => {
+    if (child.material && child.material.uniforms && child.material.uniforms.uTime) {
+      _stShaderMaterials.push(child.material);
+    }
+  });
+}
+function _buildSpacetimeSceneInner() {
   // Clear
   while (spacetimeGroup.children.length > 0) {
     const child = spacetimeGroup.children[0];
     spacetimeGroup.remove(child);
     if (child.geometry) child.geometry.dispose();
-    if (child.material) child.material.dispose();
+    if (child.material) {
+      if (child.material.map) child.material.map.dispose();
+      child.material.dispose();
+    }
   }
+  _stShaderMaterials.length = 0;
 
   if (!stResult || !stSpatialGraph || !stPositions) return;
 
