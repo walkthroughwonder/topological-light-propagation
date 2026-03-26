@@ -1502,7 +1502,7 @@
 
 
     <!-- SPACETIME HYPERGRAPH REWRITING -->
-    <div class="spacetime-controls active" id="spacetime-controls">
+    <div class="spacetime-controls" id="spacetime-controls">
       <div class="section-title">Hypergraph Rules</div>
       <div class="tool-desc" style="margin-bottom: 6px;">Wolfram-style set substitution on ordered relations. These rules rewrite patterns of hyperedges, producing a spatial hypergraph whose structure encodes emergent spacetime geometry.</div>
 
@@ -1555,11 +1555,11 @@
   <!-- CENTER: 3D Visualization -->
   <div id="center">
     <div id="view-switcher">
-      <button class="view-tab" data-view="multiway">Multiway</button>
+      <button class="view-tab active" data-view="multiway">Multiway</button>
       <button class="view-tab" data-view="causal">Causal</button>
       <button class="view-tab" data-view="branchial">Branchial</button>
       <button class="view-tab" data-view="both">Overlay</button>
-      <button class="view-tab active" data-view="spacetime">Spacetime</button>
+      <button class="view-tab" data-view="spacetime">Spacetime</button>
     </div>
     <div id="status-bar"></div>
 
@@ -3410,7 +3410,7 @@ controls.touches = {
 // ─── CONTROL MODES ───
 // Spacetime: click+drag = orbit, Ctrl+drag = pan (3D exploration)
 // Flat views: click+drag = pan, Shift+drag = orbit (graph navigation)
-let _controlMode = 'spacetime'; // current mode
+let _controlMode = 'flat'; // current mode
 
 function setSpacetimeControls() {
   _controlMode = 'spacetime';
@@ -3510,7 +3510,7 @@ scene.add(causalGroup);
 
 const _tmpColor = new THREE.Color();
 
-let currentView = 'spacetime';
+let currentView = 'multiway';
 let STEP_SPACING = 3.0;
 let NODE_SIZE = 1.0;
 let currentSystem = null;
