@@ -28,9 +28,9 @@
   html, body {
     width: 100%; height: 100%;
     overflow: hidden;
-    background: #0e0e10;
+    background: #FFFFFF;
     font-family: 'Inter', system-ui, sans-serif;
-    color: #e8e8f0;
+    color: #111111;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -46,11 +46,11 @@
   .panel {
     padding: 20px 22px;
     overflow-y: auto;
-    border-right: 1px solid rgba(255,255,255,0.06);
+    background: #FFFFFF; border-right: 1px solid #D9D9D4;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.1) transparent;
+    scrollbar-color: #D9D9D4 transparent;
   }
-  .panel:last-child { border-right: none; border-left: 1px solid rgba(255,255,255,0.06); }
+  .panel:last-child { border-right: none; border-left: 1px solid #D9D9D4; background: #FFFFFF; }
 
   #center {
     position: relative;
@@ -65,10 +65,10 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.50);
+    color: #555555;
     margin-bottom: 14px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid #D9D9D4;
   }
   .subsection {
     margin-bottom: 20px;
@@ -76,14 +76,14 @@
   .subsection h3 {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255,255,255,0.85);
+    color: #111111;
     margin-bottom: 6px;
     letter-spacing: 0.01em;
   }
   .subsection p, .subsection .desc {
     font-size: 11.5px;
     font-weight: 400;
-    color: rgba(255,255,255,0.50);
+    color: #555555;
     line-height: 1.6;
   }
   /* Collapsible sections for progressive disclosure */
@@ -97,15 +97,15 @@
     transition: color 0.2s;
   }
   .collapsible-header:hover {
-    color: rgba(255,255,255,0.7);
+    color: #111111;
   }
   .collapsible-header .chevron {
     font-size: 8px;
-    color: rgba(255,255,255,0.25);
+    color: #999999;
     transition: transform 0.25s ease, color 0.2s;
     flex-shrink: 0;
   }
-  .collapsible-header:hover .chevron { color: rgba(255,255,255,0.5); }
+  .collapsible-header:hover .chevron { color: #555555; }
   .collapsible-header.open .chevron { transform: rotate(90deg); }
   .collapsible-body {
     max-height: 0;
@@ -120,21 +120,21 @@
   .mono {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
-    color: rgba(255,255,255,0.55);
-    background: rgba(255,255,255,0.04);
+    color: #555555;
+    background: #F6F6F4;
     padding: 2px 5px;
     border-radius: 3px;
   }
   .rule-display {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    color: rgba(120,200,255,0.8);
-    background: rgba(120,200,255,0.06);
+    color: #E86C00;
+    background: rgba(232,108,0,0.06);
     padding: 8px 12px;
     border-radius: 5px;
     margin-bottom: 12px;
     letter-spacing: 0.05em;
-    border: 1px solid rgba(120,200,255,0.1);
+    border: 1px solid rgba(232,108,0,0.15);
   }
 
   /* ─── RULE EDITOR ─── */
@@ -150,30 +150,30 @@
     padding: 5px 7px;
     font-size: 12px;
     font-family: 'JetBrains Mono', monospace;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
     border-radius: 4px;
-    color: rgba(255,255,255,0.85);
+    color: #111111;
     outline: none;
     text-align: center;
     letter-spacing: 0.05em;
     transition: border-color 0.15s, background 0.15s;
   }
   .rule-row input:focus {
-    border-color: rgba(0,240,255,0.4);
-    background: rgba(0,240,255,0.06);
-    color: rgba(0,240,255,0.95);
+    border-color: rgba(232,108,0,0.5);
+    background: rgba(232,108,0,0.04);
+    color: #E86C00;
   }
   .rule-arrow {
     font-size: 12px;
-    color: rgba(255,255,255,0.35);
+    color: #999999;
     flex-shrink: 0;
   }
   .rule-remove {
     width: 18px; height: 18px;
     border: none;
-    background: rgba(255,80,80,0.1);
-    color: rgba(255,80,80,0.5);
+    background: rgba(220,38,38,0.06);
+    color: rgba(220,38,38,0.5);
     font-size: 11px;
     border-radius: 3px;
     cursor: pointer;
@@ -184,8 +184,8 @@
     transition: all 0.15s;
   }
   .rule-remove:hover {
-    background: rgba(255,80,80,0.2);
-    color: rgba(255,80,80,0.8);
+    background: rgba(220,38,38,0.1);
+    color: rgba(220,38,38,0.8);
   }
   .rule-add {
     display: inline-flex;
@@ -196,35 +196,35 @@
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     letter-spacing: 0.04em;
-    color: rgba(255,255,255,0.4);
+    color: #999999;
     background: transparent;
-    border: 1px dashed rgba(255,255,255,0.12);
+    border: 1px dashed #D9D9D4;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.15s;
   }
   .rule-add:hover {
-    border-color: rgba(0,240,255,0.30);
-    color: rgba(0,240,255,0.8);
+    border-color: #E86C00;
+    color: #E86C00;
   }
   .init-input {
     width: 100%;
     padding: 7px 10px;
     font-size: 12px;
     font-family: 'JetBrains Mono', monospace;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
     border-radius: 5px;
-    color: rgba(255,255,255,0.85);
+    color: #111111;
     outline: none;
     letter-spacing: 0.04em;
     margin-bottom: 10px;
     transition: border-color 0.15s;
   }
   .init-input:focus {
-    border-color: rgba(0,240,255,0.4);
-    background: rgba(0,240,255,0.05);
-    color: rgba(0,240,255,0.95);
+    border-color: rgba(232,108,0,0.5);
+    background: rgba(232,108,0,0.03);
+    color: #E86C00;
   }
 
   /* ─── PRESET GALLERY ─── */
@@ -240,43 +240,43 @@
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     letter-spacing: 0.02em;
-    color: rgba(255,255,255,0.55);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: #555555;
+    background: #F6F6F4;
+    border: 1px solid #E6E6E0;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
   }
   .preset-chip:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.16);
-    color: rgba(255,255,255,0.85);
+    background: #EEEEEA;
+    border-color: #BBBBBB;
+    color: #111111;
   }
   .preset-chip.active {
-    background: rgba(0,240,255,0.10);
-    border-color: rgba(0,240,255,0.30);
-    color: rgba(0,240,255,0.9);
+    background: rgba(232,108,0,0.08);
+    border-color: rgba(232,108,0,0.4);
+    color: #E86C00;
   }
   .preset-category {
     font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
+    color: #999999;
     margin-top: 10px;
     margin-bottom: 5px;
   }
   .preset-category:first-child { margin-top: 0; }
   .safety-warning {
     font-size: 9px;
-    color: rgba(255,180,80,0.6);
+    color: #D08000;
     font-style: italic;
     margin-bottom: 8px;
     padding: 4px 6px;
-    background: rgba(255,180,80,0.05);
+    background: rgba(232,108,0,0.04);
     border-radius: 3px;
-    border-left: 2px solid rgba(255,180,80,0.2);
+    border-left: 2px solid rgba(232,108,0,0.3);
     display: none;
   }
 
@@ -288,14 +288,14 @@
     align-items: center;
     font-size: 11px;
     font-weight: 400;
-    color: rgba(255,255,255,0.55);
+    color: #555555;
     letter-spacing: 0.02em;
     margin-bottom: 5px;
   }
   .ctrl-val {
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
-    color: rgba(255,255,255,0.75);
+    color: #111111;
     font-weight: 500;
     min-width: 40px;
     text-align: right;
@@ -304,30 +304,31 @@
     -webkit-appearance: none; appearance: none;
     width: 100%; height: 3px;
     border-radius: 2px;
-    background: rgba(255,255,255,0.1);
+    background: #D9D9D4;
     outline: none; cursor: pointer;
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none;
     width: 12px; height: 12px; border-radius: 50%;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: #FFFFFF;
+    border: 2px solid #D9D9D4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
   }
   input[type="range"]:hover::-webkit-slider-thumb {
-    background: rgba(0,240,255,0.8);
-    border-color: rgba(0,240,255,0.4);
+    background: #E86C00;
+    border-color: rgba(232,108,0,0.4);
   }
   select {
     width: 100%;
     padding: 6px 8px;
     font-size: 11px;
     font-family: 'Inter', sans-serif;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #F0F0EC;
+    border: 1px solid #D9D9D4;
     border-radius: 4px;
-    color: rgba(255,255,255,0.7);
+    color: #111111;
     outline: none;
     cursor: pointer;
     margin-bottom: 12px;
@@ -340,9 +341,9 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    color: #111111;
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
     border-radius: 6px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
@@ -350,42 +351,42 @@
     margin-bottom: 8px;
   }
   button.action-btn:hover {
-    background: rgba(0,240,255,0.10);
-    border-color: rgba(0,240,255,0.30);
-    color: rgba(0,240,255,0.95);
+    background: rgba(232,108,0,0.08);
+    border-color: rgba(232,108,0,0.3);
+    color: #E86C00;
   }
   button.action-btn.primary-evolve {
     padding: 12px 0;
     font-size: 12px;
     font-weight: 700;
-    background: rgba(0,240,255,0.08);
-    border: 1px solid rgba(0,240,255,0.20);
-    color: rgba(0,240,255,0.9);
+    background: rgba(232,108,0,0.06);
+    border: 1px solid #D9D9D4;
+    color: #E86C00;
     border-radius: 8px;
     margin-top: 6px;
   }
   button.action-btn.primary-evolve:hover {
-    background: rgba(0,240,255,0.14);
-    border-color: rgba(0,240,255,0.40);
-    box-shadow: 0 0 20px rgba(0,240,255,0.08);
+    background: rgba(232,108,0,0.08);
+    border-color: #E86C00;
+    box-shadow: 0 0 20px rgba(232,108,0,0.06);
   }
 
   /* ─── INTENSITY PLOT ─── */
   #intensity-canvas {
     width: 100%;
     height: 140px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-bottom: 12px;
-    background: rgba(0,0,0,0.3);
+    background: #F9F9F7;
   }
   #branchial-canvas {
     width: 100%;
     height: 200px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-bottom: 12px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
     cursor: pointer;
   }
 
@@ -395,12 +396,12 @@
     justify-content: space-between;
     font-size: 11px;
     padding: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid #F4F4F0;
   }
-  .stat-row .stat-label { color: rgba(255,255,255,0.45); }
+  .stat-row .stat-label { color: #555555; }
   .stat-row .stat-value {
     font-family: 'JetBrains Mono', monospace;
-    color: rgba(255,255,255,0.70);
+    color: #333333;
   }
 
   /* ─── VIEW SWITCHER (center viewport overlay) ─── */
@@ -411,45 +412,42 @@
     transform: translateX(-50%);
     display: flex;
     gap: 2px;
-    background: rgba(14, 14, 16, 0.75);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid #E6E6E0;
     border-radius: 8px;
     padding: 3px;
     z-index: 10;
     pointer-events: auto;
   }
   .view-tab {
-    padding: 7px 14px;
-    font-size: 10.5px;
-    font-weight: 500;
-    text-align: center;
-    letter-spacing: 0.05em;
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: #999999;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-bottom: 2px solid transparent;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.2s ease;
+    transition: all 180ms ease;
     white-space: nowrap;
+    font-family: 'Inter', system-ui, sans-serif;
   }
   .view-tab:hover {
-    color: rgba(255,255,255,0.65);
-    background: rgba(255,255,255,0.05);
+    color: #111111;
+    border-bottom-color: #D9D9D4;
   }
   .view-tab.active {
-    background: rgba(0, 240, 255, 0.12);
-    color: rgba(0, 240, 255, 0.95);
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.10);
-    font-weight: 600;
+    color: #E86C00;
+    background: transparent;
+    border-bottom-color: #E86C00;
   }
   .view-tab.active[data-view="spacetime"] {
-    background: rgba(204, 255, 0, 0.1);
-    color: rgba(204, 255, 0, 0.9);
-    box-shadow: 0 0 12px rgba(204, 255, 0, 0.08);
+    color: #E86C00;
+    border-bottom-color: #E86C00;
   }
 
 
@@ -470,21 +468,21 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgba(204, 255, 0, 0.85);
-    background: rgba(14, 14, 16, 0.75);
+    color: #111111;
+    background: #FFFFFF;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(204, 255, 0, 0.15);
+    border: 1px solid #D9D9D4;
     border-radius: 8px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
-    transition: all 0.25s ease;
+    transition: all 180ms ease;
     white-space: nowrap;
   }
   #scenes-btn:hover {
-    background: rgba(204, 255, 0, 0.08);
-    border-color: rgba(204, 255, 0, 0.3);
-    color: rgba(204, 255, 0, 1);
+    background: #FAFAFA;
+    border-color: #E86C00;
+    color: #E86C00;
   }
   #scenes-btn .chevron {
     font-size: 8px;
@@ -501,19 +499,19 @@
     width: 340px;
     max-height: 80vh;
     overflow-y: auto;
-    background: rgba(14, 14, 16, 0.92);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid #E6E6E0;
     border-radius: 10px;
     padding: 6px;
     display: none;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
   }
   #scenes-panel.open { display: block; }
   #scenes-panel::-webkit-scrollbar { width: 4px; }
   #scenes-panel::-webkit-scrollbar-track { background: transparent; }
-  #scenes-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+  #scenes-panel::-webkit-scrollbar-thumb { background: #D9D9D4; border-radius: 2px; }
   .scene-card {
     display: block;
     width: 100%;
@@ -526,21 +524,21 @@
     font-family: 'Inter', sans-serif;
     transition: all 0.2s ease;
     margin-bottom: 2px;
-    color: rgba(255,255,255,0.75);
+    color: #333333;
   }
   .scene-card:hover {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.08);
+    background: #F4F4F0;
+    border-color: #E6E6E0;
   }
   .scene-card.active {
-    background: rgba(204, 255, 0, 0.06);
-    border-color: rgba(204, 255, 0, 0.15);
+    background: rgba(232, 108, 0, 0.04);
+    border-color: rgba(232,108,0,0.20);
   }
   .scene-card .scene-name {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: rgba(255,255,255,0.9);
+    color: #111111;
     margin-bottom: 3px;
   }
   .scene-card .scene-tag {
@@ -554,13 +552,13 @@
     margin-right: 4px;
     vertical-align: middle;
   }
-  .scene-tag.st { background: rgba(204,255,0,0.12); color: rgba(204,255,0,0.8); }
-  .scene-tag.mw { background: rgba(0,240,255,0.12); color: rgba(0,240,255,0.8); }
+  .scene-tag.st { background: rgba(232,108,0,0.08); color: #E86C00; }
+  .scene-tag.mw { background: rgba(232,108,0,0.08); color: #E86C00; }
   .scene-tag.ca { background: rgba(255,140,0,0.12); color: rgba(255,140,0,0.8); }
   .scene-card .scene-desc {
     font-size: 10px;
     line-height: 1.5;
-    color: rgba(255,255,255,0.45);
+    color: #555555;
     margin-top: 3px;
   }
   .scene-divider {
@@ -568,7 +566,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.25);
+    color: #AAAAAA;
     padding: 10px 12px 4px;
   }
 
@@ -588,7 +586,7 @@
   .cg-slider-row .cg-val {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: rgba(112, 0, 255, 0.9);
+    color: rgba(232,108,0,0.8);
     min-width: 18px;
     text-align: right;
   }
@@ -598,7 +596,7 @@
     font-size: 8px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.25);
+    color: #AAAAAA;
     margin-bottom: 12px;
   }
   .ci-gauge {
@@ -610,7 +608,7 @@
   .ci-gauge-bar {
     flex: 1;
     height: 6px;
-    background: rgba(255,255,255,0.06);
+    background: #F6F6F4;
     border-radius: 3px;
     overflow: hidden;
     position: relative;
@@ -623,7 +621,7 @@
   .ci-gauge-label {
     font-size: 9px;
     font-family: 'JetBrains Mono', monospace;
-    color: rgba(255,255,255,0.5);
+    color: #555555;
     min-width: 40px;
     text-align: right;
   }
@@ -633,14 +631,14 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
     line-height: 1.6;
-    color: rgba(112, 0, 255, 0.7);
-    background: rgba(112, 0, 255, 0.04);
-    border: 1px solid rgba(112, 0, 255, 0.1);
-    border-radius: 4px;
+    color: #555555;
+    background: #F6F6F4;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     padding: 6px 8px;
     margin: 8px 0;
     scrollbar-width: thin;
-    scrollbar-color: rgba(112, 0, 255, 0.2) transparent;
+    scrollbar-color: #D9D9D4 transparent;
   }
   .cg-completion-rules:empty {
     display: none;
@@ -648,20 +646,20 @@
   .cg-narrative {
     font-size: 11px;
     font-weight: 300;
-    color: rgba(255,255,255,0.5);
+    color: #555555;
     line-height: 1.55;
     margin: 8px 0;
     padding: 8px 10px;
-    background: rgba(112, 0, 255, 0.04);
-    border-left: 2px solid rgba(112, 0, 255, 0.3);
+    background: rgba(232,108,0,0.04);
+    border-left: 2px solid rgba(232, 108, 0, 0.3);
     border-radius: 0 4px 4px 0;
   }
   .cg-narrative strong {
-    color: rgba(112, 0, 255, 0.9);
+    color: rgba(232,108,0,0.8);
     font-weight: 500;
   }
   .cg-narrative em {
-    color: rgba(0, 240, 255, 0.7);
+    color: #E86C00;
   }
   .cg-stats {
     display: grid;
@@ -671,10 +669,10 @@
     margin: 8px 0;
   }
   .cg-stats .cg-stat-label {
-    color: rgba(255,255,255,0.4);
+    color: #999999;
   }
   .cg-stats .cg-stat-value {
-    color: rgba(112, 0, 255, 0.8);
+    color: #E86C00;
     font-family: 'JetBrains Mono', monospace;
     text-align: right;
   }
@@ -683,7 +681,7 @@
     gap: 14px;
     margin: 8px 0;
     font-size: 9px;
-    color: rgba(255,255,255,0.4);
+    color: #999999;
   }
   .cg-edge-legend span::before {
     content: '';
@@ -695,29 +693,29 @@
     border-radius: 1px;
   }
   .cg-edge-legend .legend-unitary::before {
-    background: rgba(0, 240, 255, 0.7);
+    background: #E86C00;
   }
   .cg-edge-legend .legend-hermitian::before {
     content: '';
-    background: repeating-linear-gradient(90deg, rgba(112, 0, 255, 0.7) 0px, rgba(112, 0, 255, 0.7) 3px, transparent 3px, transparent 5px);
+    background: repeating-linear-gradient(90deg, #D97706 0px, #D97706 3px, transparent 3px, transparent 5px);
   }
 
     /* ─── COMPLETION LOG ─── */
   #completion-log {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
-    color: rgba(255,255,255,0.4);
+    color: #777777;
     line-height: 1.6;
     max-height: 160px;
     overflow-y: auto;
     padding: 8px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.04);
+    background: #F6F6F4;
+    border-radius: 6px;
+    border: 1px solid #E6E6E0;
   }
-  .log-constructive { color: rgba(80,220,140,0.7); }
+  .log-constructive { color: #2E8B57; }
   .log-destructive { color: rgba(255,100,80,0.7); }
-  .log-neutral { color: rgba(255,255,255,0.3); }
+  .log-neutral { color: #999999; }
 
   #status-bar {
     position: absolute;
@@ -725,7 +723,7 @@
     transform: translateX(-50%);
     font-size: 10px;
     font-family: 'JetBrains Mono', monospace;
-    color: rgba(255,255,255,0.25);
+    color: #AAAAAA;
     pointer-events: none;
     white-space: nowrap;
   }
@@ -738,7 +736,7 @@
   }
   footer a {
     font-size: 9px;
-    color: rgba(255,255,255,0.12);
+    color: #D9D9D4;
     text-decoration: none;
     font-family: 'Inter', sans-serif;
   }
@@ -748,7 +746,7 @@
     display: flex;
     gap: 2px;
     margin-bottom: 10px;
-    background: rgba(255,255,255,0.03);
+    background: #FFFFFF;
     border-radius: 5px;
     padding: 2px;
   }
@@ -759,17 +757,17 @@
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
+    color: #777777;
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid #E6E6E0;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     transition: all 0.2s;
   }
   .mode-tab.active {
-    background: rgba(0,240,255,0.08);
-    color: rgba(0,240,255,0.85);
-    border-color: rgba(0,240,255,0.15);
+    background: rgba(232,108,0,0.06);
+    color: #E86C00;
+    border-color: rgba(232,108,0,0.12);
   }
 
   /* ─── STEP CONTROLS ─── */
@@ -779,13 +777,13 @@
   .step-counter {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    color: rgba(255,255,255,0.55);
+    color: #555555;
     text-align: center;
     margin-bottom: 8px;
     letter-spacing: 0.04em;
   }
   .step-counter .step-num {
-    color: rgba(120,200,255,0.9);
+    color: #E86C00;
     font-weight: 500;
   }
 
@@ -813,7 +811,7 @@
   .step-btn:hover {
     background: rgba(120,200,255,0.12);
     border-color: rgba(120,200,255,0.3);
-    color: rgba(120,200,255,0.9);
+    color: #E86C00;
   }
   .step-btn:disabled {
     opacity: 0.3;
@@ -821,22 +819,22 @@
   }
   .step-btn.playing {
     background: rgba(80,220,140,0.1);
-    border-color: rgba(80,220,140,0.3);
-    color: rgba(80,220,140,0.8);
+    border-color: rgba(46,139,87,0.3);
+    color: #2E8B57;
   }
 
   /* ─── TOOL DESCRIPTIONS: muted, not interactive-colored ─── */
   .tool-desc {
     font-size: 11px;
     font-weight: 400;
-    color: rgba(255,255,255,0.40);
+    color: #555555;
     line-height: 1.55;
     margin-bottom: 8px;
   }
   .tool-title {
     font-size: 11.5px;
     font-weight: 600;
-    color: rgba(255,255,255,0.75);
+    color: #333333;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -845,15 +843,15 @@
   .tool-section {
     margin-bottom: 16px;
     padding: 10px 12px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
+    background: #FAFAFA;
+    border: 1px solid #F4F4F0;
     border-radius: 6px;
   }
   .tool-item {
     margin-bottom: 14px;
     padding: 10px 12px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
+    background: #FAFAFA;
+    border: 1px solid #F4F4F0;
     border-radius: 6px;
   }
 
@@ -863,18 +861,18 @@
   }
   .observer-desc {
     font-size: 10px;
-    color: rgba(255,255,255,0.3);
+    color: #999999;
     line-height: 1.5;
     margin-bottom: 8px;
   }
   .observer-state {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
-    color: rgba(204,255,0,0.8);
-    background: rgba(204,255,0,0.06);
+    color: #E86C00;
+    background: rgba(232,108,0,0.05);
     padding: 5px 8px;
     border-radius: 4px;
-    border: 1px solid rgba(204,255,0,0.15);
+    border: 1px solid rgba(232,108,0,0.12);
     margin-bottom: 6px;
     word-break: break-all;
     display: none;
@@ -886,17 +884,17 @@
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: #999999;
+    background: #F4F4F0;
+    border: 1px solid #E6E6E0;
     border-radius: 3px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     transition: all 0.15s;
   }
   .observer-clear:hover {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.6);
+    background: #E6E6E0;
+    color: #555555;
   }
 
   /* ─── OBSERVER ANALYSIS ─── */
@@ -904,8 +902,8 @@
     display: none;
     margin-top: 10px;
     padding: 10px;
-    background: rgba(204,255,0,0.02);
-    border: 1px solid rgba(204,255,0,0.08);
+    background: rgba(232,108,0,0.02);
+    border: 1px solid rgba(232,108,0,0.06);
     border-radius: 5px;
   }
   .observer-analysis .oa-title {
@@ -913,7 +911,7 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(204,255,0,0.5);
+    color: rgba(232,108,0,0.5);
     margin-bottom: 8px;
   }
   .observer-analysis .oa-row {
@@ -924,28 +922,28 @@
   }
   .observer-analysis .oa-label {
     font-size: 9px;
-    color: rgba(255,255,255,0.35);
+    color: #777777;
     font-weight: 400;
   }
   .observer-analysis .oa-value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
-    color: rgba(204,255,0,0.7);
+    color: #E86C00;
     text-align: right;
   }
   .observer-analysis .oa-divider {
     height: 1px;
-    background: rgba(204,255,0,0.06);
+    background: rgba(232,108,0,0.05);
     margin: 6px 0;
   }
   .observer-analysis .oa-narrative {
     font-size: 9px;
-    color: rgba(255,255,255,0.35);
+    color: #777777;
     line-height: 1.55;
     margin-top: 4px;
   }
   .observer-analysis .oa-narrative strong {
-    color: rgba(204,255,0,0.6);
+    color: rgba(232,108,0,0.6);
     font-weight: 500;
   }
   .observer-analysis .oa-section {
@@ -959,7 +957,7 @@
   }
   .observer-analysis .oa-bar-label {
     font-size: 8px;
-    color: rgba(255,255,255,0.3);
+    color: #999999;
     width: 60px;
     flex-shrink: 0;
     text-align: right;
@@ -967,7 +965,7 @@
   .observer-analysis .oa-bar {
     flex: 1;
     height: 4px;
-    background: rgba(255,255,255,0.04);
+    background: #F4F4F0;
     border-radius: 2px;
     overflow: hidden;
   }
@@ -979,7 +977,7 @@
   .observer-analysis .oa-bar-value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 8px;
-    color: rgba(255,255,255,0.3);
+    color: #999999;
     width: 30px;
     flex-shrink: 0;
   }
@@ -991,7 +989,7 @@
     padding: 6px 10px;
     border-radius: 4px;
     font: 10px 'JetBrains Mono', monospace;
-    color: rgba(255,255,255,0.7);
+    color: #111111;
     pointer-events: none;
     z-index: 100;
     position: fixed;
@@ -1001,16 +999,16 @@
     line-height: 1.5;
   }
   #tooltip .tt-label {
-    color: rgba(255,255,255,0.35);
+    color: #777777;
     font-size: 8px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
   #tooltip .tt-state {
-    color: rgba(120,200,255,0.9);
+    color: #E86C00;
   }
   #tooltip .tt-weight {
-    color: rgba(80,220,140,0.8);
+    color: #2E8B57;
   }
 
 
@@ -1018,8 +1016,8 @@
   .tool-section {
     margin-bottom: 14px;
     padding: 12px;
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: #FAFAFA;
+    border: 1px solid #F0F0EC;
     border-radius: 6px;
   }
   .tool-section .tool-title {
@@ -1027,7 +1025,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.70);
+    color: #333333;
     margin-bottom: 6px;
     display: flex;
     align-items: center;
@@ -1037,7 +1035,7 @@
     position: relative;
     width: 28px;
     height: 14px;
-    background: rgba(255,255,255,0.08);
+    background: #E6E6E0;
     border-radius: 7px;
     cursor: pointer;
     transition: background 0.2s;
@@ -1051,19 +1049,19 @@
     top: 2px; left: 2px;
     width: 10px; height: 10px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.3);
+    background: #999999;
     transition: all 0.2s;
   }
   .tool-toggle.active {
-    background: rgba(0,240,255,0.25);
+    background: rgba(232,108,0,0.15);
   }
   .tool-toggle.active::after {
     left: 16px;
-    background: rgba(0,240,255,0.9);
+    background: #E86C00;
   }
   .tool-desc {
     font-size: 11px;
-    color: rgba(255,255,255,0.40);
+    color: #555555;
     line-height: 1.55;
     margin-bottom: 8px;
   }
@@ -1074,9 +1072,9 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.55);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
+    color: #555555;
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
     border-radius: 4px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
@@ -1085,14 +1083,14 @@
     margin-bottom: 4px;
   }
   .tool-btn:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.20);
-    color: rgba(255,255,255,0.85);
+    background: #E6E6E0;
+    border-color: #BBBBBB;
+    color: #111111;
   }
   .tool-btn.active {
-    background: rgba(0,240,255,0.10);
-    border-color: rgba(0,240,255,0.25);
-    color: rgba(0,240,255,0.9);
+    background: rgba(232,108,0,0.08);
+    border-color: rgba(232,108,0,0.25);
+    color: #E86C00;
   }
   .tool-btn.warn {
     color: rgba(255,180,80,0.7);
@@ -1107,39 +1105,39 @@
   .tool-result {
     font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
-    color: rgba(255,255,255,0.4);
+    color: #777777;
     line-height: 1.5;
     margin-top: 6px;
     padding: 6px 8px;
-    background: rgba(0,0,0,0.2);
+    background: #F6F6F4;
     border-radius: 3px;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid #F4F4F0;
     max-height: 120px;
     overflow-y: auto;
   }
-  .tool-result .ci-confluent { color: rgba(80,220,140,0.8); }
+  .tool-result .ci-confluent { color: #2E8B57; }
   .tool-result .ci-divergent { color: rgba(255,100,80,0.8); }
-  .tool-result .ci-score { color: rgba(0,240,255,0.8); font-weight: 500; }
+  .tool-result .ci-score { color: #E86C00; font-weight: 500; }
 
   /* ─── GEODESIC PATH ─── */
-  .geodesic-mode .tool-desc { color: rgba(255,180,80,0.45); }
+  .geodesic-mode .tool-desc { color: #B87333; }
 
   /* ─── SPEED CHART ─── */
   #speed-canvas {
     width: 100%;
     height: 100px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
   #persistence-canvas {
     width: 100%;
     height: 100px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
 
   /* ─── REFERENCE FRAME CHIPS ─── */
@@ -1167,13 +1165,13 @@
     line-height: 1.3;
   }
   .token-char.changed {
-    background: rgba(0,240,255,0.15);
-    color: rgba(0,240,255,0.9);
-    border: 1px solid rgba(0,240,255,0.3);
+    background: rgba(232,108,0,0.1);
+    color: #E86C00;
+    border: 1px solid rgba(232,108,0,0.3);
   }
   .token-char.unchanged {
-    background: rgba(255,255,255,0.03);
-    color: rgba(255,255,255,0.3);
+    background: #FFFFFF;
+    color: #999999;
     border: 1px solid transparent;
   }
 
@@ -1187,18 +1185,18 @@
   #ricci-canvas, #geodev-canvas {
     width: 100%;
     height: 100px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
   .ricci-positive { color: #FF4040; }
   .ricci-negative { color: #4080FF; }
-  .ricci-flat { color: rgba(255,255,255,0.4); }
-  .tangle-count { color: #CCFF00; font-weight: 500; }
+  .ricci-flat { color: #999999; }
+  .tangle-count { color: #D97706; font-weight: 500; }
   .tangle-item {
-    background: rgba(112,0,255,0.12);
-    border: 1px solid rgba(112,0,255,0.25);
+    background: rgba(232,108,0,0.08);
+    border: 1px solid rgba(232,108,0,0.2);
     border-radius: 5px;
     padding: 6px 8px;
     margin-top: 4px;
@@ -1208,14 +1206,14 @@
     transition: background 0.2s;
   }
   .tangle-item:hover {
-    background: rgba(112,0,255,0.25);
+    background: rgba(232,108,0,0.15);
   }
   .tangle-item .tangle-label {
-    color: rgba(204,255,0,0.9);
+    color: #D97706;
     font-weight: 500;
   }
   .tangle-item .tangle-info {
-    color: rgba(255,255,255,0.5);
+    color: #555555;
     font-size: 10px;
     margin-top: 2px;
   }
@@ -1225,16 +1223,16 @@
   #zeno-canvas {
     width: 100%;
     height: 100px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
   .zeno-active-indicator {
     display: inline-block;
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: rgba(204,255,0,0.8);
+    background: #E86C00;
     margin-right: 4px;
     animation: zeno-pulse 1s ease-in-out infinite;
     vertical-align: middle;
@@ -1248,39 +1246,39 @@
   #tunneling-canvas {
     width: 100%;
     height: 100px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
-  .tunnel-path { color: rgba(0,240,255,0.8); }
-  .tunnel-ratio { color: rgba(204,255,0,0.8); font-weight: 500; }
+  .tunnel-path { color: #E86C00; }
+  .tunnel-ratio { color: #E86C00; font-weight: 500; }
 
   /* ─── OBSERVER BRANCHING ASYMMETRY ─── */
   #asymmetry-canvas {
     width: 100%;
     height: 120px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
-  .asymmetry-subjective { color: rgba(0,240,255,0.8); }
-  .asymmetry-total { color: rgba(112,0,255,0.8); }
-  .asymmetry-ratio { color: rgba(204,255,0,0.8); font-weight: 500; }
+  .asymmetry-subjective { color: #E86C00; }
+  .asymmetry-total { color: rgba(232,108,0,0.7); }
+  .asymmetry-ratio { color: #E86C00; font-weight: 500; }
 
   /* ─── HOLOGRAPHIC BOUND ─── */
   #holographic-canvas {
     width: 100%;
     height: 120px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
-  .holo-area { color: rgba(0,240,255,0.8); }
+  .holo-area { color: #E86C00; }
   .holo-volume { color: rgba(255,107,53,0.8); }
-  .holo-scaling { color: rgba(204,255,0,0.8); font-weight: 500; }
+  .holo-scaling { color: #E86C00; font-weight: 500; }
 
 
   /* ─── SPACETIME MODE ─── */
@@ -1298,41 +1296,41 @@
   }
   .st-rule-input {
     flex: 1;
-    background: rgba(0,240,255,0.06);
-    border: 1px solid rgba(0,240,255,0.2);
-    color: #e8e8f0;
+    background: rgba(232,108,0,0.05);
+    border: 1px solid rgba(232,108,0,0.2);
+    color: #111111;
     padding: 4px 6px;
     border-radius: 4px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
   }
-  .st-rule-arrow { color: rgba(255,255,255,0.3); font-size: 12px; }
+  .st-rule-arrow { color: #999999; font-size: 12px; }
   .st-preset-chip {
     padding: 5px 10px;
     font-size: 10px;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
-    color: rgba(204,255,0,0.6);
-    background: rgba(204,255,0,0.04);
-    border: 1px solid rgba(204,255,0,0.12);
+    color: rgba(232,108,0,0.6);
+    background: rgba(232,108,0,0.04);
+    border: 1px solid rgba(232,108,0,0.10);
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
   }
   .st-preset-chip:hover {
-    background: rgba(204,255,0,0.08);
-    border-color: rgba(204,255,0,0.20);
-    color: rgba(204,255,0,0.85);
+    background: rgba(232,108,0,0.08);
+    border-color: rgba(232,108,0,0.20);
+    color: #E86C00;
   }
   .st-preset-chip.active {
-    background: rgba(204,255,0,0.10);
-    border-color: rgba(204,255,0,0.30);
-    color: rgba(204,255,0,0.95);
+    background: rgba(232,108,0,0.08);
+    border-color: rgba(232,108,0,0.30);
+    color: #E86C00;
   }
   .st-dim-readout {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #F6F6F4;
+    border: 1px solid #E6E6E0;
     border-radius: 6px;
     padding: 8px 10px;
     margin-top: 8px;
@@ -1341,34 +1339,34 @@
   .st-dim-value {
     font-size: 22px;
     font-weight: 500;
-    color: #00F0FF;
+    color: #E86C00;
     line-height: 1;
   }
   .st-dim-label {
     font-size: 9px;
-    color: rgba(255,255,255,0.35);
+    color: #777777;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 2px;
   }
   .st-stats {
     font-size: 10px;
-    color: rgba(255,255,255,0.4);
+    color: #777777;
     margin-top: 6px;
     line-height: 1.5;
   }
-  .st-stats span { color: rgba(204,255,0,0.7); font-weight: 500; }
+  .st-stats span { color: #E86C00; font-weight: 500; }
   #dim-canvas {
     width: 100%;
     height: 100px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 5px;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
     margin-top: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #1A1A1A;
   }
   .foliation-label {
     font-size: 9px;
-    color: rgba(255,255,255,0.3);
+    color: #999999;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 8px;
@@ -1378,7 +1376,7 @@
   /* ─── Spacetime Feature Tools ─── */
   .st-feature-tools {
     margin-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid #EEEEEA;
     padding-top: 10px;
   }
   .st-feature-tools .tool-section { margin-bottom: 10px; }
@@ -1390,7 +1388,7 @@
     gap: 6px;
     margin-top: 6px;
     font-size: 8px;
-    color: rgba(255,255,255,0.35);
+    color: #777777;
   }
   .st-legend .swatch {
     width: 10px; height: 10px; border-radius: 2px;
@@ -1400,22 +1398,380 @@
     height: 8px;
     border-radius: 3px;
     margin-top: 6px;
-    background: linear-gradient(to right, #7000FF, #00F0FF, #CCFF00);
+    background: linear-gradient(to right, #4A90D9, #E86C00, #DC2626);
   }
   .st-gradient-labels {
     display: flex;
     justify-content: space-between;
     font-size: 7px;
-    color: rgba(255,255,255,0.3);
+    color: #999999;
     margin-top: 2px;
   }
   .cone-info {
     font-size: 9px;
-    color: rgba(255,255,255,0.4);
+    color: #777777;
     margin-top: 4px;
     line-height: 1.4;
   }
-  .cone-info span { color: rgba(204,255,0,0.7); font-weight: 500; }
+  .cone-info span { color: #E86C00; font-weight: 500; }
+
+
+    
+  /* ═══ WOLFRAM BRAND OVERRIDE ═══ */
+  
+  /* Panels: clean white with subtle borders */
+  .panel {
+    background: #FFFFFF !important;
+    color: #111111;
+  }
+  
+  /* Section titles */
+  .section-title {
+    color: #555555;
+    border-bottom-color: #E6E6E0;
+  }
+  
+  /* All text in panels */
+  .panel h3, .panel h4 {
+    color: #111111;
+  }
+  .panel p, .panel span, .panel label, .panel .desc {
+    color: #555555;
+  }
+  
+  /* Accent links and highlights */
+  a, .highlight, .accent-text {
+    color: #E86C00;
+  }
+  
+  /* View tabs container - minimal editorial bar */
+  .view-tabs-container {
+    background: #FFFFFF;
+    border-bottom: 1px solid #D9D9D4;
+    box-shadow: none;
+  }
+  
+  /* Scenes button */
+  .scenes-btn, #scenes-btn {
+    background: #FFFFFF;
+    border: 1px solid #D9D9D4;
+    color: #111111;
+  }
+  .scenes-btn:hover, #scenes-btn:hover {
+    border-color: #E86C00;
+    color: #E86C00;
+  }
+  .scenes-btn.open, #scenes-btn.open {
+    background: #E86C00;
+    color: #FFFFFF;
+    border-color: #E86C00;
+  }
+  
+  /* Scenes panel */
+  #scenes-panel {
+    background: rgba(255,255,255,0.97) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid #D9D9D4;
+  }
+  #scenes-panel .scene-card {
+    background: #FFFFFF;
+    border: 1px solid #E6E6E0;
+    color: #111111;
+    border-radius: 8px;
+  }
+  #scenes-panel .scene-card:hover {
+    border-color: #E86C00;
+    background: #FAFAFA;
+  }
+  #scenes-panel .scene-card.active {
+    border-color: #E86C00;
+    background: rgba(232,108,0,0.04);
+  }
+  #scenes-panel .scene-card h4 {
+    color: #111111;
+  }
+  #scenes-panel .scene-card p {
+    color: #555555;
+  }
+  #scenes-panel .scene-badge {
+    background: rgba(232,108,0,0.1);
+    color: #E86C00;
+  }
+  #scenes-panel .scene-group-title {
+    color: #999999;
+  }
+  
+  /* Tool toggles — pill switches */
+  .tool-toggle {
+    background: #E6E6E0;
+    border: 1px solid #D9D9D4;
+    color: #999999;
+  }
+  .tool-toggle[style*="color: rgba(0,240,255"] {
+    color: #E86C00 !important;
+  }
+  
+  /* Tool section backgrounds */
+  .tool-section {
+    background: transparent;
+    border: none;
+  }
+  
+  /* Tool titles */
+  .tool-title {
+    color: #111111;
+  }
+  
+  /* Tool descriptions */
+  .tool-desc {
+    color: #555555;
+  }
+  
+  /* Tool results */
+  .tool-result {
+    background: #F6F6F4;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
+    color: #333333;
+  }
+  
+  /* Statistics section */
+  .stat-row {
+    color: #555555;
+    border-bottom-color: #E6E6E0;
+  }
+  .stat-row span:last-child {
+    color: #111111;
+    font-weight: 600;
+  }
+  
+  /* Frame chips */
+  .tool-btn {
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
+    color: #555555;
+  }
+  .tool-btn:hover {
+    border-color: #E86C00;
+    color: #E86C00;
+  }
+  .tool-btn.active {
+    background: #E86C00;
+    color: #FFFFFF;
+    border-color: #E86C00;
+  }
+  
+  /* Coarse-graining section */
+  #quantum-observer-panel {
+    background: #FFFFFF !important;
+    border: 1px solid #E6E6E0;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  
+  /* Causal invariance bar */
+  .causal-bar-bg {
+    background: #E6E6E0 !important;
+  }
+  .causal-bar-fg {
+    background: #E86C00 !important;
+  }
+  
+  /* Big idea text at bottom of left panel */
+  #left-panel .big-idea, .big-idea-text {
+    color: #555555;
+    border-top: 1px solid #E6E6E0;
+    padding-top: 16px;
+  }
+  
+  /* Spacetime controls overlay */
+  #spacetime-controls {
+    background: rgba(255,255,255,0.97) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid #D9D9D4;
+  }
+  #spacetime-controls input, #spacetime-controls select {
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
+    color: #111111;
+  }
+  #spacetime-controls label, #spacetime-controls .ctrl-label {
+    color: #555555;
+  }
+  
+  /* ST dimension readout */
+  .st-dim-readout {
+    background: #F6F6F4 !important;
+    border: 1px solid #E6E6E0;
+    border-radius: 8px;
+  }
+  .st-dim-value {
+    color: #E86C00 !important;
+  }
+  .st-dim-label {
+    color: #555555 !important;
+  }
+  
+  /* ST evolve button */
+  #btn-st-evolve {
+    background: #E86C00 !important;
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  #btn-st-evolve:hover {
+    background: #D05E00 !important;
+  }
+  
+  /* ST info elements */
+  #st-cone-info, #st-entangle-info {
+    background: #F6F6F4;
+    border: 1px solid #E6E6E0;
+    border-radius: 6px;
+    color: #333333;
+  }
+  
+  /* Dimension heatmap legend */
+  .st-gradient-bar {
+    background: linear-gradient(to right, #4A90D9, #E86C00, #DC2626) !important;
+  }
+  .st-gradient-labels span {
+    color: #555555 !important;
+  }
+  
+  /* Intensity chart */
+  .intensity-chart canvas {
+    filter: none;
+  }
+  
+  /* Status bar at bottom of center */
+  #status {
+    color: #777777;
+    background: rgba(255,255,255,0.85);
+  }
+  
+  /* Keyboard shortcut hints */
+  kbd, .kbd-hint {
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
+    color: #555555;
+    border-radius: 4px;
+  }
+  
+  /* Branchial graph mini-viz background */
+  #branchial-graph-container, .branchial-mini {
+    background: #1A1A1A;
+    border-radius: 8px;
+    border: 1px solid #E6E6E0;
+  }
+  
+  /* Footer attribution */
+  footer a, .attribution a {
+    color: #E86C00;
+  }
+  
+  /* Custom scrollbars for light theme */
+  .panel::-webkit-scrollbar {
+    width: 6px;
+  }
+  .panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .panel::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.12);
+    border-radius: 3px;
+  }
+  .panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.2);
+  }
+
+  /* ── Wolfram Pass 2 overrides ── */
+  
+  /* Observer panel highlights */
+  #quantum-observer-panel strong[style*="color"] {
+    color: #E86C00 !important;
+  }
+  
+  /* Causal invariance gauge */
+  .ci-gauge-fill {
+    background: #E86C00 !important;
+  }
+  
+  /* Observer analysis text highlights */
+  .oa-narrative strong[style*="color"] {
+    color: #E86C00 !important;
+  }
+  
+  /* Observer analysis future bars */
+  .oa-bar-fill {
+    background: rgba(232,108,0,0.3) !important;
+  }
+  
+  /* Past cone bar */
+  .oa-bar-fill[style*="rgba(204,255,0"] {
+    background: rgba(217,119,6,0.3) !important;
+  }
+  
+  /* Fix any remaining cyan accents in text */
+  [style*="color:rgba(0,240,255"] {
+    color: #E86C00 !important;
+  }
+  [style*="color: rgba(0,240,255"] {
+    color: #E86C00 !important;
+  }
+  [style*="color:#00F0FF"] {
+    color: #E86C00 !important;
+  }
+  [style*="color: #00F0FF"] {
+    color: #E86C00 !important;
+  }
+  
+  /* Fix any remaining purple accents */
+  [style*="color:rgba(112,0,255"] {
+    color: #E86C00 !important;
+  }
+  [style*="color: rgba(112,0,255"] {
+    color: #E86C00 !important;
+  }
+  [style*="color:#7000FF"] {
+    color: #E86C00 !important;
+  }
+  
+  /* Fix any remaining lime accents in text */
+  [style*="color:rgba(204,255,0"] {
+    color: #D97706 !important;
+  }
+  [style*="color: rgba(204,255,0"] {
+    color: #D97706 !important;
+  }
+  [style*="color:#CCFF00"] {
+    color: #D97706 !important;
+  }
+  
+  /* Observer analysis bars - past cone */
+  .oa-bar-bg {
+    background: #E6E6E0 !important;
+  }
+  
+  /* Remove any old hover glow effects */
+  .tool-toggle:hover {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  /* Intensity chart legend */
+  .intensity-legend, .chart-legend {
+    color: #555555 !important;
+  }
+  
+  /* Make sure rule editor delete buttons are subtle */
+  .rule-del {
+    color: #999999 !important;
+  }
+  .rule-del:hover {
+    color: #DC2626 !important;
+  }
 
 </style>
 </head>
@@ -1439,7 +1795,7 @@
     <!-- HOW IT WORKS — prominent position per Jobs/Ive -->
     <div class="section-title" style="margin-top: 16px;">The Big Idea</div>
     <div class="subsection" style="margin-bottom: 12px;">
-      <p class="desc" style="color: rgba(255,255,255,0.60); font-size: 12px; line-height: 1.65;">Simple string rules → branching possibilities → quantum interference. You're watching the universe compute itself.</p>
+      <p class="desc" style="color: #555555; font-size: 12px; line-height: 1.65;">Simple string rules → branching possibilities → quantum interference. You're watching the universe compute itself.</p>
     </div>
     <div class="subsection">
       <h3>Path Weights → Amplitudes</h3>
@@ -1574,7 +1930,7 @@
     <div class="section-title">The Observer</div>
     <div id="quantum-observer-panel">
       <div class="tool-desc" style="margin-bottom: 4px;">
-        Gorard's observer model: you impose <strong style="color:rgba(112,0,255,0.85)">completion rules</strong> on the multiway graph by coarse-graining — identifying branches whose <em>causal futures are isomorphic</em> at your resolution. This Knuth-Bendix completion is formally equivalent to <em>wavefunction collapse</em>.
+        Gorard's observer model: you impose <strong style="color:#E86C00">completion rules</strong> on the multiway graph by coarse-graining — identifying branches whose <em>causal futures are isomorphic</em> at your resolution. This Knuth-Bendix completion is formally equivalent to <em>wavefunction collapse</em>.
       </div>
 
       <div class="cg-slider-row">
@@ -1590,7 +1946,7 @@
       <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:4px;letter-spacing:0.10em;font-weight:600">CAUSAL INVARIANCE</div>
       <div class="ci-gauge">
         <div class="ci-gauge-bar">
-          <div class="ci-gauge-fill" id="ci-gauge-fill" style="width:50%;background:rgba(0,240,255,0.5)"></div>
+          <div class="ci-gauge-fill" id="ci-gauge-fill" style="width:50%;background:#E86C00"></div>
         </div>
         <span class="ci-gauge-label" id="ci-gauge-label">—</span>
       </div>
@@ -4349,7 +4705,7 @@ function drawIntensityPlot(sys, analyticalFn, filterNodeIds) {
 
   // Draw analytical comparison (dashed line) — only for sorting presets and no filter
   if (analyticalFn && !filterNodeIds) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
     ctx.setLineDash([3, 3]);
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -4373,21 +4729,22 @@ function drawIntensityPlot(sys, analyticalFn, filterNodeIds) {
 
     let r, g, b;
     if (filterNodeIds) {
-      // Gold-tinted bars when filtered
-      r = Math.floor(100 + intensity * 104);
-      g = Math.floor(140 + intensity * 115);
-      b = Math.floor(0 + intensity * 30);
+      // Amber-tinted bars when filtered
+      r = Math.floor(180 + intensity * 52);
+      g = Math.floor(100 + intensity * 68);
+      b = Math.floor(0 + intensity * 20);
     } else {
-      r = Math.floor(40 + intensity * 80);
-      g = Math.floor(80 + intensity * 200);
-      b = Math.floor(120 + intensity * 135);
+      // Wolfram orange bars
+      r = Math.floor(180 + intensity * 52);
+      g = Math.floor(80 + intensity * 28);
+      b = Math.floor(0 + intensity * 10);
     }
     ctx.fillStyle = `rgba(${r},${g},${b},${0.5 + intensity * 0.5})`;
     ctx.fillRect(x, pad + plotH - barH, barW, barH);
   }
 
   // Axes labels
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
   ctx.font = '9px Inter';
   ctx.textAlign = 'center';
   ctx.fillText('Screen Position', w / 2, h - 2);
@@ -4401,14 +4758,14 @@ function drawIntensityPlot(sys, analyticalFn, filterNodeIds) {
   ctx.font = '8px Inter';
   ctx.textAlign = 'right';
   if (analyticalFn && !filterNodeIds) {
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
     ctx.fillText('─ ─ Analytical', w - pad, pad - 4);
   }
   if (filterNodeIds) {
-    ctx.fillStyle = 'rgba(204,255,0,0.5)';
+    ctx.fillStyle = 'rgba(232,168,56,0.6)';
     ctx.fillText('██ Observer branch', w - pad, pad - 4);
   } else {
-    ctx.fillStyle = 'rgba(100,200,255,0.4)';
+    ctx.fillStyle = 'rgba(232,108,0,0.5)';
     ctx.fillText('██ Multiway weights', w - pad, analyticalFn ? pad + 6 : pad - 4);
   }
 }
@@ -4513,9 +4870,9 @@ function drawBranchialPlot(sys, highlightNodeId) {
 
     if (ancestrySet) {
       const highlighted = ancestrySet.has(e.from) && ancestrySet.has(e.to);
-      ctx.strokeStyle = highlighted ? 'rgba(204,255,0,0.3)' : 'rgba(80,200,160,0.06)';
+      ctx.strokeStyle = highlighted ? 'rgba(232,168,56,0.3)' : 'rgba(160,160,140,0.06)';
     } else {
-      ctx.strokeStyle = 'rgba(80,200,160,0.15)';
+      ctx.strokeStyle = 'rgba(232,108,0,0.12)';
     }
 
     ctx.beginPath();
@@ -4539,20 +4896,15 @@ function drawBranchialPlot(sys, highlightNodeId) {
     ctx.arc(nx, ny, size, 0, Math.PI * 2);
 
     if (isSelected) {
-      ctx.fillStyle = 'rgba(204,255,0,0.95)';
+      ctx.fillStyle = 'rgba(232,168,56,0.95)';
     } else if (isAncestry) {
-      ctx.fillStyle = `rgba(204,255,0,${0.4 + wNorm * 0.4})`;
+      ctx.fillStyle = `rgba(232,168,56,${0.4 + wNorm * 0.4})`;
     } else if (ancestrySet) {
       // Dimmed
-      const r = Math.floor(40 + wNorm * 100);
-      const g = Math.floor(120 + wNorm * 135);
-      const b = Math.floor(200 + wNorm * 55);
-      ctx.fillStyle = `rgba(${r},${g},${b},${0.1})`;
+      ctx.fillStyle = `rgba(232,108,0,${0.1})`;
     } else {
-      const r = Math.floor(40 + wNorm * 100);
-      const g = Math.floor(120 + wNorm * 135);
-      const b = Math.floor(200 + wNorm * 55);
-      ctx.fillStyle = `rgba(${r},${g},${b},${0.4 + wNorm * 0.6})`;
+      const alpha = 0.4 + wNorm * 0.6;
+      ctx.fillStyle = `rgba(232,${Math.floor(108 + wNorm * 60)},${Math.floor(wNorm * 20)},${alpha})`;
     }
     ctx.fill();
 
@@ -5061,8 +5413,8 @@ function renderObserverAnalysis(nodeId) {
   // Collapse narrative
   const isOnFinalStep = a.step === a.finalStep;
   const collapseNarrative = isOnFinalStep
-    ? `Selecting this branch is equivalent to the observer's <strong>Knuth-Bendix completion projecting onto a single thread</strong>. The <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) form the past causal cone through the multiway graph.`
-    : `This node at <strong>step ${a.step}</strong> sits mid-evolution. Its <strong style="color:rgba(204,255,0,0.8)">${a.ancestors} ancestors</strong> (lime) trace backward to the initial state, and its <strong style="color:rgba(0,240,255,0.8)">${a.descendants} descendants</strong> (cyan) propagate forward to the final step. Together they form a <strong>full causal history</strong> — the complete light cone of this node in the multiway graph.`;
+    ? `Selecting this branch is equivalent to the observer's <strong>Knuth-Bendix completion projecting onto a single thread</strong>. The <strong style="color:#D97706">${a.ancestors} ancestors</strong> (lime) form the past causal cone through the multiway graph.`
+    : `This node at <strong>step ${a.step}</strong> sits mid-evolution. Its <strong style="color:#D97706">${a.ancestors} ancestors</strong> (lime) trace backward to the initial state, and its <strong style="color:#E86C00">${a.descendants} descendants</strong> (cyan) propagate forward to the final step. Together they form a <strong>full causal history</strong> — the complete light cone of this node in the multiway graph.`;
 
   // Build bars for causal cone per step
   let coneBarsHtml = '';
@@ -5075,8 +5427,8 @@ function renderObserverAnalysis(nodeId) {
       <div class="oa-bar-row">
         <div class="oa-bar-label"${isObs ? ' style="color:rgba(255,255,255,0.7);font-weight:500"' : ''}>Step ${s.step}${isObs ? ' ◀' : ''}</div>
         <div class="oa-bar" style="position:relative">
-          <div class="oa-bar-fill" style="width:${pastPct}%;background:rgba(204,255,0,0.5);position:absolute;left:0;top:0"></div>
-          <div class="oa-bar-fill" style="width:${futurePct}%;background:rgba(0,240,255,0.4);position:absolute;right:0;top:0"></div>
+          <div class="oa-bar-fill" style="width:${pastPct}%;background:rgba(217,119,6,0.3);position:absolute;left:0;top:0"></div>
+          <div class="oa-bar-fill" style="width:${futurePct}%;background:rgba(232,108,0,0.3);position:absolute;right:0;top:0"></div>
         </div>
         <div class="oa-bar-value">${s.inCone}/${s.total}</div>
       </div>`;
@@ -5086,8 +5438,8 @@ function renderObserverAnalysis(nodeId) {
   let decoherenceBarsHtml = '';
   if (totalBranchial > 0) {
     const items = [
-      { label: 'Coherent', count: a.coherent, color: 'rgba(204,255,0,0.6)' },
-      { label: 'Near', count: a.nearCoherent, color: 'rgba(0,240,255,0.5)' },
+      { label: 'Coherent', count: a.coherent, color: 'rgba(217,119,6,0.5)' },
+      { label: 'Near', count: a.nearCoherent, color: 'rgba(232,108,0,0.5)' },
       { label: 'Decoherent', count: a.decoherent, color: 'rgba(255,80,80,0.5)' },
     ];
     for (const item of items) {
@@ -5108,8 +5460,8 @@ function renderObserverAnalysis(nodeId) {
 
     <div class="oa-row"><span class="oa-label">Step</span><span class="oa-value">${a.step} / ${a.finalStep}</span></div>
     <div class="oa-row"><span class="oa-label">Path weight</span><span class="oa-value">${a.weight.toLocaleString()} paths (${pct(a.weightFraction)}%)</span></div>
-    <div class="oa-row"><span class="oa-label">Past cone <span style="color:rgba(204,255,0,0.5)">■</span></span><span class="oa-value">${a.ancestors} nodes (${pct(a.pastConeFraction)}%)</span></div>
-    <div class="oa-row"><span class="oa-label">Future cone <span style="color:rgba(0,240,255,0.5)">■</span></span><span class="oa-value">${a.descendants} nodes (${pct(a.futureConeFraction)}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Past cone <span style="color:#D97706">■</span></span><span class="oa-value">${a.ancestors} nodes (${pct(a.pastConeFraction)}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Future cone <span style="color:#E86C00">■</span></span><span class="oa-value">${a.descendants} nodes (${pct(a.futureConeFraction)}%)</span></div>
     <div class="oa-row"><span class="oa-label">Full history</span><span class="oa-value">${a.fullHistory} / ${a.totalNodes} (${pct(a.coneFraction)}%)</span></div>
     <div class="oa-row"><span class="oa-label">History edges</span><span class="oa-value">${a.fullHistoryEdges} / ${a.totalEdges}</span></div>
     <div class="oa-row"><span class="oa-label">Avg branching</span><span class="oa-value">${a.avgBranching.toFixed(2)}×</span></div>
@@ -5682,8 +6034,8 @@ function renderCausalEventAnalysis(eventId) {
       <div class="oa-bar-row">
         <div class="oa-bar-label"${isEvStep ? ' style="color:rgba(255,255,255,0.7);font-weight:500"' : ''}>Step ${step}${isEvStep ? ' \u25C0' : ''}</div>
         <div class="oa-bar" style="position:relative">
-          <div class="oa-bar-fill" style="width:${pastPct}%;background:rgba(204,255,0,0.5);position:absolute;left:0;top:0"></div>
-          <div class="oa-bar-fill" style="width:${futurePct}%;background:rgba(0,240,255,0.4);position:absolute;right:0;top:0"></div>
+          <div class="oa-bar-fill" style="width:${pastPct}%;background:rgba(217,119,6,0.3);position:absolute;left:0;top:0"></div>
+          <div class="oa-bar-fill" style="width:${futurePct}%;background:rgba(232,108,0,0.3);position:absolute;right:0;top:0"></div>
         </div>
         <div class="oa-bar-value">${inPast + inFuture - (cone.pastCone.has(eventId) && cone.futureCone.has(eventId) && isEvStep ? 1 : 0)}/${total}</div>
       </div>`;
@@ -5695,8 +6047,8 @@ function renderCausalEventAnalysis(eventId) {
     <div class="oa-row"><span class="oa-label">Event</span><span class="oa-value">#${eventId} [${ruleStr}]</span></div>
     <div class="oa-row"><span class="oa-label">Step</span><span class="oa-value">${ev.step}</span></div>
     <div class="oa-row"><span class="oa-label">Position</span><span class="oa-value">${ev.position} in "${sys.nodes[ev.parentNodeId].state.length > 25 ? sys.nodes[ev.parentNodeId].state.slice(0,22)+'...' : sys.nodes[ev.parentNodeId].state}"</span></div>
-    <div class="oa-row"><span class="oa-label">Past cone <span style="color:rgba(204,255,0,0.5)">\u25A0</span></span><span class="oa-value">${pastSize} events (${pct(pastSize / Math.max(totalEvents, 1))}%)</span></div>
-    <div class="oa-row"><span class="oa-label">Future cone <span style="color:rgba(0,240,255,0.5)">\u25A0</span></span><span class="oa-value">${futureSize} events (${pct(futureSize / Math.max(totalEvents, 1))}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Past cone <span style="color:#D97706">\u25A0</span></span><span class="oa-value">${pastSize} events (${pct(pastSize / Math.max(totalEvents, 1))}%)</span></div>
+    <div class="oa-row"><span class="oa-label">Future cone <span style="color:#E86C00">\u25A0</span></span><span class="oa-value">${futureSize} events (${pct(futureSize / Math.max(totalEvents, 1))}%)</span></div>
     <div class="oa-row"><span class="oa-label">Full light cone</span><span class="oa-value">${fullSize} / ${totalEvents} events</span></div>
     <div class="oa-row"><span class="oa-label">Causal edges</span><span class="oa-value">${totalCausalEdges}</span></div>
     <div class="oa-row"><span class="oa-label">Geodesic depth</span><span class="oa-value">${geodesic.pastDepth} past \u00B7 ${geodesic.futureDepth} future \u00B7 ${geodesic.pastDepth + geodesic.futureDepth} total</span></div>
@@ -5705,7 +6057,7 @@ function renderCausalEventAnalysis(eventId) {
 
     <div class="oa-section">
       <div class="oa-title">Spacetime Light Cone</div>
-      <div class="oa-narrative">${coneNarrative} The <strong style="color:rgba(204,255,0,0.8)">${pastSize} past events</strong> (lime) are the spacetime past \u2014 everything that <em>could have influenced</em> this event. The <strong style="color:rgba(0,240,255,0.8)">${futureSize} future events</strong> (cyan) are the spacetime future \u2014 everything this event <em>can influence</em>.</div>
+      <div class="oa-narrative">${coneNarrative} The <strong style="color:#D97706">${pastSize} past events</strong> (lime) are the spacetime past \u2014 everything that <em>could have influenced</em> this event. The <strong style="color:#E86C00">${futureSize} future events</strong> (cyan) are the spacetime future \u2014 everything this event <em>can influence</em>.</div>
     </div>
 
     <div class="oa-section">
@@ -6169,7 +6521,7 @@ function renderTokenView(nodeId) {
     html += `<span class="token-char ${changed ? 'changed' : 'unchanged'}">${parentState[i]}</span>`;
   }
   html += '</div>';
-  html += '<div style="margin-bottom:4px;font-size:8px;color:rgba(0,240,255,0.4)">CHILD:</div>';
+  html += '<div style="margin-bottom:4px;font-size:8px;color:#E86C00">CHILD:</div>';
   html += '<div style="display:flex;flex-wrap:wrap;gap:1px">';
   for (let i = 0; i < childState.length; i++) {
     const changed = i >= parentState.length || childState[i] !== parentState[i];
@@ -6695,7 +7047,7 @@ function drawSpeedChart(data) {
   const maxVal = Math.max(maxBranch, maxCausal);
 
   // Branchial line (purple)
-  ctx.strokeStyle = 'rgba(112,0,255,0.8)';
+  ctx.strokeStyle = 'rgba(232,108,0,0.8)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i < data.length; i++) {
@@ -6718,7 +7070,7 @@ function drawSpeedChart(data) {
 
   // Legend
   ctx.font = '8px Inter';
-  ctx.fillStyle = 'rgba(112,0,255,0.7)';
+  ctx.fillStyle = 'rgba(232,108,0,0.7)';
   ctx.textAlign = 'right';
   ctx.fillText('── Branchial edges', w - pad, pad - 2);
   ctx.fillStyle = 'rgba(255,107,53,0.7)';
@@ -6828,7 +7180,7 @@ function drawPersistenceChart(data) {
   const plotH = h - pad * 2;
 
   // Persistence line (lime)
-  ctx.strokeStyle = 'rgba(204,255,0,0.8)';
+  ctx.strokeStyle = 'rgba(232,168,56,0.8)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i < data.length; i++) {
@@ -6839,7 +7191,7 @@ function drawPersistenceChart(data) {
   ctx.stroke();
 
   // Fill area
-  ctx.fillStyle = 'rgba(204,255,0,0.08)';
+  ctx.fillStyle = 'rgba(232,168,56,0.08)';
   ctx.beginPath();
   ctx.moveTo(pad, pad + plotH);
   for (let i = 0; i < data.length; i++) {
@@ -7053,7 +7405,7 @@ function drawZenoChart() {
   const plotH = h - pad * 2;
 
   // Draw frozen ratio over time (lime)
-  ctx.strokeStyle = 'rgba(204,255,0,0.8)';
+  ctx.strokeStyle = 'rgba(232,168,56,0.8)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i < zenoHistory.length; i++) {
@@ -7064,7 +7416,7 @@ function drawZenoChart() {
   ctx.stroke();
 
   // Fill area
-  ctx.fillStyle = 'rgba(204,255,0,0.06)';
+  ctx.fillStyle = 'rgba(232,168,56,0.06)';
   ctx.beginPath();
   ctx.moveTo(pad, pad + plotH);
   for (let i = 0; i < zenoHistory.length; i++) {
@@ -7078,7 +7430,7 @@ function drawZenoChart() {
 
   // Draw total vs surviving as bar comparison
   const maxBranch = Math.max(...zenoHistory.map(h => h.totalBranches), 1);
-  ctx.strokeStyle = 'rgba(112,0,255,0.5)';
+  ctx.strokeStyle = 'rgba(232,108,0,0.5)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i < zenoHistory.length; i++) {
@@ -7088,7 +7440,7 @@ function drawZenoChart() {
   }
   ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(0,240,255,0.5)';
+  ctx.strokeStyle = 'rgba(232,108,0,0.6)';
   ctx.beginPath();
   for (let i = 0; i < zenoHistory.length; i++) {
     const x = pad + (i / (zenoHistory.length - 1)) * plotW;
@@ -7100,11 +7452,11 @@ function drawZenoChart() {
   // Legend
   ctx.font = '8px Inter';
   ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(204,255,0,0.7)';
+  ctx.fillStyle = 'rgba(232,168,56,0.7)';
   ctx.fillText('── Frozen ratio', w - pad, pad - 2);
-  ctx.fillStyle = 'rgba(112,0,255,0.5)';
+  ctx.fillStyle = 'rgba(232,108,0,0.5)';
   ctx.fillText('── Total branches', w - pad, pad + 8);
-  ctx.fillStyle = 'rgba(0,240,255,0.5)';
+  ctx.fillStyle = 'rgba(232,108,0,0.5)';
   ctx.fillText('── Surviving', w - pad, pad + 18);
 
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
@@ -7279,12 +7631,12 @@ function drawTunnelingChart(pairs) {
 
     ctx.beginPath();
     ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(0, ${Math.floor(240 * intensity)}, ${Math.floor(255 * intensity)}, ${0.4 + intensity * 0.5})`;
+    ctx.fillStyle = `rgba(232, ${Math.floor(108 + intensity * 60)}, ${Math.floor(intensity * 20)}, ${0.4 + intensity * 0.5})`;
     ctx.fill();
   }
 
   // Draw diagonal (no-tunneling line)
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.strokeStyle = 'rgba(0,0,0,0.1)';
   ctx.lineWidth = 1;
   ctx.setLineDash([4, 4]);
   ctx.beginPath();
@@ -7305,7 +7657,7 @@ function drawTunnelingChart(pairs) {
   ctx.restore();
 
   ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(0,240,255,0.4)';
+  ctx.fillStyle = 'rgba(232,108,0,0.4)';
   ctx.fillText('above diagonal = tunneling', w - pad, pad - 2);
 }
 
@@ -7529,7 +7881,7 @@ function drawAsymmetryChart(data) {
   const maxNodes = Math.max(...steps.map(s => s.totalNodes), 1);
 
   // Total nodes (purple, filled area)
-  ctx.fillStyle = 'rgba(112,0,255,0.12)';
+  ctx.fillStyle = 'rgba(232,108,0,0.12)';
   ctx.beginPath();
   ctx.moveTo(pad, pad + plotH);
   for (let i = 0; i < steps.length; i++) {
@@ -7541,7 +7893,7 @@ function drawAsymmetryChart(data) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.strokeStyle = 'rgba(112,0,255,0.6)';
+  ctx.strokeStyle = 'rgba(232,108,0,0.6)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i < steps.length; i++) {
@@ -7552,7 +7904,7 @@ function drawAsymmetryChart(data) {
   ctx.stroke();
 
   // Subjective nodes (cyan, filled area)
-  ctx.fillStyle = 'rgba(0,240,255,0.12)';
+  ctx.fillStyle = 'rgba(232,108,0,0.12)';
   ctx.beginPath();
   ctx.moveTo(pad, pad + plotH);
   for (let i = 0; i < steps.length; i++) {
@@ -7564,7 +7916,7 @@ function drawAsymmetryChart(data) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.strokeStyle = 'rgba(0,240,255,0.8)';
+  ctx.strokeStyle = 'rgba(232,108,0,0.8)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i < steps.length; i++) {
@@ -7575,7 +7927,7 @@ function drawAsymmetryChart(data) {
   ctx.stroke();
 
   // Access ratio line (lime, secondary axis)
-  ctx.strokeStyle = 'rgba(204,255,0,0.6)';
+  ctx.strokeStyle = 'rgba(232,168,56,0.6)';
   ctx.lineWidth = 1;
   ctx.setLineDash([3, 3]);
   ctx.beginPath();
@@ -7590,11 +7942,11 @@ function drawAsymmetryChart(data) {
   // Legend
   ctx.font = '8px Inter';
   ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(112,0,255,0.7)';
+  ctx.fillStyle = 'rgba(232,108,0,0.7)';
   ctx.fillText('── Total branches', w - pad, pad - 2);
-  ctx.fillStyle = 'rgba(0,240,255,0.8)';
+  ctx.fillStyle = 'rgba(232,108,0,0.8)';
   ctx.fillText('── Subjective (observer cone)', w - pad, pad + 8);
-  ctx.fillStyle = 'rgba(204,255,0,0.6)';
+  ctx.fillStyle = 'rgba(232,168,56,0.6)';
   ctx.fillText('- - Access ratio', w - pad, pad + 18);
 
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
@@ -7847,7 +8199,7 @@ function drawHolographicChart(data) {
   const maxVolume = Math.max(...rd.map(r => r.volume), 1);
 
   // Entropy line (lime)
-  ctx.strokeStyle = 'rgba(204,255,0,0.8)';
+  ctx.strokeStyle = 'rgba(232,168,56,0.8)';
   ctx.lineWidth = 2;
   ctx.beginPath();
   for (let i = 0; i < rd.length; i++) {
@@ -7858,7 +8210,7 @@ function drawHolographicChart(data) {
   ctx.stroke();
 
   // Boundary line (cyan)
-  ctx.strokeStyle = 'rgba(0,240,255,0.6)';
+  ctx.strokeStyle = 'rgba(232,108,0,0.7)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i < rd.length; i++) {
@@ -7882,9 +8234,9 @@ function drawHolographicChart(data) {
   // Legend
   ctx.font = '8px Inter';
   ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(204,255,0,0.8)';
+  ctx.fillStyle = 'rgba(232,168,56,0.8)';
   ctx.fillText('── Entropy (states)', w - pad, pad - 2);
-  ctx.fillStyle = 'rgba(0,240,255,0.6)';
+  ctx.fillStyle = 'rgba(232,108,0,0.6)';
   ctx.fillText('── Boundary', w - pad, pad + 8);
   ctx.fillStyle = 'rgba(255,107,53,0.6)';
   ctx.fillText('── Volume', w - pad, pad + 18);
@@ -8036,7 +8388,7 @@ function updateCoarseGrainUI(result) {
     const pct = (ci.invariance * 100).toFixed(0);
     gaugeFill.style.width = pct + '%';
     gaugeFill.style.background = ci.invariance > 0.8
-      ? 'rgba(204,255,0,0.6)' : ci.invariance > 0.5
+      ? 'rgba(232,168,56,0.6)' : ci.invariance > 0.5
       ? 'rgba(255,200,0,0.6)' : 'rgba(255,80,80,0.6)';
     gaugeLabel.textContent = pct + '%';
 
@@ -8077,7 +8429,7 @@ function updateCoarseGrainUI(result) {
   const pctAfter = (ciAfter * 100).toFixed(0);
   gaugeFill.style.width = pctAfter + '%';
   gaugeFill.style.background = ciAfter > 0.8
-    ? 'rgba(204,255,0,0.6)' : ciAfter > 0.5
+    ? 'rgba(232,168,56,0.6)' : ciAfter > 0.5
     ? 'rgba(255,200,0,0.6)' : 'rgba(255,80,80,0.6)';
   gaugeLabel.textContent = pctAfter + '%';
 
@@ -9985,7 +10337,7 @@ function drawDimensionChart(dimData) {
   ctx.setLineDash([]);
 
   // Plot dimension estimates
-  ctx.strokeStyle = '#00F0FF';
+  ctx.strokeStyle = '#E86C00';
   ctx.lineWidth = 2;
   ctx.beginPath();
   for (let i = 0; i < estimates.length; i++) {
@@ -10000,7 +10352,7 @@ function drawDimensionChart(dimData) {
   for (const est of estimates) {
     const x = pad + (est.r / maxR) * plotW;
     const y = pad + plotH - ((est.d - minD) / range) * plotH;
-    ctx.fillStyle = '#00F0FF';
+    ctx.fillStyle = '#E86C00';
     ctx.beginPath();
     ctx.arc(x, y, 2.5, 0, Math.PI * 2);
     ctx.fill();
@@ -10009,7 +10361,7 @@ function drawDimensionChart(dimData) {
   // Mean line
   if (dimData.dimension !== null) {
     const meanY = pad + plotH - ((dimData.dimension - minD) / range) * plotH;
-    ctx.strokeStyle = 'rgba(204,255,0,0.5)';
+    ctx.strokeStyle = 'rgba(232,168,56,0.5)';
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 3]);
     ctx.beginPath();
@@ -10017,7 +10369,7 @@ function drawDimensionChart(dimData) {
     ctx.lineTo(pad + plotW, meanY);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(204,255,0,0.7)';
+    ctx.fillStyle = 'rgba(232,168,56,0.7)';
     ctx.font = '9px JetBrains Mono';
     ctx.textAlign = 'right';
     ctx.fillText('d ≈ ' + dimData.dimension.toFixed(2), pad + plotW, meanY - 4);
@@ -10261,7 +10613,7 @@ if (fubiniToggle) {
   fubiniToggle.addEventListener('click', () => {
     _fubiniStudyActive = !_fubiniStudyActive;
     fubiniToggle.textContent = _fubiniStudyActive ? '●' : '';
-    fubiniToggle.style.color = _fubiniStudyActive ? 'rgba(0,240,255,0.8)' : '';
+    fubiniToggle.style.color = _fubiniStudyActive ? '#E86C00' : '';
   });
 }
 
@@ -10273,7 +10625,7 @@ if (geodesicToggle) {
   geodesicToggle.addEventListener('click', () => {
     _geodesicActive = !_geodesicActive;
     geodesicToggle.textContent = _geodesicActive ? '●' : '';
-    geodesicToggle.style.color = _geodesicActive ? 'rgba(204,255,0,0.8)' : '';
+    geodesicToggle.style.color = _geodesicActive ? '#E86C00' : '';
     if (!_geodesicActive) { _geodesicNodeA = null; _geodesicNodeB = null; _geodesicPath = null; }
   });
 }
@@ -10286,7 +10638,7 @@ if (embObsToggle) {
   embObsToggle.addEventListener('click', () => {
     _embeddedObserverActive = !_embeddedObserverActive;
     embObsToggle.textContent = _embeddedObserverActive ? '●' : '';
-    embObsToggle.style.color = _embeddedObserverActive ? 'rgba(112,0,255,0.8)' : '';
+    embObsToggle.style.color = _embeddedObserverActive ? '#E86C00' : '';
     if (!_embeddedObserverActive) _embeddedObserverResult = null;
   });
 }
@@ -10314,7 +10666,7 @@ if (stLightConeToggle) {
   stLightConeToggle.addEventListener('click', () => {
     _stLightConeActive = !_stLightConeActive;
     stLightConeToggle.textContent = _stLightConeActive ? '●' : '';
-    stLightConeToggle.style.color = _stLightConeActive ? 'rgba(204,255,0,0.8)' : '';
+    stLightConeToggle.style.color = _stLightConeActive ? '#E86C00' : '';
     if (!_stLightConeActive) {
       clearLightCone();
     }
@@ -10495,7 +10847,7 @@ if (stDimHeatToggle) {
   stDimHeatToggle.addEventListener('click', () => {
     _stDimHeatActive = !_stDimHeatActive;
     stDimHeatToggle.textContent = _stDimHeatActive ? '●' : '';
-    stDimHeatToggle.style.color = _stDimHeatActive ? 'rgba(0,240,255,0.8)' : '';
+    stDimHeatToggle.style.color = _stDimHeatActive ? '#E86C00' : '';
     document.getElementById('st-dimheat-legend').style.display = _stDimHeatActive ? 'block' : 'none';
     if (_stDimHeatActive) {
       applyDimensionHeatmap();
@@ -10656,7 +11008,7 @@ if (stEntangleToggle) {
   stEntangleToggle.addEventListener('click', () => {
     _stEntangleActive = !_stEntangleActive;
     stEntangleToggle.textContent = _stEntangleActive ? '●' : '';
-    stEntangleToggle.style.color = _stEntangleActive ? 'rgba(112,0,255,0.8)' : '';
+    stEntangleToggle.style.color = _stEntangleActive ? '#E86C00' : '';
     if (_stEntangleActive) {
       showEntanglementThreads();
     } else {
@@ -11320,14 +11672,14 @@ function applyScene(scene) {
           for (const feat of scene.features) {
             if (feat === 'dimheat') {
               _stDimHeatActive = true;
-              if (dhToggle) { dhToggle.textContent = '●'; dhToggle.style.color = 'rgba(204,255,0,0.8)'; }
+              if (dhToggle) { dhToggle.textContent = '●'; dhToggle.style.color = '#E86C00'; }
               if (typeof applyDimensionHeatmap === 'function') applyDimensionHeatmap();
             } else if (feat === 'lightcone') {
               _stLightConeActive = true;
-              if (lcToggle) { lcToggle.textContent = '●'; lcToggle.style.color = 'rgba(204,255,0,0.8)'; }
+              if (lcToggle) { lcToggle.textContent = '●'; lcToggle.style.color = '#E86C00'; }
             } else if (feat === 'entangle') {
               _stEntangleActive = true;
-              if (etToggle) { etToggle.textContent = '●'; etToggle.style.color = 'rgba(204,255,0,0.8)'; }
+              if (etToggle) { etToggle.textContent = '●'; etToggle.style.color = '#E86C00'; }
               if (typeof showEntanglementThreads === 'function') showEntanglementThreads();
             }
           }
