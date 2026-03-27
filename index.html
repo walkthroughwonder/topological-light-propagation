@@ -1466,9 +1466,9 @@
     color: #E86C00;
   }
   .scenes-btn.open, #scenes-btn.open {
-    background: #E86C00;
-    color: #FFFFFF;
-    border-color: #E86C00;
+    background: rgba(232,108,0,0.08);
+    color: #E86C00;
+    border-color: rgba(232,108,0,0.30);
   }
   
   /* Scenes panel */
@@ -1951,52 +1951,57 @@
 
   /* ─── SCENES BUTTON ─── */
   [data-theme="dark"] #scenes-btn {
-    background: #1E1E1E !important;
+    background: #1A1A1A !important;
     border-color: #333333 !important;
-    color: #BBBBBB !important;
+    color: #999999 !important;
   }
   [data-theme="dark"] #scenes-btn:hover {
-    border-color: #E86C00 !important;
-    color: #E86C00 !important;
+    border-color: #555555 !important;
+    color: #CCCCCC !important;
     background: #222222 !important;
   }
   [data-theme="dark"] #scenes-btn.open {
-    background: #E86C00 !important;
-    color: #FFFFFF !important;
-    border-color: #E86C00 !important;
+    background: rgba(232,108,0,0.15) !important;
+    color: #E86C00 !important;
+    border-color: rgba(232,108,0,0.35) !important;
   }
 
   /* ─── SCENES PANEL ─── */
   [data-theme="dark"] #scenes-panel {
-    background: rgba(22,22,22,0.97) !important;
-    border-color: #333333 !important;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
+    background: rgba(20,20,20,0.97) !important;
+    border-color: #2A2A2A !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important;
   }
   [data-theme="dark"] #scenes-panel::-webkit-scrollbar-thumb {
-    background: #444444;
+    background: #333333;
   }
-  [data-theme="dark"] .scene-card {
+  [data-theme="dark"] #scenes-panel .scene-card {
+    background: #1A1A1A !important;
+    border-color: #2A2A2A !important;
+    color: #AAAAAA !important;
+  }
+  [data-theme="dark"] #scenes-panel .scene-card:hover {
+    background: #1E1E1E !important;
+    border-color: #333333 !important;
+  }
+  [data-theme="dark"] #scenes-panel .scene-card.active {
+    background: rgba(232,108,0,0.06) !important;
+    border-color: rgba(232,108,0,0.20) !important;
+  }
+  [data-theme="dark"] #scenes-panel .scene-card h4,
+  [data-theme="dark"] #scenes-panel .scene-card .scene-name {
     color: #CCCCCC !important;
   }
-  [data-theme="dark"] .scene-card:hover {
-    background: #222222 !important;
-    border-color: #444444 !important;
-  }
-  [data-theme="dark"] .scene-card.active {
-    background: rgba(232,108,0,0.08) !important;
-    border-color: rgba(232,108,0,0.3) !important;
-  }
-  [data-theme="dark"] .scene-card .scene-name {
-    color: #E8E8E8 !important;
-  }
-  [data-theme="dark"] .scene-card .scene-desc {
-    color: #999999 !important;
+  [data-theme="dark"] #scenes-panel .scene-card p,
+  [data-theme="dark"] #scenes-panel .scene-card .scene-desc {
+    color: #777777 !important;
   }
   [data-theme="dark"] .scene-tag {
-    background: rgba(232,108,0,0.15) !important;
+    background: rgba(232,108,0,0.10) !important;
+    color: rgba(232,108,0,0.7) !important;
   }
   [data-theme="dark"] .scene-group-title {
-    color: #666666 !important;
+    color: #555555 !important;
   }
 
   /* ─── ACTION BUTTON ─── */
