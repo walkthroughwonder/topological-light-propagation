@@ -3261,9 +3261,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 
 // ═══════════════════════════════════════════════════════════════
 // PART 1: MULTIWAY STRING REWRITING ENGINE
@@ -5327,75 +5324,34 @@ function buildScene(sys, highlightSet) {
   }
 
   const edgeOpacity = highlightSet ? 0.6 : (isDarkTheme ? 0.55 : 1.0);
-
-  // Light mode: use Line2 for fat pixel-width lines
-  // Dark mode: use LineSegments with shader (additive blending glow)
-  let edgeLines;
-  if (!isDarkTheme) {
-    // Build Line2 geometry — positions and colors as flat arrays (per-vertex)
-    const fatPositions = [];
-    const fatColors = [];
-    for (let i = 0; i < sys.edges.length; i++) {
-      const i6 = i * 6;
-      fatPositions.push(
-        edgeVerts[i6], edgeVerts[i6+1], edgeVerts[i6+2],
-        edgeVerts[i6+3], edgeVerts[i6+4], edgeVerts[i6+5]
-      );
-      fatColors.push(
-        edgeColors[i6], edgeColors[i6+1], edgeColors[i6+2],
-        edgeColors[i6+3], edgeColors[i6+4], edgeColors[i6+5]
-      );
-    }
-    const fatGeo = new LineGeometry();
-    fatGeo.setPositions(fatPositions);
-    fatGeo.setColors(fatColors);
-    const fatMat = new LineMaterial({
-      vertexColors: true,
-      transparent: true,
-      opacity: edgeOpacity,
-      linewidth: 2,  // pixels
-      resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-      depthWrite: false
-    });
-    edgeLines = new Line2(fatGeo, fatMat);
-    edgeLines.computeLineDistances();
-    edgeLines._isFatLine = true;
-  } else {
-    const edgeGeo = new THREE.BufferGeometry();
-    edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgeVerts, 3));
-    edgeGeo.setAttribute('color', new THREE.BufferAttribute(edgeColors, 3));
-    const edgeProgress = new Float32Array(sys.edges.length * 2);
-    for (let i = 0; i < sys.edges.length; i++) {
-      edgeProgress[i * 2] = 0.0;
-      edgeProgress[i * 2 + 1] = 1.0;
-    }
-    edgeGeo.setAttribute('edgeProgress', new THREE.BufferAttribute(edgeProgress, 1));
-    const edgeMat = new THREE.ShaderMaterial({
-      vertexColors: true,
-      transparent: true,
-      depthWrite: false,
-      blending: _blend,
-      uniforms: {
-        uOpacity: { value: edgeOpacity }
-      },
-      vertexShader: `
-        varying vec3 vColor;
-        void main() {
-          vColor = color;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float uOpacity;
-        varying vec3 vColor;
-        void main() {
-          gl_FragColor = vec4(vColor, uOpacity);
-        }
-      `
-    });
-    edgeMat._isFlowMaterial = true;
-    edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
-  }
+  const edgeGeo = new THREE.BufferGeometry();
+  edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgeVerts, 3));
+  edgeGeo.setAttribute('color', new THREE.BufferAttribute(edgeColors, 3));
+  const edgeMat = new THREE.ShaderMaterial({
+    vertexColors: true,
+    transparent: true,
+    depthWrite: false,
+    blending: _blend,
+    uniforms: {
+      uOpacity: { value: edgeOpacity }
+    },
+    vertexShader: `
+      varying vec3 vColor;
+      void main() {
+        vColor = color;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uOpacity;
+      varying vec3 vColor;
+      void main() {
+        gl_FragColor = vec4(vColor, uOpacity);
+      }
+    `
+  });
+  edgeMat._isFlowMaterial = true;
+  const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
   multiwayGroup.add(edgeLines);
   currentEdgeLines = edgeLines;
   savedEdgeOpacity = edgeOpacity;
@@ -5821,12 +5777,9 @@ function buildScene(sys, highlightSet) {
     savedNodeColors = new Float32Array(nc.array);
     savedNodeSizes = new Float32Array(ns.array);
   }
-  if (currentEdgeLines && !currentEdgeLines._isFatLine) {
+  if (currentEdgeLines) {
     const ec = currentEdgeLines.geometry.getAttribute('color');
     savedEdgeColors = new Float32Array(ec.array);
-  } else if (currentEdgeLines && currentEdgeLines._isFatLine) {
-    // Line2 stores colors differently — save the raw edgeColors for reference
-    savedEdgeColors = null; // hover edge coloring disabled for fat lines
   }
 }
 window._buildScene = buildScene;
@@ -7360,10 +7313,6 @@ function onResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   composer.setSize(w, h);
-  // Update Line2 resolution for fat lines
-  if (currentEdgeLines && currentEdgeLines._isFatLine && currentEdgeLines.material) {
-    currentEdgeLines.material.resolution.set(w, h);
-  }
   if (currentSystem) {
     drawIntensityPlot(currentSystem, getCurrentAnalytical());
     drawBranchialPlot(currentSystem, selectedObserverNodeId);
