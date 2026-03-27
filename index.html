@@ -701,6 +701,18 @@
   .log-destructive { color: rgba(255,100,80,0.7); }
   .log-neutral { color: #999999; }
 
+  #controls-hint {
+    position: absolute;
+    bottom: 46px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 0.3px;
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(0,0,0,0.3);
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+  }
   #status-bar {
     position: absolute;
     bottom: 24px; left: 50%;
@@ -1300,7 +1312,8 @@
     .view-tab { font-size: 9px; padding: 5px 8px; }
     #scenes-dropdown-wrap { top: 12px; left: auto; right: 56px; }
     #about-btn { bottom: 12px; right: 12px; }
-    .theme-toggle { top: 12px !important; left: 56px !important; right: auto !important; transform: none !important; }
+    .theme-toggle { top: 12px !important; left: 56px !important; right: auto !important; }
+    #controls-hint { display: none !important; }
     #status-bar { font-size: 9px; top: auto; bottom: 44px; left: 50%; transform: translateX(-50%); right: auto; }
   }
   @media (max-width: 480px) {
@@ -2392,7 +2405,10 @@
     color: #999999 !important;
   }
 
-  /* ─── STATUS BAR & FOOTER ─── */
+  /* ─── STATUS BAR, CONTROLS HINT & FOOTER ─── */
+  [data-theme="dark"] #controls-hint {
+    color: rgba(255,255,255,0.3) !important;
+  }
   [data-theme="dark"] #status-bar {
     color: rgba(255,255,255,0.45) !important;
   }
@@ -2457,14 +2473,13 @@
   .theme-toggle {
     position: fixed;
     top: 12px;
-    left: 50%;
-    transform: translateX(calc(-50% - 270px));
+    left: 332px;
     z-index: 50;
     background: rgba(255,255,255,0.9);
     border: 1px solid #D9D9D4;
     border-radius: 20px;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2482,6 +2497,7 @@
   [data-theme="dark"] .theme-toggle {
     background: rgba(30,30,30,0.9);
     border-color: #444444;
+    color: #CCCCCC;
   }
   [data-theme="dark"] .theme-toggle:hover {
     border-color: #E86C00;
@@ -2765,7 +2781,7 @@
 
   <!-- Theme toggle button -->
   <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
-    <span id="theme-icon">☀️</span>
+    <span id="theme-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
   </button>
 
   <!-- LEFT PANEL: Physics & Controls -->
@@ -2921,6 +2937,7 @@
       <button class="view-tab" data-view="bevolution">B-Evolution</button>
       <button class="view-tab" data-view="spacetime">Spacetime</button>
     </div>
+    <div id="controls-hint"></div>
     <div id="status-bar"></div>
 
     <div id="scenes-dropdown-wrap">
@@ -6874,8 +6891,23 @@ document.querySelectorAll('.view-tab').forEach(tab => {
     const _distS = document.getElementById('bev-distance-section');
     if (_distS) _distS.classList.toggle('active', currentView === 'bevolution');
     if (currentView !== 'bevolution' && currentSystem) fitCamera(currentSystem);
+    updateControlsHint();
   });
 });
+
+// ─── Controls hint per viewport ───
+const _controlsHintEl = document.getElementById('controls-hint');
+const _controlsMap = {
+  multiway:   'Drag = Pan · Shift+Drag = Rotate · Scroll = Zoom',
+  causal:     'Drag = Pan · Shift+Drag = Rotate · Scroll = Zoom',
+  branchial:  'Drag = Pan · Shift+Drag = Rotate · Scroll = Zoom',
+  bevolution: 'Drag = Pan · Scroll = Zoom',
+  spacetime:  'Drag = Orbit · Ctrl+Drag = Pan · Scroll = Zoom'
+};
+function updateControlsHint() {
+  if (_controlsHintEl) _controlsHintEl.textContent = _controlsMap[currentView] || '';
+}
+updateControlsHint();
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -12969,7 +13001,9 @@ renderScenesPanel();
 
   function applyTheme(theme) {
     html.setAttribute('data-theme', theme);
-    icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    icon.innerHTML = theme === 'dark'
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     try { window['local'+'Storage'].setItem('wolfram-theme', theme); } catch(e) {}
 
     // Notify canvas renderers to update text colors
@@ -13523,7 +13557,7 @@ window.addEventListener('resize', () => {
     if (params.get('t') === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       const icon = document.getElementById('theme-icon');
-      if (icon) icon.textContent = '🌙';
+      if (icon) icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
       try { window['local'+'Storage'].setItem('wolfram-theme', 'light'); } catch(e) {}
     }
 
