@@ -5071,7 +5071,7 @@ let sceneSpreadScale = 1;
 let savedNodeColors = null;
 let savedNodeSizes = null;
 let savedEdgeColors = null;
-let savedEdgeOpacity = 0.35;
+let savedEdgeOpacity = 0.55;
 let hoverHighlightNodeId = null; // currently hover-highlighted node ID
 
 // ─── Build the 3D scene from a MultiwaySystem ───
@@ -5291,9 +5291,9 @@ function buildScene(sys, highlightSet) {
       _tmpColor.multiplyScalar(0.3 + wNorm * 0.4);
     } else {
       if (isDarkTheme) {
-        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.5, 0.15 + wNorm * 0.25);
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.55, 0.22 + wNorm * 0.30);
       } else {
-        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.45, 0.20 + wNorm * 0.28);
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.50, 0.25 + wNorm * 0.30);
       }
       if (!isEdgeHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
@@ -5315,7 +5315,7 @@ function buildScene(sys, highlightSet) {
     edgeProgress[i * 2 + 1] = 1.0; // to vertex
   }
   edgeGeo.setAttribute('edgeProgress', new THREE.BufferAttribute(edgeProgress, 1));
-  const edgeOpacity = highlightSet ? 0.5 : (isDarkTheme ? 0.35 : 0.7);
+  const edgeOpacity = highlightSet ? 0.6 : (isDarkTheme ? 0.55 : 0.85);
   // Animated flow shader — dashed lines with moving offset
   const edgeMat = new THREE.ShaderMaterial({
     vertexColors: true,
@@ -5349,7 +5349,7 @@ function buildScene(sys, highlightSet) {
         // Animated dash pattern — flows along edge direction
         float flow = fract(vProgress * 12.0 - uTime * 0.5 * uFlow);
         float dash = smoothstep(0.0, 0.15, flow) * smoothstep(0.6, 0.45, flow);
-        float alpha = mix(0.25, 0.25 + dash * 0.75, uFlow);
+        float alpha = mix(0.4, 0.4 + dash * 0.6, uFlow);
         gl_FragColor = vec4(vColor, alpha * uOpacity);
       }
     `
@@ -5583,7 +5583,7 @@ function buildScene(sys, highlightSet) {
   bEdgeGeo.setAttribute('position', new THREE.BufferAttribute(bEdgeVerts, 3));
   bEdgeGeo.setAttribute('color', new THREE.BufferAttribute(bEdgeColors, 3));
   const bEdgeMat = new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0.25,
+    vertexColors: true, transparent: true, opacity: 0.40,
     blending: _blend, depthWrite: false
   });
   branchialGroup.add(new THREE.LineSegments(bEdgeGeo, bEdgeMat));
@@ -5760,7 +5760,7 @@ function buildScene(sys, highlightSet) {
       ceGeo.setAttribute('position', new THREE.BufferAttribute(ceVerts, 3));
       ceGeo.setAttribute('color', new THREE.BufferAttribute(ceColors, 3));
       const ceMat = new THREE.LineBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0.4,
+        vertexColors: true, transparent: true, opacity: 0.55,
         blending: _blend, depthWrite: false
       });
       causalGroup.add(new THREE.LineSegments(ceGeo, ceMat));
