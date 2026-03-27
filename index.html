@@ -12888,29 +12888,91 @@ document.addEventListener('click', (e) => {
 renderScenesPanel();
 
 // ═══════════════════════════════════════════════════════════════
-// JOBS/IVE REDESIGN: Progressive Disclosure (Collapsible Sections)
+// UNIVERSAL COLLAPSIBLE SECTIONS
 // ═══════════════════════════════════════════════════════════════
 (function initCollapsibles() {
+  // 1. Handle pre-existing data-collapse headers (Physics Tools, Spatial Geometry, etc.)
   document.querySelectorAll('.collapsible-header').forEach(header => {
     const targetId = header.getAttribute('data-collapse');
     const body = document.getElementById(targetId);
     if (!body) return;
-    
-    // Set initial state
-    if (body.classList.contains('open')) {
-      header.classList.add('open');
-    }
-    
+    if (body.classList.contains('open')) header.classList.add('open');
     header.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = body.classList.contains('open');
-      if (isOpen) {
-        body.classList.remove('open');
-        header.classList.remove('open');
-      } else {
-        body.classList.add('open');
-        header.classList.add('open');
+      body.classList.toggle('open', !isOpen);
+      header.classList.toggle('open', !isOpen);
+    });
+  });
+
+  // 2. Auto-wrap all plain .section-title elements in #left-panel and #right-panel
+  //    Sections that should start OPEN by default:
+  const defaultOpen = new Set([
+    'Rewriting Rules', 'Initial State', 'Presets', 'Configuration',
+    'The Observer', 'Emergent Intensity Pattern'
+  ]);
+  //    Skip these (already collapsible or sub-headers):
+  const skipTitles = new Set();
+  document.querySelectorAll('.collapsible-header').forEach(h => {
+    skipTitles.add(h);
+  });
+
+  ['left-panel', 'right-panel'].forEach(panelId => {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+
+    // Gather all section-title direct children (or near-direct in spacetime-controls)
+    const titles = panel.querySelectorAll('.section-title');
+    titles.forEach(title => {
+      if (skipTitles.has(title)) return;
+      // Skip sub-headers inside spacetime-controls that say "Spacetime Presets"
+      const titleText = title.textContent.trim();
+      if (titleText === 'Spacetime Presets') return;
+
+      // Already has a chevron? Skip
+      if (title.querySelector('.chevron')) return;
+
+      // Add collapsible-header class and chevron
+      title.classList.add('collapsible-header');
+      const chevron = document.createElement('span');
+      chevron.className = 'chevron';
+      chevron.textContent = '▶';
+      title.appendChild(chevron);
+
+      // Collect all siblings until the next .section-title or .collapsible-header or .spacetime-controls
+      const body = document.createElement('div');
+      body.className = 'collapsible-body';
+      let sibling = title.nextElementSibling;
+      const toWrap = [];
+      while (sibling) {
+        if (sibling.classList.contains('section-title') ||
+            sibling.classList.contains('collapsible-header') ||
+            (sibling.classList.contains('spacetime-controls') && !title.closest('.spacetime-controls'))) {
+          break;
+        }
+        toWrap.push(sibling);
+        sibling = sibling.nextElementSibling;
       }
+      if (toWrap.length === 0) return;
+
+      // Insert wrapper after title
+      title.after(body);
+      toWrap.forEach(el => body.appendChild(el));
+
+      // Default open state
+      const isOpen = defaultOpen.has(titleText);
+      if (isOpen) {
+        body.classList.add('open');
+        title.classList.add('open');
+      }
+
+      // Click handler
+      title.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = body.classList.contains('open');
+        body.classList.toggle('open', !open);
+        title.classList.toggle('open', !open);
+      });
     });
   });
 })();
