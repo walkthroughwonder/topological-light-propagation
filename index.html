@@ -55,7 +55,7 @@
   #center {
     position: relative;
     overflow: hidden;
-    background: #0a0a0c;
+    background: #F0F0EC;
   }
   #center canvas { display: block; width: 100%; height: 100%; }
 
@@ -723,7 +723,7 @@
     transform: translateX(-50%);
     font-size: 10px;
     font-family: 'JetBrains Mono', monospace;
-    color: rgba(255,255,255,0.45);
+    color: rgba(0,0,0,0.35);
     pointer-events: none;
     white-space: nowrap;
   }
@@ -736,7 +736,7 @@
   }
   footer a {
     font-size: 9px;
-    color: rgba(255,255,255,0.35);
+    color: rgba(0,0,0,0.25);
     text-decoration: none;
     font-family: 'Inter', sans-serif;
     transition: color 180ms ease;
@@ -4620,13 +4620,33 @@ const centerEl = document.getElementById('center');
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
 renderer.setSize(centerEl.clientWidth, centerEl.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x0a0a0c, 1);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 centerEl.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x0a0a0c, 0.012);
+
+// Theme-aware 3D viewport colors
+const _darkBg = new THREE.Color(0x0a0a0c);
+const _lightBg = new THREE.Color(0xF0F0EC);
+function updateSceneTheme(theme) {
+  const isDark = theme === 'dark';
+  const bg = isDark ? _darkBg : _lightBg;
+  renderer.setClearColor(bg, 1);
+  scene.fog = new THREE.FogExp2(bg.getHex(), isDark ? 0.012 : 0.008);
+  renderer.toneMappingExposure = isDark ? 1.0 : 0.85;
+  // Disable bloom on light backgrounds (additive bloom washes out)
+  // Use try-catch because bloomPass is a const declared later — typeof check
+  // still throws ReferenceError in the temporal dead zone (ES module strict mode)
+  try {
+    if (bloomPass) {
+      bloomPass.strength = isDark ? parseFloat(document.getElementById('sl-bloom')?.value || 0.4) : 0;
+    }
+  } catch(e) { /* bloomPass not yet initialized */ }
+}
+// Apply initial theme
+updateSceneTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+window._updateSceneTheme = updateSceneTheme;
 
 const camera = new THREE.PerspectiveCamera(50, centerEl.clientWidth / centerEl.clientHeight, 0.1, 500);
 camera.position.set(0, 2, 30);
@@ -4745,6 +4765,11 @@ const bloomPass = new UnrealBloomPass(
   0.4, 0.3, 0.7
 );
 composer.addPass(bloomPass);
+// Ensure bloom is disabled for light mode on initial load
+// (updateSceneTheme ran before bloomPass was created, so the try-catch skipped it)
+if ((document.documentElement.getAttribute('data-theme') || 'dark') !== 'dark') {
+  bloomPass.strength = 0;
+}
 
 // Scene objects
 let multiwayGroup = new THREE.Group();
@@ -4846,9 +4871,11 @@ function buildScene(sys, highlightSet) {
   const nodeColors = new Float32Array(sys.nodes.length * 3);
   const nodeSizes = new Float32Array(sys.nodes.length);
 
-  const goldColor = new THREE.Color('#CCFF00');
-  const cyanColor = new THREE.Color('#00F0FF');
-  const whiteColor = new THREE.Color('#FFFFFF');
+  const isDarkTheme = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  const _blend = isDarkTheme ? THREE.AdditiveBlending : THREE.NormalBlending;
+  const goldColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#4A7A00');
+  const cyanColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#006688');
+  const whiteColor = new THREE.Color(isDarkTheme ? '#FFFFFF' : '#222222');
 
   // Support causal history mode: highlightSet can be a Set or an object {ancestors, descendants, selectedId}
   // Also supports {causalEventId} for causal event cone highlighting (only affects causal layer)
@@ -4885,7 +4912,11 @@ function buildScene(sys, highlightSet) {
       _tmpColor.multiplyScalar(0.3 + wNorm * 0.7);
     } else {
       // Normal coloring
-      _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
+      if (isDarkTheme) {
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
+      } else {
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.6 + wNorm * 0.3, 0.18 + wNorm * 0.30);
+      }
       if (!isHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
       }
@@ -4927,7 +4958,7 @@ function buildScene(sys, highlightSet) {
   const nodeMatMW = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: _blend,
     vertexColors: true,
     uniforms: {
       uPixelRatio: { value: renderer.getPixelRatio() },
@@ -5006,7 +5037,11 @@ function buildScene(sys, highlightSet) {
       }
       _tmpColor.multiplyScalar(0.3 + wNorm * 0.4);
     } else {
-      _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.5, 0.15 + wNorm * 0.25);
+      if (isDarkTheme) {
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.5, 0.15 + wNorm * 0.25);
+      } else {
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.45, 0.20 + wNorm * 0.28);
+      }
       if (!isEdgeHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
       }
@@ -5027,13 +5062,13 @@ function buildScene(sys, highlightSet) {
     edgeProgress[i * 2 + 1] = 1.0; // to vertex
   }
   edgeGeo.setAttribute('edgeProgress', new THREE.BufferAttribute(edgeProgress, 1));
-  const edgeOpacity = highlightSet ? 0.5 : 0.35;
+  const edgeOpacity = highlightSet ? 0.5 : (isDarkTheme ? 0.35 : 0.7);
   // Animated flow shader — dashed lines with moving offset
   const edgeMat = new THREE.ShaderMaterial({
     vertexColors: true,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: _blend,
     uniforms: {
       uTime: { value: 0.0 },
       uOpacity: { value: edgeOpacity },
@@ -5230,7 +5265,7 @@ function buildScene(sys, highlightSet) {
   const branchialNodeMat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: _blend,
     vertexColors: true,
     uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
     vertexShader: `
@@ -5296,7 +5331,7 @@ function buildScene(sys, highlightSet) {
   bEdgeGeo.setAttribute('color', new THREE.BufferAttribute(bEdgeColors, 3));
   const bEdgeMat = new THREE.LineBasicMaterial({
     vertexColors: true, transparent: true, opacity: 0.25,
-    blending: THREE.AdditiveBlending, depthWrite: false
+    blending: _blend, depthWrite: false
   });
   branchialGroup.add(new THREE.LineSegments(bEdgeGeo, bEdgeMat));
 
@@ -5304,9 +5339,9 @@ function buildScene(sys, highlightSet) {
 
   // ── CAUSAL GRAPH ──
   if (sys.causalEvents && sys.causalEvents.length > 0) {
-    const causalColor = new THREE.Color('#FF6B35'); // warm orange for events
-    const causalPastColor = new THREE.Color('#CCFF00');
-    const causalFutureColor = new THREE.Color('#00F0FF');
+    const causalColor = new THREE.Color(isDarkTheme ? '#FF6B35' : '#CC4400'); // warm orange for events
+    const causalPastColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#7A9900');
+    const causalFutureColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#0088AA');
 
     // Determine highlight sets for causal events
     let hlCausalPast = null, hlCausalFuture = null, hlCausalSelected = null;
@@ -5395,7 +5430,7 @@ function buildScene(sys, highlightSet) {
 
     const cMat = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: _blend,
       vertexColors: true,
       uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
       vertexShader: `
@@ -5473,7 +5508,7 @@ function buildScene(sys, highlightSet) {
       ceGeo.setAttribute('color', new THREE.BufferAttribute(ceColors, 3));
       const ceMat = new THREE.LineBasicMaterial({
         vertexColors: true, transparent: true, opacity: 0.4,
-        blending: THREE.AdditiveBlending, depthWrite: false
+        blending: _blend, depthWrite: false
       });
       causalGroup.add(new THREE.LineSegments(ceGeo, ceMat));
     }
@@ -5495,6 +5530,7 @@ function buildScene(sys, highlightSet) {
     savedEdgeColors = new Float32Array(ec.array);
   }
 }
+window._buildScene = buildScene;
 
 function fitCamera(sys, instant) {
   if (!sys) return;
@@ -7549,7 +7585,12 @@ function buildBranchial3d() {
 
     const node = sys.nodes[p.nodeId];
     const wNorm = node.weight / maxWeight;
-    _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.7, 0.25 + wNorm * 0.5);
+    const _isDkB3d = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
+    if (_isDkB3d) {
+      _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.7, 0.25 + wNorm * 0.5);
+    } else {
+      _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.65, 0.15 + wNorm * 0.3);
+    }
     nodeCol[i * 3] = _hoverTmp.r;
     nodeCol[i * 3 + 1] = _hoverTmp.g;
     nodeCol[i * 3 + 2] = _hoverTmp.b;
@@ -7561,9 +7602,10 @@ function buildBranchial3d() {
   nGeo.setAttribute('color', new THREE.BufferAttribute(nodeCol, 3));
   nGeo.setAttribute('size', new THREE.BufferAttribute(nodeSz, 1));
 
+  const _b3dBlend = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark') ? THREE.AdditiveBlending : THREE.NormalBlending;
   const nMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: _b3dBlend,
     vertexColors: true,
     uniforms: { uPixelRatio: { value: renderer.getPixelRatio() } },
     vertexShader: `
@@ -7613,8 +7655,8 @@ function buildBranchial3d() {
     eGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgeVerts, 3));
     eGeo.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
     const eMat = new THREE.LineBasicMaterial({
-      vertexColors: true, transparent: true, opacity: 0.2,
-      blending: THREE.AdditiveBlending, depthWrite: false
+      vertexColors: true, transparent: true, opacity: _b3dBlend === THREE.NormalBlending ? 0.45 : 0.2,
+      blending: _b3dBlend, depthWrite: false
     });
     branchial3dGroup.add(new THREE.LineSegments(eGeo, eMat));
   }
@@ -9364,11 +9406,12 @@ function updateCoarseGrainVisuals(result) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    const _cgBlend = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
     const mat = new THREE.LineBasicMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending,
+      opacity: _cgBlend ? 0.4 : 0.6,
+      blending: _cgBlend ? THREE.AdditiveBlending : THREE.NormalBlending,
       depthWrite: false
     });
     const lines = new THREE.LineSegments(geo, mat);
@@ -10962,6 +11005,9 @@ function _buildSpacetimeSceneInner() {
 
   if (!stResult || !stSpatialGraph || !stPositions) return;
 
+  const _stIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
+  const _stBlend = _stIsDark ? THREE.AdditiveBlending : THREE.NormalBlending;
+
   const { atoms, adjacency } = stSpatialGraph;
   const n = atoms.length;
   if (n === 0) return;
@@ -10992,9 +11038,9 @@ function _buildSpacetimeSceneInner() {
   }
   const maxDepth = Math.max(...depths.values(), 1);
 
-  const cyanColor = new THREE.Color('#00F0FF');
-  const purpleColor = new THREE.Color('#7000FF');
-  const limeColor = new THREE.Color('#CCFF00');
+  const cyanColor = new THREE.Color(_stIsDark ? '#00F0FF' : '#007088');
+  const purpleColor = new THREE.Color(_stIsDark ? '#7000FF' : '#4A0099');
+  const limeColor = new THREE.Color(_stIsDark ? '#CCFF00' : '#5A8800');
 
   for (let i = 0; i < n; i++) {
     const atom = atoms[i];
@@ -11023,7 +11069,7 @@ function _buildSpacetimeSceneInner() {
   const nodeMat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: _stBlend,
     vertexColors: true,
     uniforms: {
       uPixelRatio: { value: renderer.getPixelRatio() },
@@ -11113,10 +11159,10 @@ function _buildSpacetimeSceneInner() {
       vertexColors: true,
       transparent: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: _stBlend,
       uniforms: {
         uTime: { value: 0.0 },
-        uOpacity: { value: 0.40 },
+        uOpacity: { value: _stIsDark ? 0.40 : 0.65 },
         uFlow: { value: 1.0 },
         uDashScale: { value: 0.06 }
       },
@@ -11831,9 +11877,10 @@ function applyDimensionHeatmap() {
   const colorAttr = nodePoints.geometry.attributes.color;
   const sizeAttr = nodePoints.geometry.attributes.size;
   
-  const purpleCol = new THREE.Color('#7000FF');
-  const cyanCol = new THREE.Color('#00F0FF');
-  const limeCol = new THREE.Color('#CCFF00');
+  const _dimIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
+  const purpleCol = new THREE.Color(_dimIsDark ? '#7000FF' : '#4A0099');
+  const cyanCol = new THREE.Color(_dimIsDark ? '#00F0FF' : '#007088');
+  const limeCol = new THREE.Color(_dimIsDark ? '#CCFF00' : '#5A8800');
 
   for (let i = 0; i < n; i++) {
     const dim = localDims[i];
@@ -12043,8 +12090,9 @@ function showEntanglementThreads() {
   const threadColors = [];
   const threadProgress = [];
   
-  const purpleCol = new THREE.Color('#7000FF');
-  const magentaCol = new THREE.Color('#FF00FF');
+  const _coneIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
+  const purpleCol = new THREE.Color(_coneIsDark ? '#7000FF' : '#4A0099');
+  const magentaCol = new THREE.Color(_coneIsDark ? '#FF00FF' : '#AA0077');
 
   for (const thread of displayThreads) {
     const posA = stPositions.get(thread.from);
@@ -12093,14 +12141,15 @@ function showEntanglementThreads() {
     geo.setAttribute('color', new THREE.Float32BufferAttribute(threadColors, 3));
     geo.setAttribute('edgeProgress', new THREE.Float32BufferAttribute(threadProgress, 1));
 
+    const _pcIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
     const mat = new THREE.ShaderMaterial({
       vertexColors: true,
       transparent: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: _pcIsDark ? THREE.AdditiveBlending : THREE.NormalBlending,
       uniforms: {
         uTime: { value: 0.0 },
-        uOpacity: { value: 0.55 },
+        uOpacity: { value: _pcIsDark ? 0.55 : 0.7 },
         uFlow: { value: 1.0 },
         uDashScale: { value: 0.1 }
       },
@@ -12634,6 +12683,17 @@ renderScenesPanel();
 
     // Notify canvas renderers to update text colors
     window._currentTheme = theme;
+
+    // Update 3D viewport background/fog
+    if (typeof window._updateSceneTheme === 'function') {
+      window._updateSceneTheme(theme);
+    }
+
+    // Rebuild the 3D scene with theme-appropriate node/edge colors
+    if (typeof window._buildScene === 'function' && typeof window._currentSystem === 'function') {
+      try { window._buildScene(window._currentSystem()); } catch(e) {}
+    }
+
     // Trigger redraw of intensity and branchial canvases
     // Reinit branchial evolution if active
     if (typeof bevLayoutCache !== 'undefined' && bevLayoutCache) bevLayoutCache.clear();
