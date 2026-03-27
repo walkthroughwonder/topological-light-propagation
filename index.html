@@ -1888,24 +1888,47 @@
     color: #E8E8E8 !important;
   }
 
+  /* ─── MONOSPACE BADGES ─── */
+  [data-theme="dark"] .mono {
+    background: #1E1E1E;
+    color: #999999;
+    border: 1px solid #2A2A2A;
+  }
+
   /* ─── PRESET BUTTONS ─── */
-  [data-theme="dark"] .preset-btn,
   [data-theme="dark"] .preset-chip {
     background: #1E1E1E;
     border-color: #333333;
     color: #BBBBBB;
   }
-  [data-theme="dark"] .preset-btn:hover,
   [data-theme="dark"] .preset-chip:hover {
     background: #252525;
     border-color: #555555;
     color: #E8E8E8;
   }
-  [data-theme="dark"] .preset-btn.active,
   [data-theme="dark"] .preset-chip.active {
     background: rgba(232,108,0,0.12);
     border-color: #E86C00;
     color: #E86C00;
+  }
+
+  /* ─── MODE TABS (Batch/Interactive) ─── */
+  [data-theme="dark"] .mode-tabs {
+    background: #1A1A1A;
+    border: 1px solid #333333;
+  }
+  [data-theme="dark"] .mode-tab {
+    color: #999999;
+    border-color: #333333;
+  }
+  [data-theme="dark"] .mode-tab:hover {
+    color: #E8E8E8;
+    background: #222222;
+  }
+  [data-theme="dark"] .mode-tab.active {
+    background: rgba(232,108,0,0.10);
+    color: #E86C00;
+    border-color: rgba(232,108,0,0.3);
   }
 
   /* ─── VIEW SWITCHER ─── */
@@ -2119,6 +2142,16 @@
     border-color: #E86C00 !important;
   }
 
+  /* ─── TOOL SECTIONS & ITEMS ─── */
+  [data-theme="dark"] .tool-section {
+    background: #1A1A1A;
+    border-color: #2A2A2A;
+  }
+  [data-theme="dark"] .tool-item {
+    background: #1A1A1A;
+    border-color: #2A2A2A;
+  }
+
   /* ─── STAT ROWS ─── */
   [data-theme="dark"] .stat-row {
     color: #999999 !important;
@@ -2211,6 +2244,10 @@
     background: #FF8C2A !important;
   }
 
+  [data-theme="dark"] .st-feature-tools {
+    border-color: #333333;
+  }
+
   /* ─── ST INFO ELEMENTS ─── */
   [data-theme="dark"] #st-cone-info, [data-theme="dark"] #st-entangle-info {
     background: #1A1A1A !important;
@@ -2242,6 +2279,11 @@
   }
   [data-theme="dark"] .panel::-webkit-scrollbar-thumb:hover {
     background: rgba(255,255,255,0.20) !important;
+  }
+
+  /* Firefox scrollbar dark mode */
+  [data-theme="dark"] .panel {
+    scrollbar-color: #444444 transparent;
   }
 
   /* ─── INLINE STYLE OVERRIDES ─── */
