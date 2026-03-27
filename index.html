@@ -5340,19 +5340,10 @@ function buildScene(sys, highlightSet) {
       }
     `,
     fragmentShader: `
-      uniform float uTime;
       uniform float uOpacity;
-      uniform float uFlow;
-      uniform float uDashScale;
-      uniform float uBaseAlpha;
       varying vec3 vColor;
-      varying float vProgress;
       void main() {
-        // Animated dash pattern — flows along edge direction
-        float flow = fract(vProgress * 12.0 - uTime * 0.5 * uFlow);
-        float dash = smoothstep(0.0, 0.15, flow) * smoothstep(0.6, 0.45, flow);
-        float alpha = mix(uBaseAlpha, uBaseAlpha + dash * (1.0 - uBaseAlpha), uFlow);
-        gl_FragColor = vec4(vColor, alpha * uOpacity);
+        gl_FragColor = vec4(vColor, uOpacity);
       }
     `
   });
@@ -11432,17 +11423,10 @@ function _buildSpacetimeSceneInner() {
         }
       `,
       fragmentShader: `
-        uniform float uTime;
         uniform float uOpacity;
-        uniform float uFlow;
-        uniform float uDashScale;
         varying vec3 vColor;
-        varying float vProgress;
         void main() {
-          float flow = fract(vProgress * 8.0 - uTime * 0.3 * uFlow);
-          float dash = smoothstep(0.0, 0.2, flow) * smoothstep(0.7, 0.5, flow);
-          float alpha = mix(0.3, 0.3 + dash * 0.7, uFlow);
-          gl_FragColor = vec4(vColor, alpha * uOpacity);
+          gl_FragColor = vec4(vColor, uOpacity);
         }
       `
     });
@@ -12419,20 +12403,10 @@ function showEntanglementThreads() {
         }
       `,
       fragmentShader: `
-        uniform float uTime;
         uniform float uOpacity;
-        uniform float uFlow;
-        uniform float uDashScale;
         varying vec3 vColor;
-        varying float vProgress;
         void main() {
-          // Pulsing flow along thread
-          float flow = fract(vProgress * 6.0 - uTime * 0.8 * uFlow);
-          float dash = smoothstep(0.0, 0.2, flow) * smoothstep(0.6, 0.4, flow);
-          // Fade at endpoints for soft connection
-          float endFade = smoothstep(0.0, 0.15, vProgress) * smoothstep(1.0, 0.85, vProgress);
-          float alpha = (0.15 + dash * 0.85) * endFade;
-          gl_FragColor = vec4(vColor * 1.3, alpha * uOpacity);
+          gl_FragColor = vec4(vColor, uOpacity);
         }
       `
     });
