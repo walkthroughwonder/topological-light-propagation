@@ -5143,8 +5143,8 @@ function buildScene(sys, highlightSet) {
 
   const isDarkTheme = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
   const _blend = isDarkTheme ? THREE.AdditiveBlending : THREE.NormalBlending;
-  const goldColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#4A7A00');
-  const cyanColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#006688');
+  const goldColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#B85C00');
+  const cyanColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#E86C00');
   const whiteColor = new THREE.Color(isDarkTheme ? '#FFFFFF' : '#222222');
 
   // Support causal history mode: highlightSet can be a Set or an object {ancestors, descendants, selectedId}
@@ -5185,7 +5185,7 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
       } else {
-        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.6 + wNorm * 0.3, 0.18 + wNorm * 0.30);
+        _tmpColor.setHSL(0.07 + wNorm * 0.02, 0.75 + wNorm * 0.2, 0.25 + wNorm * 0.30);
       }
       if (!isHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
@@ -5310,7 +5310,7 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.55, 0.22 + wNorm * 0.30);
       } else {
-        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.40, 0.18 + wNorm * 0.22);
+        _tmpColor.setHSL(0.07 + wNorm * 0.02, 0.65, 0.22 + wNorm * 0.25);
       }
       if (!isEdgeHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
@@ -5508,7 +5508,11 @@ function buildScene(sys, highlightSet) {
       }
       _tmpColor.multiplyScalar(0.4 + wNorm * 0.6);
     } else {
-      _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
+      if (isDarkTheme) {
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
+      } else {
+        _tmpColor.setHSL(0.07 + wNorm * 0.02, 0.75 + wNorm * 0.2, 0.25 + wNorm * 0.30);
+      }
       if (!isHighlighted && hasHighlight) _tmpColor.multiplyScalar(dimFactor);
     }
 
@@ -5603,8 +5607,8 @@ function buildScene(sys, highlightSet) {
   // ── CAUSAL GRAPH ──
   if (sys.causalEvents && sys.causalEvents.length > 0) {
     const causalColor = new THREE.Color(isDarkTheme ? '#FF6B35' : '#CC4400'); // warm orange for events
-    const causalPastColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#7A9900');
-    const causalFutureColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#0088AA');
+    const causalPastColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#B85C00');
+    const causalFutureColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#E86C00');
 
     // Determine highlight sets for causal events
     let hlCausalPast = null, hlCausalFuture = null, hlCausalSelected = null;
@@ -6238,8 +6242,11 @@ function updateCompletionLog(sys) {
 }
 
 // ─── Hover highlight: update GPU buffers in-place for instant path preview ───
+const _hoverIsDark = () => (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
 const _hoverGold = new THREE.Color('#CCFF00');
 const _hoverCyan = new THREE.Color('#00F0FF');
+const _hoverOrange = new THREE.Color('#E86C00');
+const _hoverAmber = new THREE.Color('#B85C00');
 const _hoverWhite = new THREE.Color('#FFFFFF');
 const _hoverTmp = new THREE.Color();
 
@@ -6271,14 +6278,15 @@ function applyHoverHighlight(nodeId) {
     const isSelected = nid === nodeId;
     const isHighlighted = isAncestor || isDescendant || isSelected;
 
+    const _hDk = _hoverIsDark();
     if (isSelected) {
-      _hoverTmp.copy(_hoverWhite);
+      _hoverTmp.copy(_hDk ? _hoverWhite : _hoverOrange);
     } else if (isAncestor && isDescendant) {
-      _hoverTmp.copy(_hoverGold).lerp(_hoverCyan, 0.5).multiplyScalar(0.5 + wNorm * 0.5);
+      _hoverTmp.copy(_hDk ? _hoverGold : _hoverAmber).lerp(_hDk ? _hoverCyan : _hoverOrange, 0.5).multiplyScalar(0.5 + wNorm * 0.5);
     } else if (isAncestor) {
-      _hoverTmp.copy(_hoverGold).multiplyScalar(0.3 + wNorm * 0.7);
+      _hoverTmp.copy(_hDk ? _hoverGold : _hoverAmber).multiplyScalar(0.3 + wNorm * 0.7);
     } else if (isDescendant) {
-      _hoverTmp.copy(_hoverCyan).multiplyScalar(0.3 + wNorm * 0.7);
+      _hoverTmp.copy(_hDk ? _hoverCyan : _hoverOrange).multiplyScalar(0.3 + wNorm * 0.7);
     } else {
       // Dim non-cone nodes from saved originals
       const i3 = i * 3;
@@ -6321,12 +6329,13 @@ function applyHoverHighlight(nodeId) {
     if (isEdgeHighlighted) {
       const bothPast = fromInPast && toInPast;
       const bothFuture = fromInFuture && toInFuture;
+      const _heDk = _hoverIsDark();
       if (bothPast && !bothFuture) {
-        _hoverTmp.copy(_hoverGold);
+        _hoverTmp.copy(_heDk ? _hoverGold : _hoverAmber);
       } else if (bothFuture && !bothPast) {
-        _hoverTmp.copy(_hoverCyan);
+        _hoverTmp.copy(_heDk ? _hoverCyan : _hoverOrange);
       } else {
-        _hoverTmp.copy(_hoverGold).lerp(_hoverCyan, 0.5);
+        _hoverTmp.copy(_heDk ? _hoverGold : _hoverAmber).lerp(_heDk ? _hoverCyan : _hoverOrange, 0.5);
       }
       _hoverTmp.multiplyScalar(0.3 + wNorm * 0.4);
     } else {
@@ -7867,7 +7876,7 @@ function buildBranchial3d() {
     if (_isDkB3d) {
       _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.7, 0.25 + wNorm * 0.5);
     } else {
-      _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.65, 0.15 + wNorm * 0.3);
+      _hoverTmp.setHSL(0.06 + wNorm * 0.03, 0.8, 0.25 + wNorm * 0.3);
     }
     nodeCol[i * 3] = _hoverTmp.r;
     nodeCol[i * 3 + 1] = _hoverTmp.g;
@@ -7919,13 +7928,18 @@ function buildBranchial3d() {
   // Edges
   const edgeVerts = [];
   const edgeColors = [];
+  const _bEdgeDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
   for (const be of sys.branchialEdges) {
     const fi = nodeIdToIdx.get(be.from);
     const fj = nodeIdToIdx.get(be.to);
     if (fi === undefined || fj === undefined) continue;
     edgeVerts.push(nodePos[fi*3], nodePos[fi*3+1], nodePos[fi*3+2]);
     edgeVerts.push(nodePos[fj*3], nodePos[fj*3+1], nodePos[fj*3+2]);
-    edgeColors.push(0.3,0.15,0.5, 0.3,0.15,0.5);
+    if (_bEdgeDark) {
+      edgeColors.push(0.3, 0.15, 0.5, 0.3, 0.15, 0.5);
+    } else {
+      edgeColors.push(0.7, 0.35, 0.05, 0.7, 0.35, 0.05);
+    }
   }
 
   if (edgeVerts.length > 0) {
@@ -8900,7 +8914,7 @@ function highlightTunnelingPaths() {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
     const mat = new THREE.LineBasicMaterial({
-      color: 0x00F0FF,
+      color: ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark') ? 0x00F0FF : 0xE86C00,
       transparent: true,
       opacity: 0.6,
       depthWrite: false,
@@ -11316,9 +11330,9 @@ function _buildSpacetimeSceneInner() {
   }
   const maxDepth = Math.max(...depths.values(), 1);
 
-  const cyanColor = new THREE.Color(_stIsDark ? '#00F0FF' : '#007088');
-  const purpleColor = new THREE.Color(_stIsDark ? '#7000FF' : '#4A0099');
-  const limeColor = new THREE.Color(_stIsDark ? '#CCFF00' : '#5A8800');
+  const cyanColor = new THREE.Color(_stIsDark ? '#00F0FF' : '#E86C00');
+  const purpleColor = new THREE.Color(_stIsDark ? '#7000FF' : '#994400');
+  const limeColor = new THREE.Color(_stIsDark ? '#CCFF00' : '#CC5500');
 
   for (let i = 0; i < n; i++) {
     const atom = atoms[i];
@@ -11415,10 +11429,11 @@ function _buildSpacetimeSceneInner() {
         positions[ai*3], positions[ai*3+1], positions[ai*3+2],
         positions[bi*3], positions[bi*3+1], positions[bi*3+2]
       );
-      edgeColors.push(
-        0, 0.6, 0.7,
-        0, 0.6, 0.7
-      );
+      if (_stIsDark) {
+        edgeColors.push(0, 0.6, 0.7, 0, 0.6, 0.7);
+      } else {
+        edgeColors.push(0.75, 0.35, 0.05, 0.75, 0.35, 0.05);
+      }
     }
   }
 
@@ -11970,10 +11985,11 @@ function showLightCone(atomId) {
   const colorAttr = geo.attributes.color;
   const sizeAttr = geo.attributes.size;
   
-  const cyanCol = new THREE.Color('#00F0FF');
-  const limeCol = new THREE.Color('#CCFF00');
-  const whiteCol = new THREE.Color('#FFFFFF');
-  const dimCol = new THREE.Color('#0D0E10');
+  const _stHlDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
+  const cyanCol = new THREE.Color(_stHlDark ? '#00F0FF' : '#E86C00');
+  const limeCol = new THREE.Color(_stHlDark ? '#CCFF00' : '#B85C00');
+  const whiteCol = new THREE.Color(_stHlDark ? '#FFFFFF' : '#CC4400');
+  const dimCol = new THREE.Color(_stHlDark ? '#0D0E10' : '#D0CCC5');
 
   for (let i = 0; i < atoms.length; i++) {
     const atom = atoms[i];
@@ -12149,9 +12165,9 @@ function applyDimensionHeatmap() {
   const sizeAttr = nodePoints.geometry.attributes.size;
   
   const _dimIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
-  const purpleCol = new THREE.Color(_dimIsDark ? '#7000FF' : '#4A0099');
-  const cyanCol = new THREE.Color(_dimIsDark ? '#00F0FF' : '#007088');
-  const limeCol = new THREE.Color(_dimIsDark ? '#CCFF00' : '#5A8800');
+  const purpleCol = new THREE.Color(_dimIsDark ? '#7000FF' : '#994400');
+  const cyanCol = new THREE.Color(_dimIsDark ? '#00F0FF' : '#E86C00');
+  const limeCol = new THREE.Color(_dimIsDark ? '#CCFF00' : '#CC5500');
 
   for (let i = 0; i < n; i++) {
     const dim = localDims[i];
@@ -12362,8 +12378,8 @@ function showEntanglementThreads() {
   const threadProgress = [];
   
   const _coneIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
-  const purpleCol = new THREE.Color(_coneIsDark ? '#7000FF' : '#4A0099');
-  const magentaCol = new THREE.Color(_coneIsDark ? '#FF00FF' : '#AA0077');
+  const purpleCol = new THREE.Color(_coneIsDark ? '#7000FF' : '#994400');
+  const magentaCol = new THREE.Color(_coneIsDark ? '#FF00FF' : '#CC5500');
 
   for (const thread of displayThreads) {
     const posA = stPositions.get(thread.from);
