@@ -1163,9 +1163,150 @@
     border: 1px solid transparent;
   }
 
+  /* ─── ABOUT / LEARN PANEL ─── */
+  #about-panel {
+    position: fixed; top: 0; right: 0;
+    width: 380px; max-width: 92vw; height: 100vh;
+    background: #FFFFFF; border-left: 1px solid #D9D9D4;
+    z-index: 9000; transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto; padding: 0;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.08);
+    scrollbar-width: thin; scrollbar-color: #D9D9D4 transparent;
+  }
+  #about-panel.open { transform: translateX(0); }
+  #about-panel-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.25);
+    z-index: 8999; display: none;
+  }
+  #about-panel-backdrop.open { display: block; }
+  .about-header {
+    position: sticky; top: 0; background: #FFFFFF;
+    padding: 20px 22px 12px; border-bottom: 1px solid #D9D9D4;
+    z-index: 1; display: flex; align-items: center; justify-content: space-between;
+  }
+  .about-header h2 {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #111111; margin: 0;
+  }
+  .about-close {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid #D9D9D4;
+    background: #F6F6F4; cursor: pointer; font-size: 14px; color: #555;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .about-close:hover { background: #E8E8E4; }
+  .about-body { padding: 18px 22px 32px; }
+  .about-intro {
+    font-size: 13px; line-height: 1.7; color: #333;
+    margin-bottom: 20px; padding-bottom: 16px;
+    border-bottom: 1px solid #D9D9D4;
+  }
+  .about-intro strong { color: #E86C00; }
+  .about-section {
+    margin-bottom: 6px;
+  }
+  .about-section-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; background: #F6F6F4; border: 1px solid #D9D9D4;
+    border-radius: 8px; cursor: pointer; transition: background 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .about-section-toggle:hover { background: #EEEEEA; }
+  .about-section-toggle .about-label {
+    font-size: 12px; font-weight: 600; color: #111; letter-spacing: 0.03em;
+  }
+  .about-section-toggle .about-icon {
+    font-size: 11px; color: #999; transition: transform 0.2s;
+  }
+  .about-section-toggle[aria-expanded="true"] .about-icon { transform: rotate(180deg); }
+  .about-section-content {
+    max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+    padding: 0 12px;
+  }
+  .about-section-content.open {
+    max-height: 600px; padding: 10px 12px 14px;
+  }
+  .about-section-content p {
+    font-size: 12px; line-height: 1.65; color: #555; margin: 0 0 8px;
+  }
+  .about-section-content p:last-child { margin-bottom: 0; }
+  .about-section-content code {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    background: #F0F0EC; padding: 1px 5px; border-radius: 3px;
+  }
+  .about-section-content em { color: #E86C00; font-style: normal; font-weight: 500; }
+  #about-btn {
+    position: fixed; bottom: 16px; right: 16px; z-index: 8998;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #E86C00; color: #fff; border: none; cursor: pointer;
+    font-size: 16px; font-weight: 700; font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(232,108,0,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  #about-btn:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(232,108,0,0.4); }
+
+  /* ─── MOBILE HAMBURGER ─── */
+  #mobile-menu-btn {
+    display: none; position: fixed; top: 12px; left: 12px; z-index: 7001;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(246,246,244,0.95); border: 1px solid #D9D9D4;
+    backdrop-filter: blur(8px); cursor: pointer;
+    flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  }
+  #mobile-menu-btn span {
+    display: block; width: 18px; height: 2px; background: #555;
+    border-radius: 1px; transition: transform 0.2s, opacity 0.2s;
+  }
+  #mobile-menu-btn.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+  #mobile-menu-btn.open span:nth-child(2) { opacity: 0; }
+  #mobile-menu-btn.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+  #mobile-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+    z-index: 5999;
+  }
+
+  /* ─── MOBILE RESPONSIVE ─── */
   @media (max-width: 960px) {
-    #app { grid-template-columns: 1fr; grid-template-rows: auto 50vh auto; }
-    .panel { max-height: 40vh; }
+    #app {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      position: relative;
+    }
+    #center { grid-column: 1; grid-row: 1; height: 100vh; }
+    .panel {
+      position: fixed; top: 0; height: 100vh; width: 300px;
+      max-width: 85vw; z-index: 6002;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      max-height: 100vh;
+    }
+    #left-panel {
+      left: 0; transform: translateX(-100%);
+      border-right: 1px solid #D9D9D4;
+    }
+    #left-panel.mobile-open { transform: translateX(0); }
+    #right-panel {
+      right: 0; left: auto; transform: translateX(100%);
+      border-left: 1px solid #D9D9D4;
+    }
+    #right-panel.mobile-open { transform: translateX(0); }
+    #mobile-menu-btn { display: flex; }
+    #mobile-overlay.open { display: block; }
+    #view-switcher {
+      bottom: 8px; left: 50%; transform: translateX(-50%);
+      gap: 2px; padding: 3px;
+    }
+    .view-tab { font-size: 9px; padding: 5px 8px; }
+    #scenes-dropdown-wrap { top: 12px; left: auto; right: 56px; }
+    #about-btn { bottom: 12px; right: 12px; }
+    .theme-toggle { top: 12px !important; left: 56px !important; right: auto !important; transform: none !important; }
+    #status-bar { font-size: 9px; top: auto; bottom: 44px; left: 50%; transform: translateX(-50%); right: auto; }
+  }
+  @media (max-width: 480px) {
+    .panel { width: 280px; }
+    .view-tab { font-size: 8px; padding: 4px 6px; letter-spacing: 0.04em; }
+    #about-panel { width: 100vw; max-width: 100vw; }
   }
 
 
@@ -2487,9 +2628,139 @@
     border-color: #333333;
   }
 
+  /* ─── DARK MODE: About Panel ─── */
+  [data-theme="dark"] #about-panel {
+    background: #1A1A1A; border-color: #333333;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .about-header {
+    background: #1A1A1A; border-color: #333333;
+  }
+  [data-theme="dark"] .about-header h2 { color: #E8E8E8; }
+  [data-theme="dark"] .about-close {
+    background: #222222; border-color: #333333; color: #999;
+  }
+  [data-theme="dark"] .about-close:hover { background: #333333; }
+  [data-theme="dark"] .about-intro { color: #BBBBBB; border-color: #333333; }
+  [data-theme="dark"] .about-section-toggle {
+    background: #222222; border-color: #333333;
+  }
+  [data-theme="dark"] .about-section-toggle:hover { background: #2A2A2A; }
+  [data-theme="dark"] .about-section-toggle .about-label { color: #E8E8E8; }
+  [data-theme="dark"] .about-section-content p { color: #999999; }
+  [data-theme="dark"] .about-section-content code {
+    background: #222222; color: #E8E8E8;
+  }
+  [data-theme="dark"] #about-panel-backdrop { background: rgba(0,0,0,0.5); }
+
+  /* ─── DARK MODE: Mobile ─── */
+  [data-theme="dark"] #mobile-menu-btn {
+    background: rgba(26,26,26,0.95); border-color: #333333;
+  }
+  [data-theme="dark"] #mobile-menu-btn span { background: #999; }
+
 </style>
 </head>
 <body>
+<!-- About/Learn Panel -->
+<div id="about-panel-backdrop"></div>
+<div id="about-panel">
+  <div class="about-header">
+    <h2>About This Visualization</h2>
+    <button class="about-close" id="about-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="about-body">
+    <div class="about-intro">
+      This is an interactive explorer for the <strong>Wolfram Physics Project</strong> — the idea that the universe emerges from simple computational rules applied to abstract structures. Every view below shows a different facet of the same underlying multiway system.
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="multiway">
+        <span class="about-label">Multiway Graph</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="multiway">
+        <p>The <em>multiway graph</em> shows all possible evolution histories of a string rewriting system. Each node is a state; each edge is a rule application. Branching means the system explores multiple futures simultaneously — this is the origin of quantum superposition in the Wolfram model.</p>
+        <p>Node brightness encodes <em>path weight</em> — the number of distinct paths from the initial state. These weights are the quantum amplitudes: brighter nodes have higher probability of being observed.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="causal">
+        <span class="about-label">Causal Graph</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="causal">
+        <p>The <em>causal graph</em> tracks which rewriting events enable which others. If event A produces a state that event B needs, there’s a causal edge A → B. This partial order is the discrete analog of a Lorentzian spacetime manifold.</p>
+        <p>Causal invariance — when all branch orderings produce the same causal structure — is a key property. It’s the discrete equivalent of general covariance in general relativity.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="branchial">
+        <span class="about-label">Branchial Graph</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="branchial">
+        <p>The <em>branchial graph</em> connects states that share a common ancestor one step back. Its geometry is branchial space — which converges to projective Hilbert space with the Fubini-Study metric. Distance here measures how "quantum-different" two branches are.</p>
+        <p>Close branches interfere constructively (amplitudes add). Distant branches decohere — the observer can’t identify them, and they behave as separate classical worlds.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="bevolution">
+        <span class="about-label">Branchial Evolution</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="bevolution">
+        <p><em>Branchial evolution</em> animates the branchial graph step by step, showing how the branching structure grows and recombines over time. The distance histogram (right panel) tracks the distribution of pairwise branchial distances at each step.</p>
+        <p>Watch for clustering — it signals decoherence. When groups of states become branchially distant, the observer sees them as separate classical outcomes.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="spacetime">
+        <span class="about-label">Spacetime Hypergraph</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="spacetime">
+        <p>The <em>spacetime view</em> uses Wolfram-style hypergraph rewriting — rules that transform sets of relations (hyperedges). The resulting spatial hypergraph encodes emergent geometry: its large-scale structure approximates a smooth manifold whose dimension and curvature are measurable.</p>
+        <p>The foliation slider lets you slice through the causal structure, showing the spatial hypergraph at different "moments" — the discrete analog of choosing a spacelike hypersurface in GR.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="observer">
+        <span class="about-label">The Observer &amp; Coarse-graining</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="observer">
+        <p>The coarse-graining slider implements Jonathan Gorard’s observer model. The observer imposes <em>completion rules</em> on the multiway graph by identifying branches whose causal futures are isomorphic at a given resolution. This Knuth-Bendix completion is formally equivalent to wavefunction collapse.</p>
+        <p>At resolution 0 you see the full quantum state. As you increase coarse-graining, branches merge, causal invariance rises, and the system looks increasingly classical. Orange edges are <em>completion edges</em> — the observer’s identifications.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <button class="about-section-toggle" aria-expanded="false" data-about="controls">
+        <span class="about-label">Controls &amp; Navigation</span>
+        <span class="about-icon">▼</span>
+      </button>
+      <div class="about-section-content" data-about-content="controls">
+        <p><em>3D views (Spacetime):</em> Click + drag to orbit, Ctrl + click + drag to pan, scroll to zoom.</p>
+        <p><em>Flat views (Multiway, Causal, Branchial):</em> Click + drag to pan, Shift + drag to rotate, scroll to zoom.</p>
+        <p>Hover over any node to see its state and metadata. Click a node to highlight its causal history. Use the <em>Scenes</em> dropdown for curated configurations that demonstrate specific physics.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<button id="about-btn" title="About this visualization">?</button>
+
+<!-- Mobile navigation -->
+<button id="mobile-menu-btn" aria-label="Toggle panels">
+  <span></span><span></span><span></span>
+</button>
+<div id="mobile-overlay"></div>
+
 <div id="app">
 
   <!-- Theme toggle button -->
@@ -13110,6 +13381,306 @@ window.addEventListener('resize', () => {
   }
 });
 
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// V1 FEATURES: About Panel, Shareable URLs, Mobile
+// ═══════════════════════════════════════════════════════════════
+
+// ─── 1. ABOUT / LEARN PANEL ───
+(function() {
+  const panel = document.getElementById('about-panel');
+  const backdrop = document.getElementById('about-panel-backdrop');
+  const openBtn = document.getElementById('about-btn');
+  const closeBtn = document.getElementById('about-close');
+
+  function openAbout() {
+    panel.classList.add('open');
+    backdrop.classList.add('open');
+  }
+  function closeAbout() {
+    panel.classList.remove('open');
+    backdrop.classList.remove('open');
+  }
+
+  openBtn.addEventListener('click', openAbout);
+  closeBtn.addEventListener('click', closeAbout);
+  backdrop.addEventListener('click', closeAbout);
+
+  // Keyboard: Escape closes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) closeAbout();
+  });
+
+  // Collapsible sections
+  document.querySelectorAll('.about-section-toggle').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const key = toggle.dataset.about;
+      const content = document.querySelector(`[data-about-content="${key}"]`);
+      const isOpen = content.classList.contains('open');
+      content.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', !isOpen);
+    });
+  });
+
+  // Auto-open on first visit
+  try {
+    const s = window['local'+'Storage'];
+    if (!s.getItem('wolfram-about-seen')) {
+      setTimeout(openAbout, 1200);
+      s.setItem('wolfram-about-seen', '1');
+    }
+  } catch(e) {}
+})();
+
+
+// ─── 2. SHAREABLE URLs ───
+(function() {
+  // Encode state to URL hash
+  function encodeState() {
+    const params = new URLSearchParams();
+    // Active view
+    const activeTab = document.querySelector('.view-tab.active');
+    if (activeTab) params.set('v', activeTab.dataset.view);
+    // Active preset (multiway or spacetime)
+    const view = activeTab ? activeTab.dataset.view : 'multiway';
+    if (view === 'spacetime') {
+      const stActive = document.querySelector('.st-preset-chip.active');
+      if (stActive) params.set('stp', stActive.dataset.stKey);
+      // Spacetime steps
+      const stSteps = document.getElementById('sl-st-steps');
+      if (stSteps) params.set('sts', stSteps.value);
+    } else {
+      const mwActive = document.querySelector('.preset-chip.active');
+      if (mwActive) params.set('p', mwActive.dataset.key);
+    }
+    // Coarse-graining
+    const cgSlider = document.getElementById('sl-coarsegrain');
+    if (cgSlider && cgSlider.value !== '0') params.set('cg', cgSlider.value);
+    // Evolution steps
+    const stepsSlider = document.getElementById('sl-steps');
+    if (stepsSlider) params.set('s', stepsSlider.value);
+    // Theme
+    const theme = document.documentElement.getAttribute('data-theme');
+    if (theme === 'light') params.set('t', 'light');
+    return params.toString();
+  }
+
+  // Decode state from URL hash
+  function decodeState() {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return null;
+    try {
+      return new URLSearchParams(hash);
+    } catch(e) { return null; }
+  }
+
+  // Apply state from URL on load
+  function applyHashState() {
+    const params = decodeState();
+    if (!params) return;
+
+    // Theme
+    if (params.get('t') === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      const icon = document.getElementById('theme-icon');
+      if (icon) icon.textContent = '🌙';
+      try { window['local'+'Storage'].setItem('wolfram-theme', 'light'); } catch(e) {}
+    }
+
+    // Evolution steps
+    if (params.has('s')) {
+      const sl = document.getElementById('sl-steps');
+      if (sl) { sl.value = params.get('s'); sl.dispatchEvent(new Event('input')); }
+    }
+
+    // View
+    if (params.has('v')) {
+      const viewKey = params.get('v');
+      const tab = document.querySelector(`.view-tab[data-view="${viewKey}"]`);
+      if (tab) tab.click();
+    }
+
+    // Multiway preset
+    if (params.has('p')) {
+      const chip = document.querySelector(`.preset-chip[data-key="${params.get('p')}"]`);
+      if (chip) chip.click();
+    }
+
+    // Spacetime preset
+    if (params.has('stp')) {
+      const chip = document.querySelector(`.st-preset-chip[data-st-key="${params.get('stp')}"]`);
+      if (chip) chip.click();
+    }
+
+    // Spacetime steps
+    if (params.has('sts')) {
+      const sl = document.getElementById('sl-st-steps');
+      if (sl) { sl.value = params.get('sts'); sl.dispatchEvent(new Event('input')); }
+    }
+
+    // Coarse-graining (delayed to ensure system is built)
+    if (params.has('cg')) {
+      setTimeout(() => {
+        const sl = document.getElementById('sl-coarsegrain');
+        if (sl) { sl.value = params.get('cg'); sl.dispatchEvent(new Event('input')); }
+      }, 800);
+    }
+  }
+
+  // Update hash on meaningful state changes (debounced)
+  let _hashTimer = null;
+  function scheduleHashUpdate() {
+    clearTimeout(_hashTimer);
+    _hashTimer = setTimeout(() => {
+      const newHash = encodeState();
+      if (newHash) {
+        history.replaceState(null, '', '#' + newHash);
+      }
+    }, 400);
+  }
+
+  // Hook into view tabs
+  document.querySelectorAll('.view-tab').forEach(tab => {
+    tab.addEventListener('click', scheduleHashUpdate);
+  });
+
+  // Hook into preset clicks
+  const presetGal = document.getElementById('preset-gallery');
+  if (presetGal) {
+    presetGal.addEventListener('click', (e) => {
+      if (e.target.classList.contains('preset-chip')) scheduleHashUpdate();
+    });
+  }
+
+  // Hook into spacetime preset clicks
+  document.querySelectorAll('.st-preset-chip').forEach(chip => {
+    chip.addEventListener('click', scheduleHashUpdate);
+  });
+
+  // Hook into sliders
+  ['sl-coarsegrain', 'sl-steps', 'sl-st-steps'].forEach(id => {
+    const sl = document.getElementById(id);
+    if (sl) sl.addEventListener('change', scheduleHashUpdate);
+  });
+
+  // Hook into theme toggle
+  document.getElementById('theme-toggle').addEventListener('click', scheduleHashUpdate);
+
+  // Apply hash state after a brief delay to let the app initialize
+  if (window.location.hash.length > 1) {
+    setTimeout(applyHashState, 600);
+  }
+})();
+
+
+// ─── 3. MOBILE RESPONSIVENESS ───
+(function() {
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const overlay = document.getElementById('mobile-overlay');
+  const leftPanel = document.getElementById('left-panel');
+  const rightPanel = document.getElementById('right-panel');
+
+  let mobileState = 'closed'; // 'closed' | 'left' | 'right'
+
+  function closePanels() {
+    mobileState = 'closed';
+    menuBtn.classList.remove('open');
+    overlay.classList.remove('open');
+    leftPanel.classList.remove('mobile-open');
+    rightPanel.classList.remove('mobile-open');
+  }
+
+  function openLeft() {
+    mobileState = 'left';
+    menuBtn.classList.add('open');
+    overlay.classList.add('open');
+    leftPanel.classList.add('mobile-open');
+    rightPanel.classList.remove('mobile-open');
+  }
+
+  function openRight() {
+    mobileState = 'right';
+    menuBtn.classList.remove('open');
+    overlay.classList.add('open');
+    rightPanel.classList.add('mobile-open');
+    leftPanel.classList.remove('mobile-open');
+  }
+
+  menuBtn.addEventListener('click', () => {
+    if (mobileState === 'closed') openLeft();
+    else closePanels();
+  });
+
+  overlay.addEventListener('click', closePanels);
+
+  // Swipe gestures for mobile
+  let touchStartX = 0;
+  let touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (window.innerWidth > 960) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+
+    if (dx > 0 && mobileState === 'closed' && touchStartX < 30) {
+      openLeft(); // Swipe right from left edge
+    } else if (dx < 0 && mobileState === 'closed' && touchStartX > window.innerWidth - 30) {
+      openRight(); // Swipe left from right edge
+    } else if (dx < 0 && mobileState === 'left') {
+      closePanels();
+    } else if (dx > 0 && mobileState === 'right') {
+      closePanels();
+    }
+  }, { passive: true });
+
+  // Add a "Results" button visible on mobile to open right panel
+  const isMobileQuery = window.matchMedia('(max-width: 960px)');
+  function handleMobileChange(mq) {
+    if (mq.matches) {
+      // Ensure panels are closed when entering mobile
+      closePanels();
+      // Add results button if not exists
+      if (!document.getElementById('mobile-results-btn')) {
+        const btn = document.createElement('button');
+        btn.id = 'mobile-results-btn';
+        btn.textContent = 'Results';
+        btn.style.cssText = 'position:fixed;top:12px;right:56px;z-index:7000;padding:6px 12px;' +
+          'font-size:10px;font-weight:600;font-family:Inter,sans-serif;letter-spacing:0.06em;' +
+          'text-transform:uppercase;border-radius:8px;cursor:pointer;' +
+          'background:rgba(246,246,244,0.95);border:1px solid #D9D9D4;color:#555;' +
+          'backdrop-filter:blur(8px);transition:background 0.15s;';
+        btn.addEventListener('click', () => {
+          if (mobileState === 'right') closePanels();
+          else openRight();
+        });
+        document.body.appendChild(btn);
+        // Dark mode awareness
+        const updateResultsBtn = () => {
+          const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+          btn.style.background = dark ? 'rgba(26,26,26,0.95)' : 'rgba(246,246,244,0.95)';
+          btn.style.borderColor = dark ? '#333333' : '#D9D9D4';
+          btn.style.color = dark ? '#999' : '#555';
+        };
+        updateResultsBtn();
+        const observer = new MutationObserver(updateResultsBtn);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      }
+    } else {
+      closePanels();
+      const rBtn = document.getElementById('mobile-results-btn');
+      if (rBtn) rBtn.remove();
+    }
+  }
+  isMobileQuery.addEventListener('change', handleMobileChange);
+  handleMobileChange(isMobileQuery);
+})();
 </script>
 
 </body>
