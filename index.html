@@ -5293,7 +5293,7 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.55, 0.22 + wNorm * 0.30);
       } else {
-        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.50, 0.25 + wNorm * 0.30);
+        _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.40, 0.18 + wNorm * 0.22);
       }
       if (!isEdgeHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
@@ -5315,7 +5315,7 @@ function buildScene(sys, highlightSet) {
     edgeProgress[i * 2 + 1] = 1.0; // to vertex
   }
   edgeGeo.setAttribute('edgeProgress', new THREE.BufferAttribute(edgeProgress, 1));
-  const edgeOpacity = highlightSet ? 0.6 : (isDarkTheme ? 0.55 : 0.85);
+  const edgeOpacity = highlightSet ? 0.6 : (isDarkTheme ? 0.55 : 1.0);
   // Animated flow shader — dashed lines with moving offset
   const edgeMat = new THREE.ShaderMaterial({
     vertexColors: true,
@@ -5326,7 +5326,8 @@ function buildScene(sys, highlightSet) {
       uTime: { value: 0.0 },
       uOpacity: { value: edgeOpacity },
       uFlow: { value: 1.0 },  // 1.0 = flow animation on, 0.0 = off
-      uDashScale: { value: 0.08 } // dash frequency
+      uDashScale: { value: 0.08 }, // dash frequency
+      uBaseAlpha: { value: isDarkTheme ? 0.4 : 0.7 } // floor alpha between dashes
     },
     vertexShader: `
       attribute float edgeProgress;
@@ -5343,13 +5344,14 @@ function buildScene(sys, highlightSet) {
       uniform float uOpacity;
       uniform float uFlow;
       uniform float uDashScale;
+      uniform float uBaseAlpha;
       varying vec3 vColor;
       varying float vProgress;
       void main() {
         // Animated dash pattern — flows along edge direction
         float flow = fract(vProgress * 12.0 - uTime * 0.5 * uFlow);
         float dash = smoothstep(0.0, 0.15, flow) * smoothstep(0.6, 0.45, flow);
-        float alpha = mix(0.4, 0.4 + dash * 0.6, uFlow);
+        float alpha = mix(uBaseAlpha, uBaseAlpha + dash * (1.0 - uBaseAlpha), uFlow);
         gl_FragColor = vec4(vColor, alpha * uOpacity);
       }
     `
