@@ -5185,7 +5185,8 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
       } else {
-        _tmpColor.setHSL(0.07 + wNorm * 0.02, 0.85 + wNorm * 0.15, 0.30 + wNorm * 0.25);
+        // Wide range: dark brown (low weight) → vivid orange (high weight)
+        _tmpColor.setHSL(0.05 + wNorm * 0.04, 0.6 + wNorm * 0.35, 0.18 + wNorm * 0.42);
       }
       if (!isHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
@@ -5311,7 +5312,7 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.55, 0.22 + wNorm * 0.30);
       } else {
-        _tmpColor.setHSL(0.07 + wNorm * 0.02, 0.85, 0.30 + wNorm * 0.20);
+        _tmpColor.setHSL(0.05 + wNorm * 0.04, 0.55 + wNorm * 0.35, 0.15 + wNorm * 0.38);
       }
       if (!isEdgeHighlighted && hasHighlight) {
         _tmpColor.multiplyScalar(dimFactor);
@@ -5496,7 +5497,7 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
       } else {
-        _tmpColor.setHSL(0.07 + wNorm * 0.02, 0.85 + wNorm * 0.15, 0.30 + wNorm * 0.25);
+        _tmpColor.setHSL(0.05 + wNorm * 0.04, 0.6 + wNorm * 0.35, 0.18 + wNorm * 0.42);
       }
       if (!isHighlighted && hasHighlight) _tmpColor.multiplyScalar(dimFactor);
     }
@@ -7861,7 +7862,7 @@ function buildBranchial3d() {
     if (_isDkB3d) {
       _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.7, 0.25 + wNorm * 0.5);
     } else {
-      _hoverTmp.setHSL(0.06 + wNorm * 0.03, 0.8, 0.25 + wNorm * 0.3);
+      _hoverTmp.setHSL(0.05 + wNorm * 0.04, 0.6 + wNorm * 0.35, 0.18 + wNorm * 0.42);
     }
     nodeCol[i * 3] = _hoverTmp.r;
     nodeCol[i * 3 + 1] = _hoverTmp.g;
