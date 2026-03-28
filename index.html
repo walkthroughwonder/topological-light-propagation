@@ -5143,9 +5143,9 @@ function buildScene(sys, highlightSet) {
 
   const isDarkTheme = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
   const _blend = isDarkTheme ? THREE.AdditiveBlending : THREE.NormalBlending;
-  const goldColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#B85C00');
-  const cyanColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#E86C00');
-  const whiteColor = new THREE.Color(isDarkTheme ? '#FFFFFF' : '#222222');
+  const goldColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#CC2200');
+  const cyanColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#0066CC');
+  const whiteColor = new THREE.Color(isDarkTheme ? '#FFFFFF' : '#000000');
 
   // Support causal history mode: highlightSet can be a Set or an object {ancestors, descendants, selectedId}
   // Also supports {causalEventId} for causal event cone highlighting (only affects causal layer)
@@ -5607,8 +5607,8 @@ function buildScene(sys, highlightSet) {
   // ── CAUSAL GRAPH ──
   if (sys.causalEvents && sys.causalEvents.length > 0) {
     const causalColor = new THREE.Color(isDarkTheme ? '#FF6B35' : '#CC4400'); // warm orange for events
-    const causalPastColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#B85C00');
-    const causalFutureColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#E86C00');
+    const causalPastColor = new THREE.Color(isDarkTheme ? '#CCFF00' : '#CC2200');
+    const causalFutureColor = new THREE.Color(isDarkTheme ? '#00F0FF' : '#0066CC');
 
     // Determine highlight sets for causal events
     let hlCausalPast = null, hlCausalFuture = null, hlCausalSelected = null;
@@ -6245,8 +6245,8 @@ function updateCompletionLog(sys) {
 const _hoverIsDark = () => (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
 const _hoverGold = new THREE.Color('#CCFF00');
 const _hoverCyan = new THREE.Color('#00F0FF');
-const _hoverOrange = new THREE.Color('#E86C00');
-const _hoverAmber = new THREE.Color('#B85C00');
+const _hoverOrange = new THREE.Color('#0066CC'); // light mode future (blue)
+const _hoverAmber = new THREE.Color('#CC2200');  // light mode past (red)
 const _hoverWhite = new THREE.Color('#FFFFFF');
 const _hoverTmp = new THREE.Color();
 
@@ -6280,7 +6280,7 @@ function applyHoverHighlight(nodeId) {
 
     const _hDk = _hoverIsDark();
     if (isSelected) {
-      _hoverTmp.copy(_hDk ? _hoverWhite : _hoverOrange);
+      _hoverTmp.setRGB(_hDk ? 1 : 0, _hDk ? 1 : 0, _hDk ? 1 : 0); // white in dark, black in light
     } else if (isAncestor && isDescendant) {
       _hoverTmp.copy(_hDk ? _hoverGold : _hoverAmber).lerp(_hDk ? _hoverCyan : _hoverOrange, 0.5).multiplyScalar(0.5 + wNorm * 0.5);
     } else if (isAncestor) {
@@ -11335,9 +11335,9 @@ function _buildSpacetimeSceneInner() {
   }
   const maxDepth = Math.max(...depths.values(), 1);
 
-  const cyanColor = new THREE.Color(_stIsDark ? '#00F0FF' : '#E86C00');
-  const purpleColor = new THREE.Color(_stIsDark ? '#7000FF' : '#994400');
-  const limeColor = new THREE.Color(_stIsDark ? '#CCFF00' : '#CC5500');
+  const cyanColor = new THREE.Color(_stIsDark ? '#00F0FF' : '#0066CC');
+  const purpleColor = new THREE.Color(_stIsDark ? '#7000FF' : '#6B21A8');
+  const limeColor = new THREE.Color(_stIsDark ? '#CCFF00' : '#1A7A1A');
 
   for (let i = 0; i < n; i++) {
     const atom = atoms[i];
@@ -11991,9 +11991,9 @@ function showLightCone(atomId) {
   const sizeAttr = geo.attributes.size;
   
   const _stHlDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
-  const cyanCol = new THREE.Color(_stHlDark ? '#00F0FF' : '#E86C00');
-  const limeCol = new THREE.Color(_stHlDark ? '#CCFF00' : '#B85C00');
-  const whiteCol = new THREE.Color(_stHlDark ? '#FFFFFF' : '#CC4400');
+  const cyanCol = new THREE.Color(_stHlDark ? '#00F0FF' : '#0066CC');
+  const limeCol = new THREE.Color(_stHlDark ? '#CCFF00' : '#CC2200');
+  const whiteCol = new THREE.Color(_stHlDark ? '#FFFFFF' : '#000000');
   const dimCol = new THREE.Color(_stHlDark ? '#0D0E10' : '#D0CCC5');
 
   for (let i = 0; i < atoms.length; i++) {
@@ -12170,9 +12170,9 @@ function applyDimensionHeatmap() {
   const sizeAttr = nodePoints.geometry.attributes.size;
   
   const _dimIsDark = ((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark');
-  const purpleCol = new THREE.Color(_dimIsDark ? '#7000FF' : '#994400');
-  const cyanCol = new THREE.Color(_dimIsDark ? '#00F0FF' : '#E86C00');
-  const limeCol = new THREE.Color(_dimIsDark ? '#CCFF00' : '#CC5500');
+  const purpleCol = new THREE.Color(_dimIsDark ? '#7000FF' : '#6B21A8');
+  const cyanCol = new THREE.Color(_dimIsDark ? '#00F0FF' : '#0066CC');
+  const limeCol = new THREE.Color(_dimIsDark ? '#CCFF00' : '#1A7A1A');
 
   for (let i = 0; i < n; i++) {
     const dim = localDims[i];
