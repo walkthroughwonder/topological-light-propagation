@@ -5155,6 +5155,7 @@ function buildScene(sys, highlightSet) {
   const hlSelectedId = (highlightSet && !hlCausalEventOnly && highlightSet.selectedId !== undefined) ? highlightSet.selectedId : null;
   const hasHighlight = !!highlightSet && !hlCausalEventOnly;
   const dimFactor = hasHighlight ? 0.15 : 1.0;
+  const _lightDimGrey = new THREE.Color(0.80, 0.80, 0.78); // light mode: subtle grey for non-highlighted
 
   for (const node of sys.nodes) {
     const wNorm = node.weight / maxWeight;
@@ -5192,7 +5193,7 @@ function buildScene(sys, highlightSet) {
         _tmpColor.setRGB(r, g, b);
       }
       if (!isHighlighted && hasHighlight) {
-        _tmpColor.multiplyScalar(dimFactor);
+        if (isDarkTheme) { _tmpColor.multiplyScalar(dimFactor); } else { _tmpColor.copy(_lightDimGrey); }
       }
     }
 
@@ -5322,7 +5323,7 @@ function buildScene(sys, highlightSet) {
         _tmpColor.setRGB(r, g, b);
       }
       if (!isEdgeHighlighted && hasHighlight) {
-        _tmpColor.multiplyScalar(dimFactor);
+        if (isDarkTheme) { _tmpColor.multiplyScalar(dimFactor); } else { _tmpColor.copy(_lightDimGrey); }
       }
     }
 
@@ -5510,7 +5511,7 @@ function buildScene(sys, highlightSet) {
         const b = 0.20 - wNorm * 0.20;
         _tmpColor.setRGB(r, g, b);
       }
-      if (!isHighlighted && hasHighlight) _tmpColor.multiplyScalar(dimFactor);
+      if (!isHighlighted && hasHighlight) { if (isDarkTheme) { _tmpColor.multiplyScalar(dimFactor); } else { _tmpColor.copy(_lightDimGrey); } }
     }
 
     branchialColors[i3] = _tmpColor.r;
@@ -6259,6 +6260,7 @@ function applyHoverHighlight(nodeId) {
   const sys = currentSystem;
   const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
   const dimFactor = 0.15;
+  const _hoverLightDimGrey = 0.80; // light mode: fixed grey for non-highlighted
 
   // Update node colors and sizes in-place
   const nColors = currentNodePoints.geometry.getAttribute('color');
@@ -6285,10 +6287,14 @@ function applyHoverHighlight(nodeId) {
     } else if (isDescendant) {
       _hoverTmp.copy(_hDk ? _hoverCyan : _hoverOrange).multiplyScalar(0.3 + wNorm * 0.7);
     } else {
-      // Dim non-cone nodes from saved originals
-      const i3 = i * 3;
-      _hoverTmp.setRGB(savedNodeColors[i3], savedNodeColors[i3+1], savedNodeColors[i3+2]);
-      _hoverTmp.multiplyScalar(dimFactor);
+      // Dim non-cone nodes
+      if (_hDk) {
+        const i3 = i * 3;
+        _hoverTmp.setRGB(savedNodeColors[i3], savedNodeColors[i3+1], savedNodeColors[i3+2]);
+        _hoverTmp.multiplyScalar(dimFactor);
+      } else {
+        _hoverTmp.setRGB(_hoverLightDimGrey, _hoverLightDimGrey, _hoverLightDimGrey * 0.975);
+      }
     }
     const i3 = i * 3;
     nc[i3] = _hoverTmp.r;
@@ -6336,8 +6342,13 @@ function applyHoverHighlight(nodeId) {
       }
       _hoverTmp.multiplyScalar(0.3 + wNorm * 0.4);
     } else {
-      _hoverTmp.setRGB(savedEdgeColors[i6], savedEdgeColors[i6+1], savedEdgeColors[i6+2]);
-      _hoverTmp.multiplyScalar(dimFactor);
+      const _heDk2 = _hoverIsDark();
+      if (_heDk2) {
+        _hoverTmp.setRGB(savedEdgeColors[i6], savedEdgeColors[i6+1], savedEdgeColors[i6+2]);
+        _hoverTmp.multiplyScalar(dimFactor);
+      } else {
+        _hoverTmp.setRGB(_hoverLightDimGrey, _hoverLightDimGrey, _hoverLightDimGrey * 0.975);
+      }
     }
     ec[i6] = ec[i6+3] = _hoverTmp.r;
     ec[i6+1] = ec[i6+4] = _hoverTmp.g;
