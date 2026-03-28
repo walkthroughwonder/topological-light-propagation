@@ -5325,7 +5325,7 @@ function buildScene(sys, highlightSet) {
       }
       if (!isEdgeHighlighted && hasHighlight) {
         if (isDarkTheme) { _tmpColor.multiplyScalar(dimFactor); }
-        // Light mode: leave non-cone edges at their original color
+        else { _tmpColor.setRGB(0.82, 0.82, 0.80); } // light grey
       }
     }
 
@@ -6346,13 +6346,13 @@ function applyHoverHighlight(nodeId) {
       }
       _hoverTmp.multiplyScalar(0.3 + wNorm * 0.4);
     } else {
-      // Non-cone edges: dim in dark mode, leave untouched in light mode
+      // Non-cone edges: dim in dark mode, light grey in light mode
       const _heDk2 = _hoverIsDark();
       if (_heDk2) {
         _hoverTmp.setRGB(savedEdgeColors[i6], savedEdgeColors[i6+1], savedEdgeColors[i6+2]);
         _hoverTmp.multiplyScalar(dimFactor);
       } else {
-        _hoverTmp.setRGB(savedEdgeColors[i6], savedEdgeColors[i6+1], savedEdgeColors[i6+2]);
+        _hoverTmp.setRGB(0.82, 0.82, 0.80); // light grey
       }
     }
     ec[i6] = ec[i6+3] = _hoverTmp.r;
