@@ -6880,6 +6880,282 @@ function clearHoverHighlight() {
   }
 }
 
+// ─── Causal event hover highlight ───
+let _hoveredCausalEventId = null;
+
+function applyCausalHoverHighlight(eventId) {
+  if (!currentSystem || !currentCausalPoints || !savedCausalColors) return;
+  if (selectedObserverNodeId !== null) return; // click active
+  if (_hoveredCausalEventId === eventId) return;
+  _hoveredCausalEventId = eventId;
+
+  const sys = currentSystem;
+  const { pastCone, futureCone } = sys.traceCausalEventCone(eventId);
+  const isDark = _hoverIsDark();
+  const pastColor = new THREE.Color(isDark ? '#CCFF00' : '#DD1177');
+  const futureColor = new THREE.Color(isDark ? '#00F0FF' : '#0088DD');
+  const baseColor = new THREE.Color(isDark ? '#FF6B35' : '#CC4400');
+  const _tmp = new THREE.Color();
+
+  // Update causal event colors
+  const cc = currentCausalPoints.geometry.getAttribute('color');
+  const cs = currentCausalPoints.geometry.getAttribute('size');
+  const cArr = cc.array;
+
+  for (let i = 0; i < sceneCausalData.length; i++) {
+    const evId = sceneCausalData[i].eventId;
+    const isSelected = evId === eventId;
+    const inPast = pastCone.has(evId);
+    const inFuture = futureCone.has(evId);
+    const inCone = inPast || inFuture;
+    const i3 = i * 3;
+
+    if (isSelected) {
+      _tmp.setRGB(isDark ? 1 : 0, isDark ? 1 : 0, isDark ? 1 : 0);
+    } else if (inPast && !inFuture) {
+      _tmp.copy(pastColor).multiplyScalar(0.8);
+    } else if (inFuture && !inPast) {
+      _tmp.copy(futureColor).multiplyScalar(0.8);
+    } else if (inPast && inFuture) {
+      _tmp.copy(pastColor).lerp(futureColor, 0.5).multiplyScalar(0.8);
+    } else {
+      _tmp.copy(baseColor).multiplyScalar(isDark ? 0.12 : 0.20);
+    }
+    cArr[i3] = _tmp.r; cArr[i3+1] = _tmp.g; cArr[i3+2] = _tmp.b;
+
+    if (cs) {
+      if (isSelected) cs.array[i] = savedCausalSizes[i] * 2.5;
+      else if (inCone) cs.array[i] = savedCausalSizes[i] * 1.3;
+      else cs.array[i] = savedCausalSizes[i] * 0.4;
+    }
+  }
+  cc.needsUpdate = true;
+  if (cs) cs.needsUpdate = true;
+
+  // Update causal edge colors
+  const ceLines = causalGroup.children.find(c => c.isLineSegments);
+  if (ceLines) {
+    const ceColors = ceLines.geometry.getAttribute('color');
+    if (ceColors) {
+      const ceArr = ceColors.array;
+      for (let i = 0; i < sys.causalEdges.length; i++) {
+        const ce = sys.causalEdges[i];
+        const fromIn = pastCone.has(ce.from) || futureCone.has(ce.from);
+        const toIn = pastCone.has(ce.to) || futureCone.has(ce.to);
+        const edgeIn = fromIn && toIn;
+        const i6 = i * 6;
+        if (edgeIn) {
+          _tmp.copy(baseColor).multiplyScalar(isDark ? 0.7 : 0.8);
+        } else {
+          _tmp.copy(baseColor).multiplyScalar(isDark ? 0.04 : 0.10);
+        }
+        ceArr[i6] = ceArr[i6+3] = _tmp.r;
+        ceArr[i6+1] = ceArr[i6+4] = _tmp.g;
+        ceArr[i6+2] = ceArr[i6+5] = _tmp.b;
+      }
+      ceColors.needsUpdate = true;
+    }
+  }
+}
+
+function clearCausalHoverHighlight() {
+  if (_hoveredCausalEventId === null) return;
+  if (selectedObserverNodeId !== null) return;
+  _hoveredCausalEventId = null;
+
+  if (currentCausalPoints && savedCausalColors) {
+    const cc = currentCausalPoints.geometry.getAttribute('color');
+    cc.array.set(savedCausalColors);
+    cc.needsUpdate = true;
+    const cs = currentCausalPoints.geometry.getAttribute('size');
+    if (cs && savedCausalSizes) {
+      cs.array.set(savedCausalSizes);
+      cs.needsUpdate = true;
+    }
+  }
+  // Restore causal edge colors from rebuild (edges don't have saved array, so rebuild base)
+  const ceLines = causalGroup.children.find(c => c.isLineSegments);
+  if (ceLines && currentSystem) {
+    const isDark = _hoverIsDark();
+    const baseColor = new THREE.Color(isDark ? '#FF6B35' : '#CC4400');
+    const _tmp = new THREE.Color();
+    const ceColors = ceLines.geometry.getAttribute('color');
+    if (ceColors) {
+      const ceArr = ceColors.array;
+      for (let i = 0; i < currentSystem.causalEdges.length; i++) {
+        _tmp.copy(baseColor).multiplyScalar(isDark ? 0.25 : 0.40);
+        const i6 = i * 6;
+        ceArr[i6] = ceArr[i6+3] = _tmp.r;
+        ceArr[i6+1] = ceArr[i6+4] = _tmp.g;
+        ceArr[i6+2] = ceArr[i6+5] = _tmp.b;
+      }
+      ceColors.needsUpdate = true;
+    }
+  }
+}
+
+// ─── Spacetime hover highlight ───
+let _hoveredStAtomId = null;
+
+function applySpacetimeHoverHighlight(atomId) {
+  if (!stSpatialGraph || !stResult || !spacetimeGroup.visible) return;
+  if (_hoveredStAtomId === atomId) return;
+  _hoveredStAtomId = atomId;
+
+  const { atoms, adjacency } = stSpatialGraph;
+  const atomIndex = new Map();
+  atoms.forEach((a, i) => atomIndex.set(a, i));
+  if (!atomIndex.has(atomId)) return;
+
+  // Find events touching this atom
+  const atomEvents = new Set();
+  for (let i = 0; i < stResult.events.length; i++) {
+    const evt = stResult.events[i];
+    for (const edge of evt.destroyedEdges) { if (edge.includes(atomId)) { atomEvents.add(i); break; } }
+    for (const edge of evt.createdEdges) { if (edge.includes(atomId)) { atomEvents.add(i); break; } }
+  }
+
+  // Build causal adjacency
+  const causalFwd = new Map();
+  const causalBwd = new Map();
+  for (const ce of stResult.causalEdges) {
+    if (!causalFwd.has(ce.from)) causalFwd.set(ce.from, []);
+    causalFwd.get(ce.from).push(ce.to);
+    if (!causalBwd.has(ce.to)) causalBwd.set(ce.to, []);
+    causalBwd.get(ce.to).push(ce.from);
+  }
+
+  // BFS forward
+  const futureCone = new Set([...atomEvents]);
+  const fwdQ = [...atomEvents];
+  let qi = 0;
+  while (qi < fwdQ.length) {
+    for (const n of (causalFwd.get(fwdQ[qi]) || [])) { if (!futureCone.has(n)) { futureCone.add(n); fwdQ.push(n); } }
+    qi++;
+  }
+  // BFS backward
+  const pastCone = new Set([...atomEvents]);
+  const bwdQ = [...atomEvents];
+  qi = 0;
+  while (qi < bwdQ.length) {
+    for (const n of (causalBwd.get(bwdQ[qi]) || [])) { if (!pastCone.has(n)) { pastCone.add(n); bwdQ.push(n); } }
+    qi++;
+  }
+
+  // Collect atoms touched by cone events
+  const coneAtoms = new Set([atomId]);
+  const pastAtoms = new Set();
+  const futureAtoms = new Set();
+  for (const evIdx of pastCone) {
+    const evt = stResult.events[evIdx];
+    for (const edge of evt.destroyedEdges) for (const a of edge) { coneAtoms.add(a); pastAtoms.add(a); }
+    for (const edge of evt.createdEdges) for (const a of edge) { coneAtoms.add(a); pastAtoms.add(a); }
+  }
+  for (const evIdx of futureCone) {
+    const evt = stResult.events[evIdx];
+    for (const edge of evt.destroyedEdges) for (const a of edge) { coneAtoms.add(a); futureAtoms.add(a); }
+    for (const edge of evt.createdEdges) for (const a of edge) { coneAtoms.add(a); futureAtoms.add(a); }
+  }
+
+  // Color nodes
+  const nodePoints = spacetimeGroup.children.find(c => c.isPoints);
+  if (!nodePoints) return;
+  const colors = nodePoints.geometry.getAttribute('color');
+  const sizes = nodePoints.geometry.getAttribute('size');
+  if (!colors) return;
+
+  const isDark = _hoverIsDark();
+  const pastCol = new THREE.Color(isDark ? '#CCFF00' : '#DD1177');
+  const futCol = new THREE.Color(isDark ? '#00F0FF' : '#0088DD');
+  const _tmp = new THREE.Color();
+
+  // Save original colors on first hover
+  if (!nodePoints._savedColors) nodePoints._savedColors = new Float32Array(colors.array);
+  if (sizes && !nodePoints._savedSizes) nodePoints._savedSizes = new Float32Array(sizes.array);
+
+  for (let i = 0; i < atoms.length; i++) {
+    const a = atoms[i];
+    const i3 = i * 3;
+    const isSelected = a === atomId;
+    const inPast = pastAtoms.has(a);
+    const inFuture = futureAtoms.has(a);
+    const inCone = inPast || inFuture;
+
+    if (isSelected) {
+      _tmp.setRGB(isDark ? 1 : 0, isDark ? 1 : 0, isDark ? 1 : 0);
+    } else if (inPast && inFuture) {
+      _tmp.copy(pastCol).lerp(futCol, 0.5).multiplyScalar(0.9);
+    } else if (inPast) {
+      _tmp.copy(pastCol).multiplyScalar(0.8);
+    } else if (inFuture) {
+      _tmp.copy(futCol).multiplyScalar(0.8);
+    } else {
+      // Dim
+      _tmp.setRGB(nodePoints._savedColors[i3], nodePoints._savedColors[i3+1], nodePoints._savedColors[i3+2]);
+      _tmp.multiplyScalar(isDark ? 0.15 : 0.3);
+    }
+    colors.array[i3] = _tmp.r; colors.array[i3+1] = _tmp.g; colors.array[i3+2] = _tmp.b;
+    if (sizes) {
+      if (isSelected) sizes.array[i] = nodePoints._savedSizes[i] * 2.5;
+      else if (inCone) sizes.array[i] = nodePoints._savedSizes[i] * 1.2;
+      else sizes.array[i] = nodePoints._savedSizes[i] * 0.5;
+    }
+  }
+  colors.needsUpdate = true;
+  if (sizes) sizes.needsUpdate = true;
+
+  // Color edges
+  const edgeLines = spacetimeGroup.children.find(c => c.isLineSegments);
+  if (edgeLines) {
+    const ec = edgeLines.geometry.getAttribute('color');
+    if (ec) {
+      if (!edgeLines._savedColors) edgeLines._savedColors = new Float32Array(ec.array);
+      const drawnEdges = [];
+      for (const atom of atoms) {
+        const nbrs = adjacency.get(atom);
+        if (!nbrs) continue;
+        for (const nb of nbrs) {
+          if (atom < nb) drawnEdges.push([atom, nb]);
+        }
+      }
+      for (let i = 0; i < drawnEdges.length; i++) {
+        const [a, b] = drawnEdges[i];
+        const aIn = coneAtoms.has(a);
+        const bIn = coneAtoms.has(b);
+        const i6 = i * 6;
+        if (aIn && bIn) {
+          _tmp.copy(futCol).multiplyScalar(isDark ? 0.6 : 0.7);
+        } else {
+          _tmp.setRGB(edgeLines._savedColors[i6], edgeLines._savedColors[i6+1], edgeLines._savedColors[i6+2]);
+          _tmp.multiplyScalar(isDark ? 0.1 : 0.2);
+        }
+        ec.array[i6] = ec.array[i6+3] = _tmp.r;
+        ec.array[i6+1] = ec.array[i6+4] = _tmp.g;
+        ec.array[i6+2] = ec.array[i6+5] = _tmp.b;
+      }
+      ec.needsUpdate = true;
+    }
+  }
+}
+
+function clearSpacetimeHoverHighlight() {
+  if (_hoveredStAtomId === null) return;
+  _hoveredStAtomId = null;
+  const nodePoints = spacetimeGroup.children.find(c => c.isPoints);
+  if (nodePoints && nodePoints._savedColors) {
+    const colors = nodePoints.geometry.getAttribute('color');
+    colors.array.set(nodePoints._savedColors);
+    colors.needsUpdate = true;
+    const sizes = nodePoints.geometry.getAttribute('size');
+    if (sizes && nodePoints._savedSizes) { sizes.array.set(nodePoints._savedSizes); sizes.needsUpdate = true; }
+  }
+  const edgeLines = spacetimeGroup.children.find(c => c.isLineSegments);
+  if (edgeLines && edgeLines._savedColors) {
+    const ec = edgeLines.geometry.getAttribute('color');
+    if (ec) { ec.array.set(edgeLines._savedColors); ec.needsUpdate = true; }
+  }
+}
+
 // ─── Incremental click highlight: writes colors directly into existing geometry buffers ───
 // Avoids full buildScene() rebuild on every node click.
 function applyClickHighlight(nodeId) {
@@ -8070,6 +8346,8 @@ renderer.domElement.addEventListener('mousemove', (e) => {
         hoveredNodeIdx = -1;
         hoveredCausalIdx = idx;
         clearHoverHighlight();
+        applyCausalHoverHighlight(cd.eventId);
+        clearSpacetimeHoverHighlight();
         return;
       }
     }
@@ -8086,7 +8364,28 @@ renderer.domElement.addEventListener('mousemove', (e) => {
         hoveredNodeIdx = idx;
         hoveredCausalIdx = -1;
         applyHoverHighlight(nd.id);
+        clearCausalHoverHighlight();
+        clearSpacetimeHoverHighlight();
         return;
+      }
+    }
+  }
+
+  // Check spacetime nodes
+  if (spacetimeGroup.visible && typeof stSpatialGraph !== 'undefined' && stSpatialGraph) {
+    const stPoints = spacetimeGroup.children.find(c => c.isPoints);
+    if (stPoints) {
+      const stIntersects = raycaster.intersectObject(stPoints);
+      if (stIntersects.length > 0) {
+        const idx = stIntersects[0].index;
+        if (idx < stSpatialGraph.atoms.length) {
+          const atomId = stSpatialGraph.atoms[idx];
+          showTooltip(e.clientX, e.clientY, `atom ${atomId}`, stSpatialGraph.adjacency.get(atomId)?.size || 0, 0);
+          applySpacetimeHoverHighlight(atomId);
+          clearHoverHighlight();
+          clearCausalHoverHighlight();
+          return;
+        }
       }
     }
   }
@@ -8094,6 +8393,8 @@ renderer.domElement.addEventListener('mousemove', (e) => {
   hoveredNodeIdx = -1;
   hoveredCausalIdx = -1;
   clearHoverHighlight();
+  clearCausalHoverHighlight();
+  clearSpacetimeHoverHighlight();
   hideTooltip();
 });
 
@@ -8101,6 +8402,8 @@ renderer.domElement.addEventListener('mouseleave', () => {
   hoveredNodeIdx = -1;
   hoveredCausalIdx = -1;
   clearHoverHighlight();
+  clearCausalHoverHighlight();
+  clearSpacetimeHoverHighlight();
   hideTooltip();
 });
 
