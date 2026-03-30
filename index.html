@@ -2759,6 +2759,164 @@
   }
   [data-theme="dark"] #mobile-menu-btn span { background: #999; }
 
+  /* ─── KEYBOARD SHORTCUTS OVERLAY ─── */
+  #shortcuts-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+  }
+  #shortcuts-overlay.open { display: flex; }
+  .shortcuts-card {
+    background: #FFFFFF;
+    border: 1px solid #D9D9D4;
+    border-radius: 12px;
+    padding: 24px 28px 20px;
+    max-width: 420px;
+    width: 90vw;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    position: relative;
+  }
+  .shortcuts-card h3 {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #111111;
+    margin: 0 0 16px;
+  }
+  .shortcut-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 12px;
+    color: #555;
+    border-bottom: 1px solid #F0F0EC;
+  }
+  .shortcut-row:last-child { border-bottom: none; }
+  .shortcut-row kbd {
+    display: inline-block;
+    min-width: 22px;
+    padding: 2px 7px;
+    text-align: center;
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: #333;
+    box-shadow: 0 1px 0 #D9D9D4;
+  }
+  .shortcut-group-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #999;
+    padding: 10px 0 4px;
+    border-bottom: none !important;
+  }
+  .shortcuts-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid #D9D9D4;
+    background: #F6F6F4;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .shortcuts-close:hover { background: #E8E8E4; }
+  [data-theme="dark"] .shortcuts-card {
+    background: #1A1A1A;
+    border-color: #333333;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  [data-theme="dark"] .shortcuts-card h3 { color: #E8E8E8; }
+  [data-theme="dark"] .shortcut-row { color: #999; border-color: #2A2A2A; }
+  [data-theme="dark"] .shortcut-row kbd {
+    background: #222; border-color: #444; color: #CCC;
+    box-shadow: 0 1px 0 #444;
+  }
+  [data-theme="dark"] .shortcut-group-label { color: #666; }
+  [data-theme="dark"] .shortcuts-close {
+    background: #222; border-color: #444; color: #999;
+  }
+  [data-theme="dark"] .shortcuts-close:hover { background: #333; }
+
+  /* ─── EMPTY STATE OVERLAY ─── */
+  #spacetime-empty {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 20;
+    pointer-events: none;
+  }
+  #spacetime-empty .empty-icon {
+    font-size: 32px;
+    opacity: 0.3;
+    margin-bottom: 10px;
+  }
+  #spacetime-empty .empty-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #777;
+    margin-bottom: 6px;
+  }
+  #spacetime-empty .empty-hint {
+    font-size: 11px;
+    color: #999;
+    max-width: 260px;
+    line-height: 1.5;
+  }
+  #spacetime-empty .empty-hint kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    background: #F6F6F4;
+    border: 1px solid #D9D9D4;
+    border-radius: 3px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 10px;
+    color: #555;
+  }
+  [data-theme="dark"] #spacetime-empty .empty-title { color: #666; }
+  [data-theme="dark"] #spacetime-empty .empty-hint { color: #555; }
+  [data-theme="dark"] #spacetime-empty .empty-hint kbd {
+    background: #222; border-color: #444; color: #999;
+  }
+
+  /* ─── VIEW TAB BADGES ─── */
+  .view-tab .tab-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 500;
+    color: #999;
+    margin-left: 4px;
+    opacity: 0.7;
+  }
+  .view-tab.active .tab-badge {
+    color: #E86C00;
+    opacity: 1;
+  }
+  [data-theme="dark"] .view-tab .tab-badge { color: #666; }
+  [data-theme="dark"] .view-tab.active .tab-badge { color: #E86C00; }
+
 </style>
 </head>
 <body>
@@ -3001,8 +3159,42 @@
 
   </div>
 
+  <!-- Keyboard Shortcuts Overlay -->
+  <div id="shortcuts-overlay">
+    <div class="shortcuts-card">
+      <button class="shortcuts-close" id="shortcuts-close">&times;</button>
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcut-group-label">Navigation</div>
+      <div class="shortcut-row"><span>Switch to Multiway</span><kbd>1</kbd></div>
+      <div class="shortcut-row"><span>Switch to Causal</span><kbd>2</kbd></div>
+      <div class="shortcut-row"><span>Switch to Branchial</span><kbd>3</kbd></div>
+      <div class="shortcut-row"><span>Switch to B-Evolution</span><kbd>4</kbd></div>
+      <div class="shortcut-row"><span>Switch to Spacetime</span><kbd>5</kbd></div>
+      <div class="shortcut-group-label">Playback</div>
+      <div class="shortcut-row"><span>Play / Pause</span><kbd>Space</kbd></div>
+      <div class="shortcut-row"><span>Step forward</span><kbd>→</kbd></div>
+      <div class="shortcut-row"><span>Step back</span><kbd>←</kbd></div>
+      <div class="shortcut-row"><span>Reset</span><kbd>R</kbd></div>
+      <div class="shortcut-group-label">Tools</div>
+      <div class="shortcut-row"><span>Save screenshot</span><kbd>S</kbd></div>
+      <div class="shortcut-row"><span>Close panel</span><kbd>Esc</kbd></div>
+      <div class="shortcut-row"><span>Show this help</span><kbd>?</kbd></div>
+    </div>
+  </div>
+
   <!-- CENTER: 3D Visualization -->
   <div id="center">
+
+    <!-- Spacetime empty state -->
+    <div id="spacetime-empty">
+      <div class="empty-icon">◇</div>
+      <div class="empty-title">No spacetime geometry</div>
+      <div class="empty-hint">
+        Open <strong>Scenes</strong> and choose a Spacetime preset,
+        or scroll down to the Hypergraph Rules panel
+        and press <strong>Evolve</strong>.
+      </div>
+    </div>
 
     <!-- Branchial Evolution View -->
     <div id="bevolution-container">
@@ -3018,11 +3210,11 @@
     </div>
 
     <div id="view-switcher">
-      <button class="view-tab active" data-view="multiway">Multiway</button>
-      <button class="view-tab" data-view="causal">Causal</button>
-      <button class="view-tab" data-view="branchial">Branchial</button>
-      <button class="view-tab" data-view="bevolution">B-Evolution</button>
-      <button class="view-tab" data-view="spacetime">Spacetime</button>
+      <button class="view-tab active" data-view="multiway">Multiway<span class="tab-badge" id="badge-multiway"></span></button>
+      <button class="view-tab" data-view="causal">Causal<span class="tab-badge" id="badge-causal"></span></button>
+      <button class="view-tab" data-view="branchial">Branchial<span class="tab-badge" id="badge-branchial"></span></button>
+      <button class="view-tab" data-view="bevolution">B-Evolution<span class="tab-badge" id="badge-bevolution"></span></button>
+      <button class="view-tab" data-view="spacetime">Spacetime<span class="tab-badge" id="badge-spacetime"></span></button>
     </div>
     <div id="controls-hint"></div>
     <div id="status-bar"></div>
@@ -6695,8 +6887,20 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Escape: clear observer or close scenes panel
+  // ?: open shortcuts help overlay
+  if (e.key === '?' || e.key === '/') {
+    e.preventDefault();
+    toggleShortcutsOverlay();
+    return;
+  }
+
+  // Escape: close overlays, then scenes panel
   if (e.key === 'Escape') {
+    const overlay = document.getElementById('shortcuts-overlay');
+    if (overlay && overlay.classList.contains('open')) {
+      overlay.classList.remove('open');
+      return;
+    }
     const scenesPanel = document.getElementById('scenes-panel');
     if (scenesPanel && scenesPanel.classList.contains('open')) {
       document.getElementById('scenes-btn')?.click();
@@ -6726,6 +6930,60 @@ function takeScreenshot() {
 
 // Wire the screenshot button
 document.getElementById('screenshot-btn')?.addEventListener('click', takeScreenshot);
+
+// ─── Shortcuts Help Overlay ───
+function toggleShortcutsOverlay() {
+  const overlay = document.getElementById('shortcuts-overlay');
+  overlay.classList.toggle('open');
+}
+// Close on backdrop click
+document.getElementById('shortcuts-overlay')?.addEventListener('click', (e) => {
+  if (e.target.id === 'shortcuts-overlay') {
+    e.target.classList.remove('open');
+  }
+});
+// Close on X button
+document.getElementById('shortcuts-close')?.addEventListener('click', () => {
+  document.getElementById('shortcuts-overlay').classList.remove('open');
+});
+// Wire the ? help button (reuse the existing help FAB)
+const helpFab = document.getElementById('help-fab');
+if (helpFab) helpFab.addEventListener('click', toggleShortcutsOverlay);
+
+// ─── Spacetime Empty State ───
+function updateSpacetimeEmptyState() {
+  const emptyEl = document.getElementById('spacetime-empty');
+  if (!emptyEl) return;
+  const activeView = document.querySelector('.view-tab.active')?.dataset.view;
+  const hasSTData = typeof stResult !== 'undefined' && stResult && stResult.events && stResult.events.length > 0;
+  emptyEl.style.display = (activeView === 'spacetime' && !hasSTData) ? 'block' : 'none';
+}
+
+// ─── View Tab Badges ───
+function updateViewBadges() {
+  const sys = typeof currentSystem !== 'undefined' ? currentSystem : null;
+  const mwBadge = document.getElementById('badge-multiway');
+  const causalBadge = document.getElementById('badge-causal');
+  const branchialBadge = document.getElementById('badge-branchial');
+  const bevBadge = document.getElementById('badge-bevolution');
+  const stBadge = document.getElementById('badge-spacetime');
+
+  if (sys) {
+    const n = sys.nodes ? sys.nodes.length : 0;
+    mwBadge.textContent = n > 0 ? n : '';
+    causalBadge.textContent = sys.causalEvents ? sys.causalEvents.length : '';
+    branchialBadge.textContent = n > 0 ? n : '';
+    bevBadge.textContent = n > 0 ? n : '';
+  } else {
+    mwBadge.textContent = '';
+    causalBadge.textContent = '';
+    branchialBadge.textContent = '';
+    bevBadge.textContent = '';
+  }
+
+  const hasSTData = typeof stSpatialGraph !== 'undefined' && stSpatialGraph && stSpatialGraph.atoms;
+  stBadge.textContent = hasSTData ? stSpatialGraph.atoms.length : '';
+}
 
 // ─── Observer functions ───
 function clearObserver() {
@@ -6958,6 +7216,7 @@ function runEvolution() {
     drawBranchialPlot(sys);
     updateStats(sys);
     updateCompletionLog(sys);
+    updateViewBadges();
   });
 }
 
@@ -12002,6 +12261,10 @@ function _doEvolveSpacetime(preset, btn, origText) {
   // Trigger evolve animation for smooth build-up
   triggerEvolveAnimation();
 
+  // Update badges and hide empty state
+  updateViewBadges();
+  updateSpacetimeEmptyState();
+
   // Restore button
   btn.textContent = origText;
   btn.disabled = false;
@@ -12086,7 +12349,7 @@ document.querySelectorAll('.view-tab').forEach(tab => {
     if (tab.dataset.view === 'spacetime') {
       document.getElementById('spacetime-controls').classList.add('active');
       spacetimeGroup.visible = true;
-  triggerEvolveAnimation();
+      triggerEvolveAnimation();
       multiwayGroup.visible = false;
       branchialGroup.visible = false;
       causalGroup.visible = false;
@@ -12096,6 +12359,7 @@ document.querySelectorAll('.view-tab').forEach(tab => {
       spacetimeGroup.visible = false;
       setFlatControls();
     }
+    updateSpacetimeEmptyState();
   });
 });
 
@@ -12948,6 +13212,9 @@ renderRuleEditor();
 renderPresetGallery();
 runEvolution();
 animate();
+
+// Update badges after initial evolution
+setTimeout(() => { updateViewBadges(); updateSpacetimeEmptyState(); }, 100);
 
 // Default to spacetime view: hide multiway groups, auto-evolve
 if (currentView === 'spacetime') {
