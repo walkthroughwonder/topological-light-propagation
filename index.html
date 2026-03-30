@@ -3675,6 +3675,7 @@ class MultiwaySystem {
     this._cachedBranchialSteps = null;
     this._currentStep = 0;
     this._initialState = '';
+    this._maxWeight = 1; // tracked incrementally during evolve
 
     // Causal graph: events and their causal relationships
     this.causalEvents = [];  // { id, parentNodeId, childNodeId, ruleIdx, position, inputRange, outputRange, step }
@@ -3726,6 +3727,7 @@ class MultiwaySystem {
     this._currentStep = 0;
     this._adjCacheVersion = -1; // invalidate adjacency cache
     this._initialState = initialState;
+    this._maxWeight = 1; // reset incremental max weight
 
     const rootId = this.getOrCreateNode(initialState, 0);
     this.nodes[rootId].weight = 1;
@@ -3752,6 +3754,8 @@ class MultiwaySystem {
           const childId = this.getOrCreateNode(r.result, step + 1);
           this.edges.push({ from: nodeId, to: childId });
           this.nodes[childId].weight += parentWeight;
+          // Track max weight incrementally (avoids O(n) scan later)
+          if (this.nodes[childId].weight > this._maxWeight) this._maxWeight = this.nodes[childId].weight;
 
           // Record causal event
           const eventId = this.causalEvents.length;
@@ -3795,6 +3799,7 @@ class MultiwaySystem {
     this.truncated = false;
     this._currentStep = 0;
     this._initialState = initialState;
+    this._maxWeight = 1;
 
     const rootId = this.getOrCreateNode(initialState, 0);
     this.nodes[rootId].weight = 1;
@@ -3832,6 +3837,7 @@ class MultiwaySystem {
         const childId = this.getOrCreateNode(r.result, step + 1);
         this.edges.push({ from: nodeId, to: childId });
         this.nodes[childId].weight += parentWeight;
+        if (this.nodes[childId].weight > this._maxWeight) this._maxWeight = this.nodes[childId].weight;
         generated = true;
 
         // Record causal event
@@ -3938,6 +3944,12 @@ class MultiwaySystem {
       if (newChild !== undefined) this.causalEvents[i].childNodeId = newChild;
     }
     this._buildCausalEdges();
+
+    // Recompute max weight after node removal
+    this._maxWeight = 1;
+    for (let _ri = 0; _ri < this.nodes.length; _ri++) {
+      if (this.nodes[_ri].weight > this._maxWeight) this._maxWeight = this.nodes[_ri].weight;
+    }
 
     this._buildBranchialGraph(this._currentStep);
     this._computeLayout();
@@ -5503,6 +5515,8 @@ let savedNodeColors = null;
 let savedNodeSizes = null;
 let savedEdgeColors = null;
 let savedEdgeOpacity = 0.55;
+let savedCausalColors = null; // saved base causal point colors for incremental click highlight
+let savedCausalSizes = null;  // saved base causal point sizes for incremental click highlight
 let hoverHighlightNodeId = null; // currently hover-highlighted node ID
 
 // ─── Build the 3D scene from a MultiwaySystem ───
@@ -5529,6 +5543,8 @@ function buildScene(sys, highlightSet) {
   savedNodeColors = null;
   savedNodeSizes = null;
   savedEdgeColors = null;
+  savedCausalColors = null;
+  savedCausalSizes = null;
   hoverHighlightNodeId = null;
 
   if (!sys || sys.nodes.length === 0) return;
@@ -5539,7 +5555,11 @@ function buildScene(sys, highlightSet) {
 
   // MULTIWAY GRAPH
   const nodePositions = new Float32Array(sys.nodes.length * 3);
-  const maxNodesPerStep = Math.max(...sys.stepStates.filter(Boolean).map(s => s.length), 1);
+  let maxNodesPerStep = 1;
+  for (let _si = 0; _si < sys.stepStates.length; _si++) {
+    const _ss = sys.stepStates[_si];
+    if (_ss && _ss.length > maxNodesPerStep) maxNodesPerStep = _ss.length;
+  }
   const spreadScale = Math.min(maxNodesPerStep * 0.6, 40);
   sceneSpreadScale = spreadScale;
 
@@ -5551,7 +5571,9 @@ function buildScene(sys, highlightSet) {
   }
 
   // Node points (colored by weight, with highlight/dim support)
-  const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
+  // Use cached incremental max weight if available, otherwise compute with loop
+  let maxWeight = sys._maxWeight || 1;
+  if (maxWeight < 1) maxWeight = 1;
   const nodeColors = new Float32Array(sys.nodes.length * 3);
   const nodeSizes = new Float32Array(sys.nodes.length);
 
@@ -6216,6 +6238,12 @@ function buildScene(sys, highlightSet) {
     const ec = currentEdgeLines.geometry.getAttribute('color');
     savedEdgeColors = new Float32Array(ec.array);
   }
+  if (currentCausalPoints) {
+    const cc = currentCausalPoints.geometry.getAttribute('color');
+    savedCausalColors = new Float32Array(cc.array);
+    const cs = currentCausalPoints.geometry.getAttribute('size');
+    if (cs) savedCausalSizes = new Float32Array(cs.array);
+  }
 }
 window._buildScene = buildScene;
 window._takeScreenshot = takeScreenshot;
@@ -6415,7 +6443,11 @@ function drawBranchialPlot(sys, highlightNodeId) {
   const finalIds = sys.stepStates[finalStep] || [];
   if (finalIds.length === 0) return;
 
-  const maxWeight = Math.max(...finalIds.map(id => sys.nodes[id].weight), 1);
+  let maxWeight = 1;
+  for (let _wi = 0; _wi < finalIds.length; _wi++) {
+    const _w = sys.nodes[finalIds[_wi]].weight;
+    if (_w > maxWeight) maxWeight = _w;
+  }
 
   const cx = w / 2, cy = h / 2;
   const radius = Math.min(w, h) * 0.35;
@@ -6724,7 +6756,7 @@ function applyHoverHighlight(nodeId) {
 
   const { ancestors, descendants } = currentSystem.traceCausalHistory(nodeId);
   const sys = currentSystem;
-  const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
+  const maxWeight = sys._maxWeight || 1;
   const dimFactor = 0.15;
   const _hoverLightDimGrey = 0.80; // light mode: fixed grey for non-highlighted
 
@@ -6845,6 +6877,188 @@ function clearHoverHighlight() {
     eColors.array.set(savedEdgeColors);
     eColors.needsUpdate = true;
     currentEdgeLines.material.opacity = savedEdgeOpacity;
+  }
+}
+
+// ─── Incremental click highlight: writes colors directly into existing geometry buffers ───
+// Avoids full buildScene() rebuild on every node click.
+function applyClickHighlight(nodeId) {
+  if (!currentSystem || !currentNodePoints || !currentEdgeLines) return;
+  if (!savedNodeColors || !savedEdgeColors) return;
+
+  const sys = currentSystem;
+  const { ancestors, descendants } = sys.traceCausalHistory(nodeId);
+  const maxWeight = sys._maxWeight || 1;
+  const dimFactor = 0.15;
+  const isDark = _hoverIsDark();
+  const goldColor = isDark ? new THREE.Color('#CCFF00') : new THREE.Color('#DD1177');
+  const cyanColor = isDark ? new THREE.Color('#00F0FF') : new THREE.Color('#0088DD');
+  const whiteColor = new THREE.Color(isDark ? '#FFFFFF' : '#000000');
+  const _tmp = new THREE.Color();
+
+  // Update node colors and sizes in-place
+  const nColors = currentNodePoints.geometry.getAttribute('color');
+  const nSizes = currentNodePoints.geometry.getAttribute('size');
+  const nc = nColors.array;
+  const ns = nSizes.array;
+
+  for (let i = 0; i < sceneNodeData.length; i++) {
+    const nd = sceneNodeData[i];
+    const nid = nd.id;
+    const wNorm = nd.weight / maxWeight;
+    const isAncestor = ancestors.has(nid);
+    const isDescendant = descendants.has(nid);
+    const isSelected = nid === nodeId;
+    const isHighlighted = isAncestor || isDescendant || isSelected;
+
+    if (isSelected) {
+      _tmp.copy(whiteColor);
+    } else if (isAncestor && isDescendant) {
+      _tmp.copy(goldColor).lerp(cyanColor, 0.5).multiplyScalar(0.5 + wNorm * 0.5);
+    } else if (isAncestor) {
+      _tmp.copy(goldColor).multiplyScalar(0.3 + wNorm * 0.7);
+    } else if (isDescendant) {
+      _tmp.copy(cyanColor).multiplyScalar(0.3 + wNorm * 0.7);
+    } else {
+      const i3 = i * 3;
+      _tmp.setRGB(savedNodeColors[i3], savedNodeColors[i3+1], savedNodeColors[i3+2]);
+      if (isDark) _tmp.multiplyScalar(dimFactor);
+    }
+    const i3 = i * 3;
+    nc[i3] = _tmp.r; nc[i3+1] = _tmp.g; nc[i3+2] = _tmp.b;
+
+    // Sizes
+    if (isSelected) {
+      ns[i] = savedNodeSizes[i] * 2.0;
+    } else if (!isHighlighted && isDark) {
+      ns[i] = savedNodeSizes[i] * 0.6;
+    } else {
+      ns[i] = savedNodeSizes[i];
+    }
+  }
+  nColors.needsUpdate = true;
+  nSizes.needsUpdate = true;
+
+  // Update edge colors in-place
+  const eColors = currentEdgeLines.geometry.getAttribute('color');
+  const ec = eColors.array;
+  for (let i = 0; i < sys.edges.length; i++) {
+    const e = sys.edges[i];
+    const fromInPast = ancestors.has(e.from);
+    const toInPast = ancestors.has(e.to);
+    const fromInFuture = descendants.has(e.from);
+    const toInFuture = descendants.has(e.to);
+    const fromInHistory = fromInPast || fromInFuture;
+    const toInHistory = toInPast || toInFuture;
+    const isEdgeHighlighted = fromInHistory && toInHistory;
+    const wNorm = sys.nodes[e.to].weight / maxWeight;
+    const i6 = i * 6;
+
+    if (isEdgeHighlighted) {
+      const bothPast = fromInPast && toInPast;
+      const bothFuture = fromInFuture && toInFuture;
+      if (bothPast && !bothFuture) {
+        _tmp.copy(goldColor);
+      } else if (bothFuture && !bothPast) {
+        _tmp.copy(cyanColor);
+      } else {
+        _tmp.copy(goldColor).lerp(cyanColor, 0.5);
+      }
+      _tmp.multiplyScalar(0.3 + wNorm * 0.4);
+    } else {
+      if (isDark) {
+        _tmp.setRGB(savedEdgeColors[i6], savedEdgeColors[i6+1], savedEdgeColors[i6+2]);
+        _tmp.multiplyScalar(dimFactor);
+      } else {
+        _tmp.setRGB(0.82, 0.82, 0.80);
+      }
+    }
+    ec[i6] = ec[i6+3] = _tmp.r;
+    ec[i6+1] = ec[i6+4] = _tmp.g;
+    ec[i6+2] = ec[i6+5] = _tmp.b;
+  }
+  eColors.needsUpdate = true;
+  currentEdgeLines.material.opacity = isDark ? 0.5 : currentEdgeLines.material.opacity;
+
+  // Update causal point colors in-place (if visible)
+  if (currentCausalPoints && savedCausalColors && sys.causalEvents.length > 0) {
+    const causalColor = new THREE.Color(isDark ? '#FF6B35' : '#CC4400');
+    const causalPastColor = new THREE.Color(isDark ? '#CCFF00' : '#DD1177');
+    const causalFutureColor = new THREE.Color(isDark ? '#00F0FF' : '#0088DD');
+
+    // Get causal cone for the selected state node
+    const touchEvents = sys.getEventsForNode(nodeId);
+    let hlCausalPast = null, hlCausalFuture = null, hlCausalSelected = null;
+    if (touchEvents.length > 0) {
+      const selEvent = touchEvents[0];
+      hlCausalSelected = selEvent.id;
+      const cone = sys.traceCausalEventCone(selEvent.id);
+      hlCausalPast = cone.pastCone;
+      hlCausalFuture = cone.futureCone;
+    }
+
+    const cc = currentCausalPoints.geometry.getAttribute('color');
+    const ccArr = cc.array;
+    const cSizes = currentCausalPoints.geometry.getAttribute('size');
+    const csArr = cSizes ? cSizes.array : null;
+    const baseCausalSz = 2.5 * NODE_SIZE;
+
+    for (let i = 0; i < sys.causalEvents.length; i++) {
+      const ev = sys.causalEvents[i];
+      const inPast = hlCausalPast ? hlCausalPast.has(ev.id) : false;
+      const inFuture = hlCausalFuture ? hlCausalFuture.has(ev.id) : false;
+      const isSelEvt = hlCausalSelected === ev.id;
+      const inCone = inPast || inFuture || isSelEvt;
+      const i3c = i * 3;
+
+      if (isSelEvt) {
+        _tmp.set('#FFFFFF');
+      } else if (inPast && !inFuture) {
+        _tmp.copy(causalPastColor).multiplyScalar(0.8);
+      } else if (inFuture && !inPast) {
+        _tmp.copy(causalFutureColor).multiplyScalar(0.8);
+      } else if (!inCone) {
+        _tmp.copy(causalColor).multiplyScalar(isDark ? 0.12 : 0.25);
+      } else {
+        _tmp.copy(causalColor).multiplyScalar(isDark ? 0.6 : 0.7);
+      }
+      ccArr[i3c] = _tmp.r; ccArr[i3c+1] = _tmp.g; ccArr[i3c+2] = _tmp.b;
+
+      if (csArr) {
+        if (isSelEvt) csArr[i] = baseCausalSz * 2.0;
+        else if (!inCone) csArr[i] = baseCausalSz * 0.5;
+        else csArr[i] = savedCausalSizes ? savedCausalSizes[i] : baseCausalSz;
+      }
+    }
+    cc.needsUpdate = true;
+    if (cSizes) cSizes.needsUpdate = true;
+  }
+}
+
+function clearClickHighlight() {
+  // Restore base colors from saved arrays
+  if (currentNodePoints && savedNodeColors && savedNodeSizes) {
+    const nColors = currentNodePoints.geometry.getAttribute('color');
+    const nSizes = currentNodePoints.geometry.getAttribute('size');
+    nColors.array.set(savedNodeColors);
+    nSizes.array.set(savedNodeSizes);
+    nColors.needsUpdate = true;
+    nSizes.needsUpdate = true;
+  }
+  if (currentEdgeLines && savedEdgeColors) {
+    const eColors = currentEdgeLines.geometry.getAttribute('color');
+    eColors.array.set(savedEdgeColors);
+    eColors.needsUpdate = true;
+    currentEdgeLines.material.opacity = savedEdgeOpacity;
+  }
+  if (currentCausalPoints && savedCausalColors) {
+    const cc = currentCausalPoints.geometry.getAttribute('color');
+    cc.array.set(savedCausalColors);
+    cc.needsUpdate = true;
+    if (savedCausalSizes) {
+      const cs = currentCausalPoints.geometry.getAttribute('size');
+      if (cs) { cs.array.set(savedCausalSizes); cs.needsUpdate = true; }
+    }
   }
 }
 
@@ -7240,9 +7454,16 @@ function clearObserver() {
   observerAnalysisEl.innerHTML = '';
   observerStateEl.textContent = '';
   if (currentSystem) {
-    buildScene(currentSystem);
-    drawIntensityPlot(currentSystem, getCurrentAnalytical());
-    drawBranchialPlot(currentSystem);
+    // Use incremental restore if geometry is cached; fall back to full rebuild
+    if (currentNodePoints && savedNodeColors) {
+      clearClickHighlight();
+      drawIntensityPlot(currentSystem, getCurrentAnalytical());
+      drawBranchialPlot(currentSystem);
+    } else {
+      buildScene(currentSystem);
+      drawIntensityPlot(currentSystem, getCurrentAnalytical());
+      drawBranchialPlot(currentSystem);
+    }
   }
 }
 
@@ -7272,8 +7493,13 @@ function selectCausalHistory(nodeId) {
   const finalIds = currentSystem.stepStates[finalStep] || [];
   const filteredFinalIds = finalIds.filter(id => full.has(id));
 
-  // Build scene with directional coloring: ancestors=lime, descendants=cyan
-  buildScene(currentSystem, { ancestors, descendants, selectedId: nodeId });
+  // Use incremental buffer update instead of full buildScene rebuild
+  // Falls back to buildScene if geometry isn't cached yet
+  if (currentNodePoints && currentEdgeLines && savedNodeColors && savedEdgeColors) {
+    applyClickHighlight(nodeId);
+  } else {
+    buildScene(currentSystem, { ancestors, descendants, selectedId: nodeId });
+  }
   drawIntensityPlot(currentSystem, getCurrentAnalytical(), filteredFinalIds.length > 0 ? filteredFinalIds : null);
 
   // Highlight on branchial graph if selected node is on final step
@@ -7421,6 +7647,61 @@ function renderObserverAnalysis(nodeId) {
 observerClearBtn.addEventListener('click', clearObserver);
 
 // ─── Main evolution runner (Batch) ───
+// ─── Worker setup for off-thread evolution ───
+let _evolutionWorker = null;
+let _workerSupported = false;
+(function initEvolutionWorker() {
+  try {
+    _evolutionWorker = new Worker('worker.js');
+    _workerSupported = true;
+    _evolutionWorker.onerror = () => { _workerSupported = false; _evolutionWorker = null; };
+  } catch(e) { _workerSupported = false; }
+})();
+
+/**
+ * Reconstruct a MultiwaySystem instance from worker-serialized data.
+ * Restores the stateMap (Map of Maps) from node data so all methods work.
+ */
+function _reconstructMultiwaySystem(rules, data) {
+  const sys = new MultiwaySystem(rules);
+  sys.nodes = data.nodes;
+  sys.edges = data.edges;
+  sys.stepStates = data.stepStates;
+  sys.branchialEdges = data.branchialEdges;
+  sys.causalEvents = data.causalEvents;
+  sys.causalEdges = data.causalEdges;
+  sys.truncated = data.truncated;
+  sys._currentStep = data._currentStep;
+  sys._initialState = data._initialState;
+  sys._maxWeight = data._maxWeight || 1;
+  // Rebuild stateMap (Map<step, Map<state, nodeId>>) from nodes
+  sys.stateMap = new Map();
+  for (const node of sys.nodes) {
+    if (!sys.stateMap.has(node.step)) sys.stateMap.set(node.step, new Map());
+    sys.stateMap.get(node.step).set(node.state, node.id);
+  }
+  return sys;
+}
+
+function _finishEvolution(sys, t0) {
+  currentSystem = sys;
+  const elapsed = (performance.now() - t0).toFixed(0);
+  let statusText = `${sys.nodes.length} states · ${sys.edges.length} edges`;
+  if (sys.causalEvents.length > 0) statusText += ` · ${sys.causalEvents.length} events`;
+  statusText += ` · ${elapsed}ms`;
+  if (sys.truncated) statusText += ' (truncated)';
+  statusBar.textContent = statusText;
+
+  clearObserver();
+  buildScene(sys);
+  triggerEvolveAnimation();
+  drawIntensityPlot(sys, getCurrentAnalytical());
+  drawBranchialPlot(sys);
+  updateStats(sys);
+  updateCompletionLog(sys);
+  updateViewBadges();
+}
+
 function runEvolution() {
   const rules = getCurrentRules();
   if (rules.length === 0) {
@@ -7435,32 +7716,46 @@ function runEvolution() {
   const steps = parseInt(document.getElementById('sl-steps').value);
   const maxStates = parseInt(document.getElementById('sl-maxstates').value);
 
-  statusBar.textContent = `Evolving "${initialState.length > 30 ? initialState.slice(0,27) + '...' : initialState}" for ${steps} steps...`;
+  const shortState = initialState.length > 30 ? initialState.slice(0,27) + '...' : initialState;
+  statusBar.textContent = `Evolving "${shortState}" for ${steps} steps...`;
 
-  requestAnimationFrame(() => {
+  if (_workerSupported && _evolutionWorker) {
+    // Off-thread evolution via Web Worker
     const t0 = performance.now();
+    // Show subtle indicator
+    statusBar.textContent = `Evolving "${shortState}"… (worker)`;
 
-    const sys = new MultiwaySystem(rules);
-    sys.maxTotalStates = maxStates;
-    sys.evolve(initialState, steps);
-    currentSystem = sys;
+    const handleMsg = (e) => {
+      _evolutionWorker.removeEventListener('message', handleMsg);
+      _evolutionWorker.removeEventListener('error', handleErr);
+      if (e.data.type === 'result') {
+        const sys = _reconstructMultiwaySystem(rules, e.data.result);
+        _finishEvolution(sys, t0);
+      } else {
+        // Worker error — fall back to sync
+        _runEvolutionSync(rules, initialState, steps, maxStates);
+      }
+    };
+    const handleErr = () => {
+      _evolutionWorker.removeEventListener('message', handleMsg);
+      _evolutionWorker.removeEventListener('error', handleErr);
+      _runEvolutionSync(rules, initialState, steps, maxStates);
+    };
+    _evolutionWorker.addEventListener('message', handleMsg);
+    _evolutionWorker.addEventListener('error', handleErr);
+    _evolutionWorker.postMessage({ rules, initialState, steps, maxStates });
+  } else {
+    // Synchronous fallback
+    requestAnimationFrame(() => _runEvolutionSync(rules, initialState, steps, maxStates));
+  }
+}
 
-    const elapsed = (performance.now() - t0).toFixed(0);
-    let statusText = `${sys.nodes.length} states · ${sys.edges.length} edges`;
-    if (sys.causalEvents.length > 0) statusText += ` · ${sys.causalEvents.length} events`;
-    statusText += ` · ${elapsed}ms`;
-    if (sys.truncated) statusText += ' (truncated)';
-    statusBar.textContent = statusText;
-
-    clearObserver();
-    buildScene(sys);
-    triggerEvolveAnimation();
-    drawIntensityPlot(sys, getCurrentAnalytical());
-    drawBranchialPlot(sys);
-    updateStats(sys);
-    updateCompletionLog(sys);
-    updateViewBadges();
-  });
+function _runEvolutionSync(rules, initialState, steps, maxStates) {
+  const t0 = performance.now();
+  const sys = new MultiwaySystem(rules);
+  sys.maxTotalStates = maxStates;
+  sys.evolve(initialState, steps);
+  _finishEvolution(sys, t0);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -8252,7 +8547,13 @@ function animate(timestamp) {
     }
   }
 
-  composer.render();
+  // LOD: skip composer pipeline in light mode (bloom strength = 0)
+  // This saves one full-screen texture copy per frame through the render target
+  if (bloomPass.strength > 0) {
+    composer.render();
+  } else {
+    renderer.render(scene, camera);
+  }
   updateFps();
 }
 
@@ -8681,7 +8982,7 @@ function buildBranchial3d() {
 
   branchial3dGroup = new THREE.Group();
   const sys = currentSystem;
-  const maxWeight = Math.max(...sys.nodes.map(n => n.weight), 1);
+  const maxWeight = sys._maxWeight || 1;
 
   // Build node points
   const nodePos = new Float32Array(positions.length * 3);
