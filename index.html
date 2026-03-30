@@ -2544,6 +2544,45 @@
     border-color: #444444;
     color: #CCCCCC;
   }
+  .screenshot-btn {
+    position: fixed;
+    top: 12px;
+    left: 370px;
+    z-index: 50;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #D9D9D4;
+    border-radius: 20px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 180ms ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: auto;
+    color: #555;
+  }
+  .screenshot-btn:hover {
+    border-color: #E86C00;
+    box-shadow: 0 2px 8px rgba(232,108,0,0.15);
+    color: #E86C00;
+  }
+  .screenshot-btn.flash {
+    background: rgba(232,108,0,0.15);
+    border-color: #E86C00;
+  }
+  [data-theme="dark"] .screenshot-btn {
+    background: rgba(30,30,30,0.9);
+    border-color: #444444;
+    color: #CCCCCC;
+  }
+  [data-theme="dark"] .screenshot-btn:hover {
+    border-color: #E86C00;
+    color: #E86C00;
+  }
   [data-theme="dark"] .theme-toggle:hover {
     border-color: #E86C00;
     box-shadow: 0 2px 8px rgba(232,108,0,0.25);
@@ -2827,6 +2866,9 @@
   <!-- Theme toggle button -->
   <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
     <span id="theme-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+  </button>
+  <button class="screenshot-btn" id="screenshot-btn" title="Save screenshot (S)" aria-label="Save screenshot">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
   </button>
 
   <!-- LEFT PANEL: Physics & Controls -->
@@ -4944,7 +4986,7 @@ for (const p of PRESETS) PRESET_MAP[p.key] = p;
 // ═══════════════════════════════════════════════════════════════
 
 const centerEl = document.getElementById('center');
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: true });
 renderer.setSize(centerEl.clientWidth, centerEl.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -5861,6 +5903,7 @@ function buildScene(sys, highlightSet) {
   }
 }
 window._buildScene = buildScene;
+window._takeScreenshot = takeScreenshot;
 
 function fitCamera(sys, instant) {
   if (!sys) return;
@@ -6589,6 +6632,100 @@ document.addEventListener('keydown', (e) => {
     navigateToNode(nextId);
   }
 });
+
+// ─── Global Keyboard Shortcuts ───
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const activeView = document.querySelector('.view-tab.active')?.dataset.view;
+  // Don't override B-Evolution's own space/arrow keys (but allow view switches, screenshot, escape)
+  const isBev = activeView === 'bevolution';
+
+  // Space: play/pause in interactive mode, or evolve in batch mode
+  if (!isBev && (e.key === ' ' || e.code === 'Space')) {
+    e.preventDefault();
+    if (interactiveMode) {
+      if (typeof _pbTogglePlay === 'function') _pbTogglePlay();
+      else togglePlay();
+    } else {
+      document.getElementById('btn-run')?.click();
+    }
+    return;
+  }
+
+  // Arrow Left/Right: step in interactive mode (only when no node selected)
+  if (!isBev && interactiveMode && selectedObserverNodeId === null) {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      stepForward();
+      if (typeof updatePlaybackBar === 'function') updatePlaybackBar();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      stepBack();
+      if (typeof updatePlaybackBar === 'function') updatePlaybackBar();
+      return;
+    }
+  }
+
+  // R: reset in interactive mode
+  if (!isBev && (e.key === 'r' || e.key === 'R')) {
+    if (interactiveMode) {
+      e.preventDefault();
+      resetInteractive();
+      if (typeof updatePlaybackBar === 'function') updatePlaybackBar();
+      return;
+    }
+  }
+
+  // 1-5: switch views
+  const viewKeys = { '1': 'multiway', '2': 'causal', '3': 'branchial', '4': 'bevolution', '5': 'spacetime' };
+  if (viewKeys[e.key]) {
+    e.preventDefault();
+    const tab = document.querySelector(`.view-tab[data-view="${viewKeys[e.key]}"]`);
+    if (tab) tab.click();
+    return;
+  }
+
+  // S: screenshot
+  if (e.key === 's' || e.key === 'S') {
+    e.preventDefault();
+    takeScreenshot();
+    return;
+  }
+
+  // Escape: clear observer or close scenes panel
+  if (e.key === 'Escape') {
+    const scenesPanel = document.getElementById('scenes-panel');
+    if (scenesPanel && scenesPanel.classList.contains('open')) {
+      document.getElementById('scenes-btn')?.click();
+      return;
+    }
+  }
+});
+
+// ─── Screenshot Export ───
+function takeScreenshot() {
+  // Force a fresh render so the buffer is current
+  renderer.render(scene, camera);
+  const dataURL = renderer.domElement.toDataURL('image/png');
+  const link = document.createElement('a');
+  const viewName = document.querySelector('.view-tab.active')?.dataset.view || 'hypergraph';
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  link.download = `${viewName}-${timestamp}.png`;
+  link.href = dataURL;
+  link.click();
+  // Flash feedback on the button
+  const btn = document.getElementById('screenshot-btn');
+  if (btn) {
+    btn.classList.add('flash');
+    setTimeout(() => btn.classList.remove('flash'), 400);
+  }
+}
+
+// Wire the screenshot button
+document.getElementById('screenshot-btn')?.addEventListener('click', takeScreenshot);
 
 // ─── Observer functions ───
 function clearObserver() {
@@ -11861,6 +11998,9 @@ function _doEvolveSpacetime(preset, btn, origText) {
   if (statusEl) {
     statusEl.textContent = `${stSpatialGraph.atoms.length} atoms · ${stSpatialGraph.edgeCount} hyperedges · dim ≈ ${dimStr} · ${stResult.events.length} events`;
   }
+
+  // Trigger evolve animation for smooth build-up
+  triggerEvolveAnimation();
 
   // Restore button
   btn.textContent = origText;
