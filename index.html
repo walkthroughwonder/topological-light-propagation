@@ -3132,7 +3132,7 @@
     <button class="rule-add" id="btn-add-rule">+ Add Rule</button>
 
     <div class="section-title" style="margin-top: 14px;">Initial State</div>
-    <input type="text" class="init-input" id="init-state" value="oooooooooXoooXooooooooo" spellcheck="false">
+    <input type="text" class="init-input" id="init-state" value="ooooooXoooooooXoooooo" spellcheck="false">
     <div class="safety-warning" id="safety-warning">Growth rules active — state length capped at 256 characters to keep things tractable.</div>
 
     <div class="section-title" style="margin-top: 10px;">Presets</div>
@@ -3159,8 +3159,8 @@
     <div class="section-title" style="margin-top: 14px;">Configuration</div>
 
     <div class="ctrl-group">
-      <div class="ctrl-label">Evolution Steps <span class="ctrl-val" id="v-steps">10</span></div>
-      <input type="range" id="sl-steps" min="4" max="14" step="1" value="10">
+      <div class="ctrl-label">Evolution Steps <span class="ctrl-val" id="v-steps">14</span></div>
+      <input type="range" id="sl-steps" min="4" max="14" step="1" value="14">
     </div>
 
     <div class="ctrl-group">
@@ -5293,7 +5293,7 @@ function updateSceneTheme(theme) {
   const isDark = theme === 'dark';
   const bg = isDark ? _darkBg : _lightBg;
   renderer.setClearColor(bg, 1);
-  scene.fog = new THREE.FogExp2(bg.getHex(), isDark ? 0.012 : 0.0);
+  scene.fog = new THREE.FogExp2(bg.getHex(), isDark ? 0.012 : 0.006);
   renderer.toneMappingExposure = isDark ? 1.0 : 1.0;
   // Disable bloom on light backgrounds (additive bloom washes out)
   // Use try-catch because bloomPass is a const declared later — typeof check
@@ -5707,10 +5707,10 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.55, 0.22 + wNorm * 0.30);
       } else {
-        // Continuous: dark charcoal (low weight) → bold orange (high weight)
-        const r = 0.12 + wNorm * 0.78; // 0.12 → 0.90
-        const g = 0.12 + wNorm * 0.23; // 0.12 → 0.35
-        const b = 0.12 - wNorm * 0.12; // 0.12 → 0.00
+        // Continuous: medium grey (low weight) → warm orange (high weight)
+        const r = 0.22 + wNorm * 0.68; // 0.22 → 0.90
+        const g = 0.22 + wNorm * 0.18; // 0.22 → 0.40
+        const b = 0.22 - wNorm * 0.22; // 0.22 → 0.00
         _tmpColor.setRGB(r, g, b);
       }
       if (!isEdgeHighlighted && hasHighlight) {
@@ -6541,7 +6541,8 @@ const observerClearBtn = document.getElementById('observer-clear');
 const observerAnalysisEl = document.getElementById('observer-analysis');
 
 let editorRules = [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}];
-let activePresetKey = 'double';
+// Default initial state matches 'double-wide' preset
+let activePresetKey = 'double-wide';
 
 function renderRuleEditor() {
   ruleEditorEl.innerHTML = editorRules.map((rule, i) => `
