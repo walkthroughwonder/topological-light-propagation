@@ -1358,6 +1358,8 @@
     #scenes-dropdown-wrap { top: 12px; left: auto; right: 56px; }
     #about-btn { bottom: 12px; right: 12px; }
     .theme-toggle { top: 12px !important; left: 56px !important; right: auto !important; }
+    .screenshot-btn { left: 92px !important; }
+    .export-btn { left: 128px !important; }
     #controls-hint { display: none !important; }
     #status-bar { font-size: 9px; top: auto; bottom: 44px; left: 50%; transform: translateX(-50%); right: auto; }
   }
@@ -2583,6 +2585,96 @@
     border-color: #E86C00;
     color: #E86C00;
   }
+
+  /* ── Export Button ── */
+  .export-btn {
+    position: fixed;
+    top: 12px;
+    left: 410px;
+    z-index: 50;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #D9D9D4;
+    border-radius: 20px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 180ms ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: auto;
+    color: #555;
+  }
+  .export-btn:hover {
+    border-color: #E86C00;
+    box-shadow: 0 2px 8px rgba(232,108,0,0.15);
+    color: #E86C00;
+  }
+  .export-btn.flash {
+    background: rgba(232,108,0,0.15);
+    border-color: #E86C00;
+  }
+  [data-theme="dark"] .export-btn {
+    background: rgba(30,30,30,0.9);
+    border-color: #444444;
+    color: #CCCCCC;
+  }
+  [data-theme="dark"] .export-btn:hover {
+    border-color: #E86C00;
+    color: #E86C00;
+  }
+
+  /* ── FPS Monitor ── */
+  #fps-display {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 40;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3px;
+    color: rgba(0,0,0,0.4);
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 6px;
+    padding: 3px 8px;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    user-select: none;
+    transition: opacity 0.25s ease;
+  }
+  #fps-display.visible { display: block; }
+  #fps-display .fps-val { color: #E86C00; font-weight: 600; }
+  [data-theme="dark"] #fps-display {
+    color: rgba(255,255,255,0.4);
+    background: rgba(20,20,20,0.7);
+    border-color: rgba(255,255,255,0.08);
+  }
+  [data-theme="dark"] #fps-display .fps-val { color: #E86C00; }
+
+  /* ── View Transition Overlay ── */
+  #view-transition-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.0);
+    pointer-events: none;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.12s ease-out;
+  }
+  #view-transition-overlay.active {
+    opacity: 1;
+    background: rgba(255,255,255,0.06);
+  }
+  [data-theme="dark"] #view-transition-overlay.active {
+    background: rgba(0,0,0,0.10);
+  }
+
   [data-theme="dark"] .theme-toggle:hover {
     border-color: #E86C00;
     box-shadow: 0 2px 8px rgba(232,108,0,0.25);
@@ -3025,6 +3117,9 @@
   <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
     <span id="theme-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
   </button>
+  <button class="export-btn" id="export-btn" title="Export graph data (E)" aria-label="Export graph data">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  </button>
   <button class="screenshot-btn" id="screenshot-btn" title="Save screenshot (S)" aria-label="Save screenshot">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
   </button>
@@ -3177,6 +3272,8 @@
       <div class="shortcut-row"><span>Reset</span><kbd>R</kbd></div>
       <div class="shortcut-group-label">Tools</div>
       <div class="shortcut-row"><span>Save screenshot</span><kbd>S</kbd></div>
+      <div class="shortcut-row"><span>Export graph data</span><kbd>E</kbd></div>
+      <div class="shortcut-row"><span>Toggle FPS monitor</span><kbd>F</kbd></div>
       <div class="shortcut-row"><span>Close panel</span><kbd>Esc</kbd></div>
       <div class="shortcut-row"><span>Show this help</span><kbd>?</kbd></div>
     </div>
@@ -3218,6 +3315,8 @@
     </div>
     <div id="controls-hint"></div>
     <div id="status-bar"></div>
+    <div id="fps-display"><span class="fps-val" id="fps-val">60</span> FPS</div>
+    <div id="view-transition-overlay"></div>
 
     <!-- Floating Playback Bar (interactive mode) -->
     <div id="playback-bar" style="display:none;">
@@ -6887,6 +6986,20 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
+  // E: export graph data
+  if (e.key === 'e' || e.key === 'E') {
+    e.preventDefault();
+    exportGraphData();
+    return;
+  }
+
+  // F: toggle FPS monitor
+  if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    toggleFpsMonitor();
+    return;
+  }
+
   // ?: open shortcuts help overlay
   if (e.key === '?' || e.key === '/') {
     e.preventDefault();
@@ -6930,6 +7043,111 @@ function takeScreenshot() {
 
 // Wire the screenshot button
 document.getElementById('screenshot-btn')?.addEventListener('click', takeScreenshot);
+
+// ─── Graph Data Export ───
+function exportGraphData() {
+  const sys = currentSystem;
+  if (!sys) return;
+  const viewName = document.querySelector('.view-tab.active')?.dataset.view || 'multiway';
+  const payload = {
+    meta: {
+      exported: new Date().toISOString(),
+      view: viewName,
+      generator: 'Topological Light Propagation',
+      url: window.location.href
+    },
+    rules: (sys.rules || []).map(r => ({ from: r.from, to: r.to })),
+    initialState: sys._initialState || '',
+    steps: sys.stepStates ? sys.stepStates.length : 0,
+    nodes: sys.nodes.map(n => ({
+      id: n.id,
+      state: n.state,
+      step: n.step,
+      weight: n.weight,
+      x: +n.x.toFixed(4),
+      y: +n.y.toFixed(4)
+    })),
+    edges: sys.edges.map(e => ({
+      from: e.from,
+      to: e.to,
+      ruleIdx: e.ruleIdx !== undefined ? e.ruleIdx : null
+    })),
+    branchialEdges: (sys.branchialEdges || []).map(e => ({ from: e.from, to: e.to })),
+    causalEvents: (sys.causalEvents || []).map(ev => ({
+      id: ev.id,
+      step: ev.step,
+      parentNodeId: ev.parentNodeId,
+      childNodeId: ev.childNodeId,
+      ruleIdx: ev.ruleIdx
+    })),
+    causalEdges: (sys.causalEdges || []).map(e => ({ from: e.from, to: e.to })),
+    stats: {
+      totalNodes: sys.nodes.length,
+      totalEdges: sys.edges.length,
+      totalBranchialEdges: (sys.branchialEdges || []).length,
+      totalCausalEvents: (sys.causalEvents || []).length,
+      truncated: !!sys.truncated
+    }
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  link.download = `graph-${viewName}-${timestamp}.json`;
+  link.href = url;
+  link.click();
+  URL.revokeObjectURL(url);
+  // Flash feedback
+  const btn = document.getElementById('export-btn');
+  if (btn) {
+    btn.classList.add('flash');
+    setTimeout(() => btn.classList.remove('flash'), 400);
+  }
+}
+document.getElementById('export-btn')?.addEventListener('click', exportGraphData);
+
+// ─── FPS Monitor ───
+let _fpsVisible = false;
+let _fpsFrames = 0;
+let _fpsLastTime = performance.now();
+const _fpsEl = document.getElementById('fps-display');
+const _fpsValEl = document.getElementById('fps-val');
+
+function toggleFpsMonitor() {
+  _fpsVisible = !_fpsVisible;
+  _fpsEl.classList.toggle('visible', _fpsVisible);
+  if (_fpsVisible) {
+    _fpsFrames = 0;
+    _fpsLastTime = performance.now();
+  }
+}
+
+function updateFps() {
+  if (!_fpsVisible) return;
+  _fpsFrames++;
+  const now = performance.now();
+  const elapsed = now - _fpsLastTime;
+  if (elapsed >= 500) {
+    const fps = Math.round((_fpsFrames * 1000) / elapsed);
+    _fpsValEl.textContent = fps;
+    _fpsFrames = 0;
+    _fpsLastTime = now;
+  }
+}
+
+// ─── View Transition Effect ───
+const _viewTransOverlay = document.getElementById('view-transition-overlay');
+let _viewTransTimer = null;
+
+function triggerViewTransition() {
+  if (_viewTransTimer) clearTimeout(_viewTransTimer);
+  _viewTransOverlay.classList.add('active');
+  // Brief flash + fade out
+  _viewTransTimer = setTimeout(() => {
+    _viewTransOverlay.classList.remove('active');
+  }, 120);
+}
 
 // ─── Shortcuts Help Overlay ───
 function toggleShortcutsOverlay() {
@@ -7468,6 +7686,8 @@ document.querySelectorAll('.view-tab').forEach(tab => {
     tab.classList.add('active');
     currentView = tab.dataset.view;
     updateViewVisibility();
+    triggerViewTransition();
+    triggerEvolveAnimation();
     // Show/hide bevolution container
     const _bevC = document.getElementById('bevolution-container');
     if (_bevC) {
@@ -8008,6 +8228,7 @@ function animate(timestamp) {
   }
 
   composer.render();
+  updateFps();
 }
 
 
