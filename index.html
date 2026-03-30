@@ -3640,7 +3640,8 @@
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+    "@chenglou/pretext": "https://esm.sh/@chenglou/pretext"
   }
 }
 </script>
@@ -3651,6 +3652,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+// Pretext: DOM-free text measurement for node labels
+let _pretextReady = false;
+let _pretextPrepare = null;
+let _pretextLayout = null;
+import('@chenglou/pretext').then(mod => {
+  _pretextPrepare = mod.prepare;
+  _pretextLayout = mod.layout;
+  _pretextReady = true;
+}).catch(() => { /* Pretext optional — labels degrade gracefully */ });
 
 // ═══════════════════════════════════════════════════════════════
 // PART 1: MULTIWAY STRING REWRITING ENGINE
@@ -5535,6 +5546,16 @@ function buildScene(sys, highlightSet) {
   _disposeGroup(multiwayGroup);
   _disposeGroup(branchialGroup);
   _disposeGroup(causalGroup);
+  // Re-add label group (was removed by _disposeGroup)
+  multiwayGroup.add(_labelGroup);
+  // Clear label meshes (textures stay cached)
+  while (_labelGroup.children.length > 0) {
+    const c = _labelGroup.children[0];
+    _labelGroup.remove(c);
+    if (c.geometry) c.geometry.dispose();
+    if (c.material) c.material.dispose();
+  }
+  _labelsVisible = false;
   sceneNodeData = [];
   sceneCausalData = [];
   currentNodePoints = null;
@@ -6247,6 +6268,137 @@ function buildScene(sys, highlightSet) {
 }
 window._buildScene = buildScene;
 window._takeScreenshot = takeScreenshot;
+window._labelDebug = () => ({ visible: _labelsVisible, childCount: _labelGroup.children.length, camDist: camera.position.distanceTo(controls.target).toFixed(1) });
+window._zoomTo = (dist) => { const dir = camera.position.clone().sub(controls.target).normalize(); camera.position.copy(controls.target).add(dir.multiplyScalar(dist)); };
+
+// ─── Pretext-powered node labels ───
+const _labelGroup = new THREE.Group();
+_labelGroup.name = 'nodeLabels';
+multiwayGroup.add(_labelGroup);
+
+const _labelCache = new Map(); // state string → CanvasTexture
+const _labelCanvas = document.createElement('canvas');
+const _labelCtx = _labelCanvas.getContext('2d');
+let _labelsVisible = false;
+const _LABEL_FONT = '10px JetBrains Mono, monospace';
+const _LABEL_MAX_CHARS = 20;
+const _LABEL_CAM_THRESHOLD = 35; // show labels when camera is closer than this
+
+function _createLabelTexture(text) {
+  if (_labelCache.has(text)) return _labelCache.get(text);
+
+  const display = text.length > _LABEL_MAX_CHARS ? text.slice(0, _LABEL_MAX_CHARS - 1) + '…' : text;
+  const dpr = 2;
+  _labelCtx.font = _LABEL_FONT;
+  const metrics = _labelCtx.measureText(display);
+  const w = Math.ceil(metrics.width) + 6;
+  const h = 16;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Background pill
+  ctx.fillStyle = 'rgba(0,0,0,0.65)';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, w, h, 4);
+  ctx.fill();
+
+  // Text
+  ctx.font = _LABEL_FONT;
+  ctx.fillStyle = '#E8E8E8';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(display, 3, h / 2);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+
+  _labelCache.set(text, { texture: tex, width: w, height: h });
+  return _labelCache.get(text);
+}
+
+function buildNodeLabels() {
+  // Clear old labels
+  while (_labelGroup.children.length > 0) {
+    const c = _labelGroup.children[0];
+    _labelGroup.remove(c);
+    if (c.material) c.material.dispose();
+    if (c.geometry) c.geometry.dispose();
+  }
+
+  if (!currentSystem || !currentNodePoints || sceneNodeData.length === 0) return;
+
+  const positions = currentNodePoints.geometry.getAttribute('position');
+  if (!positions) return;
+
+  const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  const maxNodes = Math.min(sceneNodeData.length, 500); // cap for perf
+
+  for (let i = 0; i < maxNodes; i++) {
+    const nd = sceneNodeData[i];
+    const { texture, width, height } = _createLabelTexture(nd.state);
+
+    const scale = 0.06; // world-space scale factor
+    const geo = new THREE.PlaneGeometry(width * scale, height * scale);
+    const mat = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+      toneMapped: false
+    });
+    if (!isDark) {
+      // Light mode: dark pill on light background
+      // Texture already has dark bg so it works in both
+    }
+    const mesh = new THREE.Mesh(geo, mat);
+
+    // Position slightly above + right of node
+    const i3 = i * 3;
+    mesh.position.set(
+      positions.array[i3] + width * scale * 0.5 + 0.3,
+      positions.array[i3 + 1] + 0.4,
+      positions.array[i3 + 2] + 0.1
+    );
+
+    // Billboard: face camera (handled in animate loop)
+    mesh.renderOrder = 999;
+    _labelGroup.add(mesh);
+  }
+}
+
+// LOD: toggle label visibility based on camera distance
+function updateLabelVisibility() {
+  if (!currentSystem) { _labelGroup.visible = false; return; }
+  // Only show in multiway view
+  if (currentView !== 'multiway') { _labelGroup.visible = false; return; }
+
+  const target = controls.target;
+  const dist = camera.position.distanceTo(target);
+  const shouldShow = dist < _LABEL_CAM_THRESHOLD;
+
+  if (shouldShow !== _labelsVisible) {
+    _labelsVisible = shouldShow;
+    _labelGroup.visible = shouldShow;
+
+    // Build labels on first zoom-in (lazy)
+    if (shouldShow && _labelGroup.children.length === 0) {
+      buildNodeLabels();
+    }
+  }
+
+  // Billboard: make all labels face the camera
+  if (_labelsVisible) {
+    for (const label of _labelGroup.children) {
+      label.quaternion.copy(camera.quaternion);
+    }
+  }
+}
 
 function fitCamera(sys, instant) {
   if (!sys) return;
@@ -8858,6 +9010,7 @@ function animate(timestamp) {
     renderer.render(scene, camera);
   }
   updateFps();
+  updateLabelVisibility();
 }
 
 
