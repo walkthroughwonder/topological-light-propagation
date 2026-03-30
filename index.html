@@ -703,7 +703,7 @@
 
   #controls-hint {
     position: absolute;
-    bottom: 46px; left: 50%;
+    bottom: 80px; left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
     letter-spacing: 0.3px;
@@ -715,7 +715,7 @@
   }
   #status-bar {
     position: absolute;
-    bottom: 24px; left: 50%;
+    bottom: 58px; left: 50%;
     transform: translateX(-50%);
     font-size: 10px;
     font-family: 'JetBrains Mono', monospace;
@@ -723,6 +723,51 @@
     pointer-events: none;
     white-space: nowrap;
   }
+
+  /* ── Floating Playback Bar ── */
+  #playback-bar {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(30, 30, 30, 0.85);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    z-index: 15;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #ccc;
+    user-select: none;
+  }
+  #playback-bar button {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+  }
+  #playback-bar button:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  #playback-bar button:disabled { opacity: 0.25; cursor: default; }
+  #playback-bar button:disabled:hover { background: none; color: #ccc; }
+  #playback-bar .pb-step { color: #E86C00; font-weight: 600; min-width: 80px; text-align: center; font-size: 11px; }
+  #playback-bar .pb-divider { width: 1px; height: 16px; background: rgba(255,255,255,0.15); }
+  #playback-bar button.pb-playing { color: #00F0FF; }
+  [data-theme="light"] #playback-bar {
+    background: rgba(255, 255, 255, 0.88);
+    border-color: rgba(0,0,0,0.12);
+    color: #555;
+  }
+  [data-theme="light"] #playback-bar button { color: #555; }
+  [data-theme="light"] #playback-bar button:hover { background: rgba(0,0,0,0.08); color: #111; }
+  [data-theme="light"] #playback-bar .pb-step { color: #CC5500; }
 
   footer {
     position: fixed;
@@ -2939,6 +2984,18 @@
     </div>
     <div id="controls-hint"></div>
     <div id="status-bar"></div>
+
+    <!-- Floating Playback Bar (interactive mode) -->
+    <div id="playback-bar" style="display:none;">
+      <button id="pb-reset" title="Reset">⏮</button>
+      <button id="pb-back" title="Step Back">◀</button>
+      <button id="pb-play" title="Play / Pause">▶</button>
+      <button id="pb-fwd" title="Step Forward">▶</button>
+      <span class="pb-divider"></span>
+      <span class="pb-step" id="pb-step-label">Step 0 / 10</span>
+      <span class="pb-divider"></span>
+      <button id="pb-speed" title="Playback speed">1×</button>
+    </div>
 
     <div id="scenes-dropdown-wrap">
       <button id="scenes-btn">Scenes <span class="chevron">▼</span></button>
@@ -5317,10 +5374,10 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.55, 0.22 + wNorm * 0.30);
       } else {
-        // Continuous: dark grey (low weight) → bold orange (high weight)
-        const r = 0.25 + wNorm * 0.70; // 0.25 → 0.95
-        const g = 0.25 + wNorm * 0.15; // 0.25 → 0.40
-        const b = 0.25 - wNorm * 0.25; // 0.25 → 0.00
+        // Continuous: dark charcoal (low weight) → bold orange (high weight)
+        const r = 0.12 + wNorm * 0.78; // 0.12 → 0.90
+        const g = 0.12 + wNorm * 0.23; // 0.12 → 0.35
+        const b = 0.12 - wNorm * 0.12; // 0.12 → 0.00
         _tmpColor.setRGB(r, g, b);
       }
       if (!isEdgeHighlighted && hasHighlight) {
@@ -5508,9 +5565,9 @@ function buildScene(sys, highlightSet) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
       } else {
         // Continuous: charcoal (low weight) → bold orange (high weight)
-        const r = 0.20 + wNorm * 0.75;
-        const g = 0.20 + wNorm * 0.20;
-        const b = 0.20 - wNorm * 0.20;
+        const r = 0.10 + wNorm * 0.80;
+        const g = 0.10 + wNorm * 0.25;
+        const b = 0.10 - wNorm * 0.10;
         _tmpColor.setRGB(r, g, b);
       }
       if (!isHighlighted && hasHighlight && isDarkTheme) { _tmpColor.multiplyScalar(dimFactor); }
@@ -5588,16 +5645,22 @@ function buildScene(sys, highlightSet) {
     bEdgeVerts[i6 + 4] = branchialPositions[fj * 3 + 1];
     bEdgeVerts[i6 + 5] = 0;
 
-    bEdgeColors[i6] = bEdgeColors[i6 + 3] = 0.2;
-    bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.5;
-    bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.4;
+    if (isDarkTheme) {
+      bEdgeColors[i6] = bEdgeColors[i6 + 3] = 0.2;
+      bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.5;
+      bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.4;
+    } else {
+      bEdgeColors[i6] = bEdgeColors[i6 + 3] = 0.35;
+      bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.20;
+      bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.05;
+    }
   }
 
   const bEdgeGeo = new THREE.BufferGeometry();
   bEdgeGeo.setAttribute('position', new THREE.BufferAttribute(bEdgeVerts, 3));
   bEdgeGeo.setAttribute('color', new THREE.BufferAttribute(bEdgeColors, 3));
   const bEdgeMat = new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0.40,
+    vertexColors: true, transparent: true, opacity: isDarkTheme ? 0.40 : 0.65,
     blending: _blend, depthWrite: false
   });
   branchialGroup.add(new THREE.LineSegments(bEdgeGeo, bEdgeMat));
@@ -5801,19 +5864,61 @@ window._buildScene = buildScene;
 
 function fitCamera(sys, instant) {
   if (!sys) return;
-  const totalSteps = sys.getTotalSteps();
-  const centerY = -(totalSteps * STEP_SPACING) / 2;
+
+  // Determine which group to frame based on current view
+  let targetGroup;
+  if (currentView === 'branchial') targetGroup = branchialGroup;
+  else if (currentView === 'causal') targetGroup = causalGroup;
+  else if (currentView === 'spacetime' && typeof spacetimeGroup !== 'undefined') targetGroup = spacetimeGroup;
+  else targetGroup = multiwayGroup;
+
+  // Compute bounding box from actual scene geometry
+  const box = new THREE.Box3();
+  let hasGeometry = false;
+
+  targetGroup.traverse(child => {
+    if (child.geometry) {
+      child.geometry.computeBoundingBox();
+      const childBox = child.geometry.boundingBox.clone();
+      // Transform to world space
+      child.updateWorldMatrix(true, false);
+      childBox.applyMatrix4(child.matrixWorld);
+      box.union(childBox);
+      hasGeometry = true;
+    }
+  });
+
+  // Fallback if no geometry found
+  if (!hasGeometry) {
+    const totalSteps = sys.getTotalSteps();
+    const centerY = -(totalSteps * STEP_SPACING) / 2;
+    box.set(
+      new THREE.Vector3(-15, centerY - 10, -5),
+      new THREE.Vector3(15, centerY + 10, 5)
+    );
+  }
+
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  const sphere = new THREE.Sphere();
+  box.getBoundingSphere(sphere);
+
+  // Camera distance: enough to frame the sphere with some padding
+  const fov = camera.fov * (Math.PI / 180);
+  const aspect = camera.aspect;
+  const hFov = 2 * Math.atan(Math.tan(fov / 2) * aspect);
+  const effFov = Math.min(fov, hFov);
+  const dist = (sphere.radius / Math.sin(effFov / 2)) * 1.15; // 15% padding
 
   let endTarget, endPos;
-  if (currentView === 'branchial') {
-    endTarget = new THREE.Vector3(branchialGroup.position.x, branchialGroup.position.y, 0);
-    endPos = new THREE.Vector3(branchialGroup.position.x, branchialGroup.position.y, 25);
-  } else if (currentView === 'causal') {
-    endTarget = new THREE.Vector3(0, centerY, 3);
-    endPos = new THREE.Vector3(0, centerY + 5, 38);
+  if (currentView === 'spacetime') {
+    // Spacetime is 3D — offset camera diagonally
+    endTarget = center.clone();
+    endPos = center.clone().add(new THREE.Vector3(dist * 0.3, dist * 0.3, dist * 0.85));
   } else {
-    endTarget = new THREE.Vector3(0, centerY, 0);
-    endPos = new THREE.Vector3(0, centerY + 5, 35);
+    // Flat views: camera looks straight down Z axis
+    endTarget = center.clone();
+    endPos = new THREE.Vector3(center.x, center.y + dist * 0.08, center.z + dist);
   }
 
   if (instant) {
@@ -6752,6 +6857,7 @@ function refreshSceneAndPlots() {
   updateStats(currentSystem);
   updateCompletionLog(currentSystem);
   updateStepUI();
+  if (typeof updatePlaybackBar === 'function') updatePlaybackBar();
 }
 
 function resetInteractive() {
@@ -6824,6 +6930,70 @@ btnStepBack.addEventListener('click', stepBack);
 btnStepPlay.addEventListener('click', togglePlay);
 btnStepReset.addEventListener('click', resetInteractive);
 
+// ─── Floating Playback Bar wiring ───
+const _pbBar = document.getElementById('playback-bar');
+const _pbPlay = document.getElementById('pb-play');
+const _pbFwd = document.getElementById('pb-fwd');
+const _pbBack = document.getElementById('pb-back');
+const _pbReset = document.getElementById('pb-reset');
+const _pbSpeed = document.getElementById('pb-speed');
+const _pbStepLabel = document.getElementById('pb-step-label');
+let _pbSpeedIdx = 1; // index into speed options
+const _pbSpeeds = [250, 500, 1000, 2000]; // ms per step
+const _pbSpeedLabels = ['2×', '1×', '½×', '¼×'];
+
+function updatePlaybackBar() {
+  if (!currentSystem || !interactiveMode) return;
+  const cur = currentSystem._currentStep;
+  _pbStepLabel.textContent = `Step ${cur} / ${interactiveMaxSteps}`;
+  _pbBack.disabled = cur <= 0;
+  _pbFwd.disabled = cur >= interactiveMaxSteps || currentSystem.truncated;
+}
+
+// Override stopPlay to also update playback bar icon
+const _origStopPlay = stopPlay;
+function _pbStopPlay() {
+  _origStopPlay();
+  _pbPlay.textContent = '\u25B6';
+  _pbPlay.classList.remove('pb-playing');
+}
+
+function _pbTogglePlay() {
+  if (playInterval) {
+    _pbStopPlay();
+  } else {
+    _pbPlay.textContent = '\u23F8';
+    _pbPlay.classList.add('pb-playing');
+    btnStepPlay.textContent = '\u23F8 Pause';
+    btnStepPlay.classList.add('playing');
+    const speed = _pbSpeeds[_pbSpeedIdx];
+    playInterval = setInterval(() => {
+      if (!currentSystem || currentSystem._currentStep >= interactiveMaxSteps || currentSystem.truncated) {
+        _pbStopPlay();
+        stopPlay();
+        return;
+      }
+      stepForward();
+      updatePlaybackBar();
+    }, speed);
+  }
+}
+
+_pbFwd.addEventListener('click', () => { stepForward(); updatePlaybackBar(); });
+_pbBack.addEventListener('click', () => { stepBack(); updatePlaybackBar(); });
+_pbReset.addEventListener('click', () => { resetInteractive(); updatePlaybackBar(); });
+_pbPlay.addEventListener('click', _pbTogglePlay);
+_pbSpeed.addEventListener('click', () => {
+  _pbSpeedIdx = (_pbSpeedIdx + 1) % _pbSpeeds.length;
+  _pbSpeed.textContent = _pbSpeedLabels[_pbSpeedIdx];
+  // If currently playing, restart with new speed
+  if (playInterval) {
+    _pbStopPlay();
+    stopPlay();
+    _pbTogglePlay();
+  }
+});
+
 // ─── Mode toggle ───
 document.querySelectorAll('.mode-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -6834,6 +7004,7 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
 
     document.getElementById('batch-controls').style.display = interactiveMode ? 'none' : 'block';
     document.getElementById('interactive-controls').style.display = interactiveMode ? 'block' : 'none';
+    _pbBar.style.display = interactiveMode ? 'flex' : 'none';
 
     stopPlay();
     clearObserver();
@@ -7889,10 +8060,10 @@ function buildBranchial3d() {
     if (_isDkB3d) {
       _hoverTmp.setHSL(0.8 - wNorm * 0.3, 0.7, 0.25 + wNorm * 0.5);
     } else {
-      // Continuous: charcoal (low weight) → bold orange (high weight)
-      const r = 0.20 + wNorm * 0.75;
-      const g = 0.20 + wNorm * 0.20;
-      const b = 0.20 - wNorm * 0.20;
+      // Continuous: dark charcoal (low weight) → bold orange (high weight)
+      const r = 0.10 + wNorm * 0.80;
+      const g = 0.10 + wNorm * 0.25;
+      const b = 0.10 - wNorm * 0.10;
       _hoverTmp.setRGB(r, g, b);
     }
     nodeCol[i * 3] = _hoverTmp.r;
@@ -7955,7 +8126,7 @@ function buildBranchial3d() {
     if (_bEdgeDark) {
       edgeColors.push(0.3, 0.15, 0.5, 0.3, 0.15, 0.5);
     } else {
-      edgeColors.push(0.7, 0.35, 0.05, 0.7, 0.35, 0.05);
+      edgeColors.push(0.45, 0.22, 0.03, 0.45, 0.22, 0.03);
     }
   }
 
@@ -7964,7 +8135,7 @@ function buildBranchial3d() {
     eGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgeVerts, 3));
     eGeo.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
     const eMat = new THREE.LineBasicMaterial({
-      vertexColors: true, transparent: true, opacity: _b3dBlend === THREE.NormalBlending ? 0.45 : 0.2,
+      vertexColors: true, transparent: true, opacity: _b3dBlend === THREE.NormalBlending ? 0.65 : 0.2,
       blending: _b3dBlend, depthWrite: false
     });
     branchial3dGroup.add(new THREE.LineSegments(eGeo, eMat));
@@ -11449,7 +11620,7 @@ function _buildSpacetimeSceneInner() {
       if (_stIsDark) {
         edgeColors.push(0, 0.6, 0.7, 0, 0.6, 0.7);
       } else {
-        edgeColors.push(0.75, 0.35, 0.05, 0.75, 0.35, 0.05);
+        edgeColors.push(0.50, 0.25, 0.03, 0.50, 0.25, 0.03);
       }
     }
   }
