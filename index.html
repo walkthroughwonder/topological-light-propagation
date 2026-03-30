@@ -5576,10 +5576,10 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
       } else {
-        // Continuous: charcoal (low weight) → bold orange (high weight)
-        const r = 0.20 + wNorm * 0.75; // 0.20 → 0.95
-        const g = 0.20 + wNorm * 0.20; // 0.20 → 0.40
-        const b = 0.20 - wNorm * 0.20; // 0.20 → 0.00
+        // Continuous: medium grey (low weight) → warm orange (high weight)
+        const r = 0.25 + wNorm * 0.65; // 0.25 → 0.90
+        const g = 0.25 + wNorm * 0.15; // 0.25 → 0.40
+        const b = 0.25 - wNorm * 0.25; // 0.25 → 0.00
         _tmpColor.setRGB(r, g, b);
       }
       if (!isHighlighted && hasHighlight) {
@@ -5897,10 +5897,10 @@ function buildScene(sys, highlightSet) {
       if (isDarkTheme) {
         _tmpColor.setHSL(0.55 - wNorm * 0.1, 0.7 + wNorm * 0.3, 0.2 + wNorm * 0.6);
       } else {
-        // Continuous: charcoal (low weight) → bold orange (high weight)
-        const r = 0.10 + wNorm * 0.80;
-        const g = 0.10 + wNorm * 0.25;
-        const b = 0.10 - wNorm * 0.10;
+        // Continuous: medium grey (low weight) → warm orange (high weight)
+        const r = 0.22 + wNorm * 0.68;
+        const g = 0.22 + wNorm * 0.18;
+        const b = 0.22 - wNorm * 0.22;
         _tmpColor.setRGB(r, g, b);
       }
       if (!isHighlighted && hasHighlight && isDarkTheme) { _tmpColor.multiplyScalar(dimFactor); }
@@ -5983,9 +5983,9 @@ function buildScene(sys, highlightSet) {
       bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.5;
       bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.4;
     } else {
-      bEdgeColors[i6] = bEdgeColors[i6 + 3] = 0.35;
-      bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.20;
-      bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.05;
+      bEdgeColors[i6] = bEdgeColors[i6 + 3] = 0.45;
+      bEdgeColors[i6 + 1] = bEdgeColors[i6 + 4] = 0.30;
+      bEdgeColors[i6 + 2] = bEdgeColors[i6 + 5] = 0.10;
     }
   }
 
@@ -5993,7 +5993,7 @@ function buildScene(sys, highlightSet) {
   bEdgeGeo.setAttribute('position', new THREE.BufferAttribute(bEdgeVerts, 3));
   bEdgeGeo.setAttribute('color', new THREE.BufferAttribute(bEdgeColors, 3));
   const bEdgeMat = new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, opacity: isDarkTheme ? 0.40 : 0.65,
+    vertexColors: true, transparent: true, opacity: isDarkTheme ? 0.40 : 0.80,
     blending: _blend, depthWrite: false
   });
   branchialGroup.add(new THREE.LineSegments(bEdgeGeo, bEdgeMat));
@@ -6062,9 +6062,9 @@ function buildScene(sys, highlightSet) {
       } else if (inFuture && !inPast) {
         _tmpColor.copy(causalFutureColor).multiplyScalar(0.8);
       } else if (hasCausalHighlight && !inCone) {
-        _tmpColor.copy(causalColor).multiplyScalar(0.12);
+        _tmpColor.copy(causalColor).multiplyScalar(isDarkTheme ? 0.12 : 0.25);
       } else {
-        _tmpColor.copy(causalColor).multiplyScalar(0.6);
+        _tmpColor.copy(causalColor).multiplyScalar(isDarkTheme ? 0.6 : 0.7);
       }
 
       cColors[i * 3] = _tmpColor.r;
@@ -6154,11 +6154,11 @@ function buildScene(sys, highlightSet) {
         const edgeInCone = fromInCone && toInCone;
 
         if (edgeInCone && hasCausalHighlight) {
-          _tmpColor.copy(causalColor).multiplyScalar(0.7);
+          _tmpColor.copy(causalColor).multiplyScalar(isDarkTheme ? 0.7 : 0.8);
         } else if (hasCausalHighlight) {
-          _tmpColor.copy(causalColor).multiplyScalar(0.06);
+          _tmpColor.copy(causalColor).multiplyScalar(isDarkTheme ? 0.06 : 0.15);
         } else {
-          _tmpColor.copy(causalColor).multiplyScalar(0.25);
+          _tmpColor.copy(causalColor).multiplyScalar(isDarkTheme ? 0.25 : 0.40);
         }
 
         ceColors[i6] = ceColors[i6 + 3] = _tmpColor.r;
@@ -6170,7 +6170,7 @@ function buildScene(sys, highlightSet) {
       ceGeo.setAttribute('position', new THREE.BufferAttribute(ceVerts, 3));
       ceGeo.setAttribute('color', new THREE.BufferAttribute(ceColors, 3));
       const ceMat = new THREE.LineBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0.55,
+        vertexColors: true, transparent: true, opacity: isDarkTheme ? 0.55 : 0.80,
         blending: _blend, depthWrite: false
       });
       causalGroup.add(new THREE.LineSegments(ceGeo, ceMat));
@@ -8744,7 +8744,7 @@ function buildBranchial3d() {
     if (_bEdgeDark) {
       edgeColors.push(0.3, 0.15, 0.5, 0.3, 0.15, 0.5);
     } else {
-      edgeColors.push(0.45, 0.22, 0.03, 0.45, 0.22, 0.03);
+      edgeColors.push(0.50, 0.30, 0.08, 0.50, 0.30, 0.08);
     }
   }
 
@@ -8753,7 +8753,7 @@ function buildBranchial3d() {
     eGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgeVerts, 3));
     eGeo.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
     const eMat = new THREE.LineBasicMaterial({
-      vertexColors: true, transparent: true, opacity: _b3dBlend === THREE.NormalBlending ? 0.65 : 0.2,
+      vertexColors: true, transparent: true, opacity: _b3dBlend === THREE.NormalBlending ? 0.80 : 0.2,
       blending: _b3dBlend, depthWrite: false
     });
     branchial3dGroup.add(new THREE.LineSegments(eGeo, eMat));
@@ -12238,7 +12238,7 @@ function _buildSpacetimeSceneInner() {
       if (_stIsDark) {
         edgeColors.push(0, 0.6, 0.7, 0, 0.6, 0.7);
       } else {
-        edgeColors.push(0.50, 0.25, 0.03, 0.50, 0.25, 0.03);
+        edgeColors.push(0.55, 0.32, 0.08, 0.55, 0.32, 0.08);
       }
     }
   }
@@ -12261,7 +12261,7 @@ function _buildSpacetimeSceneInner() {
       blending: _stBlend,
       uniforms: {
         uTime: { value: 0.0 },
-        uOpacity: { value: _stIsDark ? 0.40 : 0.65 },
+        uOpacity: { value: _stIsDark ? 0.40 : 0.80 },
         uFlow: { value: 1.0 },
         uDashScale: { value: 0.06 }
       },
