@@ -41,7 +41,7 @@
     overflow: hidden;
     background: #F0F0EC;
   }
-  #center canvas { display: block; width: 100%; height: 100%; }
+  #center canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
   /* ─── TYPOGRAPHY — Jobs/Ive 3-tier hierarchy ─── */
   .section-title {
@@ -1351,17 +1351,31 @@
     #mobile-menu-btn { display: flex; }
     #mobile-overlay.open { display: block; }
     #view-switcher {
-      bottom: 8px; left: 50%; transform: translateX(-50%);
-      gap: 2px; padding: 3px;
+      bottom: 56px; left: 4px; right: 4px;
+      transform: none;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+      white-space: nowrap;
+      display: flex;
+      flex-wrap: nowrap;
+      max-width: calc(100vw - 8px);
+      width: auto;
+      justify-content: flex-start;
+      /* Fade-out right edge to hint at overflow */
+      -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+      mask-image: linear-gradient(to right, black 85%, transparent 100%);
     }
-    .view-tab { font-size: 9px; padding: 5px 8px; }
+    .view-tab { font-size: 9px; padding: 5px 10px; flex-shrink: 0; scroll-snap-align: start; }
     #scenes-dropdown-wrap { top: 12px; left: auto; right: 56px; }
-    #about-btn { bottom: 12px; right: 12px; }
+    #about-btn { bottom: 68px; right: 12px; }
     .theme-toggle { top: 12px !important; left: 56px !important; right: auto !important; }
     .screenshot-btn { left: 92px !important; }
     .export-btn { left: 128px !important; }
     #controls-hint { display: none !important; }
-    #status-bar { font-size: 9px; top: auto; bottom: 44px; left: 50%; transform: translateX(-50%); right: auto; }
+    #status-bar { font-size: 9px; top: auto; bottom: 108px; left: 50%; transform: translateX(-50%); right: auto; }
   }
   @media (max-width: 480px) {
     .panel { width: 280px; }
@@ -14211,6 +14225,24 @@ buildSpacetimeScene = function() {
 };
 
 // ─── INITIAL SETUP ───
+// On mobile, drop to a simpler default to avoid overloading mobile GPU
+const _isMobileDevice = window.matchMedia('(max-width: 960px)').matches ||
+  (typeof navigator.maxTouchPoints !== 'undefined' && navigator.maxTouchPoints > 0);
+if (_isMobileDevice) {
+  // Drop to 8 steps (approx 200-250 nodes) and load Single Slit preset
+  const slSteps = document.getElementById('sl-steps');
+  const vSteps = document.getElementById('v-steps');
+  const mobilePreset = PRESET_MAP['single-small'];
+  if (slSteps) {
+    slSteps.value = '8';
+    if (vSteps) vSteps.textContent = '8';
+  }
+  if (mobilePreset) {
+    editorRules = mobilePreset.rules.map(r => ({ ...r }));
+    document.getElementById('init-state').value = mobilePreset.initial;
+    activePresetKey = 'single-small';
+  }
+}
 renderRuleEditor();
 renderPresetGallery();
 runEvolution();
