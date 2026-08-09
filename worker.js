@@ -1442,7 +1442,7 @@ class MultiwaySystem {
 
 // ─── Worker message handler ───
 self.onmessage = function(e) {
-  const { rules, initialState, steps, maxStates } = e.data;
+  const { rules, initialState, steps, maxStates, reqId } = e.data;
 
   try {
     const sys = new MultiwaySystem(rules);
@@ -1464,8 +1464,8 @@ self.onmessage = function(e) {
       _maxWeight: sys._maxWeight,
     };
 
-    self.postMessage({ type: 'result', result });
+    self.postMessage({ type: 'result', result, reqId });
   } catch (err) {
-    self.postMessage({ type: 'error', message: err.message || String(err) });
+    self.postMessage({ type: 'error', message: err.message || String(err), reqId });
   }
 };

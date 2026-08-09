@@ -6766,6 +6766,10 @@ let editorRules = [{from:'Xo',to:'oX'},{from:'oX',to:'Xo'}];
 // Default initial state matches 'double-wide' preset
 let activePresetKey = 'double-wide';
 
+// Exported for the classic-script theme toggle (same pattern as _buildScene/_currentSystem)
+window.drawIntensityPlot = drawIntensityPlot;
+window.drawBranchialPlot = drawBranchialPlot;
+
 function renderRuleEditor() {
   ruleEditorEl.innerHTML = editorRules.map((rule, i) => `
     <div class="rule-row">
@@ -8092,11 +8096,12 @@ observerClearBtn.addEventListener('click', clearObserver);
 // ─── Worker setup for off-thread evolution ───
 let _evolutionWorker = null;
 let _workerSupported = false;
+let _runSeq = 0;
 (function initEvolutionWorker() {
   try {
     _evolutionWorker = new Worker('worker.js');
     _workerSupported = true;
-    _evolutionWorker.onerror = () => { _workerSupported = false; _evolutionWorker = null; };
+    _evolutionWorker.onerror = () => { _workerSupported = false; };
   } catch(e) { _workerSupported = false; }
 })();
 
@@ -8164,12 +8169,15 @@ function runEvolution() {
   if (_workerSupported && _evolutionWorker) {
     // Off-thread evolution via Web Worker
     const t0 = performance.now();
+    const reqId = ++_runSeq;
     // Show subtle indicator
     statusBar.textContent = `Evolving "${shortState}"… (worker)`;
 
     const handleMsg = (e) => {
+      if (e.data.reqId !== reqId) return;      // reply belongs to another run
       _evolutionWorker.removeEventListener('message', handleMsg);
       _evolutionWorker.removeEventListener('error', handleErr);
+      if (reqId !== _runSeq) return;           // this run was superseded; drop it
       if (e.data.type === 'result') {
         const sys = _reconstructMultiwaySystem(rules, e.data.result);
         _finishEvolution(sys, t0);
@@ -8185,7 +8193,7 @@ function runEvolution() {
     };
     _evolutionWorker.addEventListener('message', handleMsg);
     _evolutionWorker.addEventListener('error', handleErr);
-    _evolutionWorker.postMessage({ rules, initialState, steps, maxStates });
+    _evolutionWorker.postMessage({ rules, initialState, steps, maxStates, reqId });
   } else {
     // Synchronous fallback
     requestAnimationFrame(() => _runEvolutionSync(rules, initialState, steps, maxStates));
@@ -13270,7 +13278,7 @@ function _doEvolveSpacetime(preset, btn, origText) {
   drawDimensionChart(stDimData);
 
   // Update status bar
-  const statusEl = document.getElementById('status');
+  const statusEl = document.getElementById('status-bar');
   if (statusEl) {
     statusEl.textContent = `${stSpatialGraph.atoms.length} atoms · ${stSpatialGraph.edgeCount} hyperedges · dim ≈ ${dimStr} · ${stResult.events.length} events`;
   }
