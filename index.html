@@ -388,13 +388,34 @@
     color: #333333;
   }
 
-  /* ─── VIEW SWITCHER (center viewport overlay) ─── */
-  #view-switcher {
+  /* ─── CENTER TOP BAR (tools + view tabs + scenes) ─── */
+  #center-topbar {
     position: absolute;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 20;
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+  #center-topbar > * { pointer-events: auto; }
+  #viz-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    order: 1;
+  }
+  /* ─── VIEW SWITCHER ─── */
+  #view-switcher {
+    position: static;
+    transform: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 2px;
     background: rgba(255,255,255,0.95);
     backdrop-filter: blur(12px);
@@ -404,12 +425,23 @@
     padding: 3px;
     z-index: 10;
     pointer-events: auto;
+    flex: 1 1 100%;
+    order: 3;
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* Wide center: tools, tabs, and Scenes share one row */
+  @media (min-width: 1600px) {
+    #view-switcher {
+      flex: 1 1 auto;
+      order: 2;
+    }
   }
   .view-tab {
-    padding: 8px 16px;
-    font-size: 11px;
+    padding: 7px 10px;
+    font-size: 10.5px;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #999999;
     background: transparent;
@@ -437,11 +469,14 @@
 
   /* ─── SCENES DROPDOWN ─── */
   #scenes-dropdown-wrap {
-    position: absolute;
-    top: 16px;
-    right: 20px;
+    position: relative;
+    top: auto;
+    right: auto;
     z-index: 11;
     pointer-events: auto;
+    flex: 0 0 auto;
+    order: 2;
+    margin-left: auto;
   }
   #scenes-btn {
     display: flex;
@@ -1350,7 +1385,13 @@
     #right-panel.mobile-open { transform: translateX(0); }
     #mobile-menu-btn { display: flex; }
     #mobile-overlay.open { display: block; }
+    #center-topbar,
+    #viz-tools {
+      display: contents;
+    }
     #view-switcher {
+      position: absolute;
+      top: auto;
       bottom: 56px; left: 4px; right: 4px;
       transform: none;
       overflow-x: auto;
@@ -1361,6 +1402,8 @@
       white-space: nowrap;
       display: flex;
       flex-wrap: nowrap;
+      flex: none;
+      order: 0;
       max-width: calc(100vw - 8px);
       width: auto;
       justify-content: flex-start;
@@ -1369,11 +1412,16 @@
       mask-image: linear-gradient(to right, black 85%, transparent 100%);
     }
     .view-tab { font-size: 9px; padding: 5px 10px; flex-shrink: 0; scroll-snap-align: start; }
-    #scenes-dropdown-wrap { top: 12px; left: auto; right: 90px; }
+    #scenes-dropdown-wrap {
+      position: absolute;
+      top: 12px; left: auto; right: 90px;
+      margin-left: 0;
+      order: 0;
+    }
     #about-btn { bottom: 68px; right: 12px; }
-    .theme-toggle { top: 12px !important; left: 56px !important; right: auto !important; }
-    .screenshot-btn { left: 92px !important; }
-    .export-btn { left: 128px !important; }
+    .theme-toggle { position: fixed; top: 12px !important; left: 56px !important; right: auto !important; }
+    .screenshot-btn { position: fixed; top: 12px; left: 92px !important; }
+    .export-btn { position: fixed; top: 12px; left: 128px !important; }
     #controls-hint { display: none !important; }
     #status-bar { font-size: 9px; top: auto; bottom: 108px; left: 50%; transform: translateX(-50%); right: auto; }
   }
@@ -2532,9 +2580,9 @@
 
   /* ─── THEME TOGGLE BUTTON ─── */
   .theme-toggle {
-    position: fixed;
-    top: 12px;
-    left: 332px;
+    position: static;
+    top: auto;
+    left: auto;
     z-index: 50;
     background: rgba(255,255,255,0.9);
     border: 1px solid #D9D9D4;
@@ -2550,6 +2598,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     pointer-events: auto;
+    flex-shrink: 0;
   }
   .theme-toggle:hover {
     border-color: #E86C00;
@@ -2561,9 +2610,9 @@
     color: #CCCCCC;
   }
   .screenshot-btn {
-    position: fixed;
-    top: 12px;
-    left: 370px;
+    position: static;
+    top: auto;
+    left: auto;
     z-index: 50;
     background: rgba(255,255,255,0.9);
     border: 1px solid #D9D9D4;
@@ -2580,6 +2629,7 @@
     -webkit-backdrop-filter: blur(8px);
     pointer-events: auto;
     color: #555;
+    flex-shrink: 0;
   }
   .screenshot-btn:hover {
     border-color: #E86C00;
@@ -2602,9 +2652,9 @@
 
   /* ── Export Button ── */
   .export-btn {
-    position: fixed;
-    top: 12px;
-    left: 410px;
+    position: static;
+    top: auto;
+    left: auto;
     z-index: 50;
     background: rgba(255,255,255,0.9);
     border: 1px solid #D9D9D4;
@@ -2621,6 +2671,7 @@
     -webkit-backdrop-filter: blur(8px);
     pointer-events: auto;
     color: #555;
+    flex-shrink: 0;
   }
   .export-btn:hover {
     border-color: #E86C00;
@@ -3127,17 +3178,6 @@
 
 <div id="app">
 
-  <!-- Theme toggle button -->
-  <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
-    <span id="theme-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
-  </button>
-  <button class="export-btn" id="export-btn" title="Export graph data (E)" aria-label="Export graph data">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-  </button>
-  <button class="screenshot-btn" id="screenshot-btn" title="Save screenshot (S)" aria-label="Save screenshot">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-  </button>
-
   <!-- LEFT PANEL: Physics & Controls -->
   <div class="panel" id="left-panel">
     <div class="section-title">Rewriting Rules</div>
@@ -3320,12 +3360,29 @@
       </div>
     </div>
 
-    <div id="view-switcher">
-      <button class="view-tab active" data-view="multiway">Multiway<span class="tab-badge" id="badge-multiway"></span></button>
-      <button class="view-tab" data-view="causal">Causal<span class="tab-badge" id="badge-causal"></span></button>
-      <button class="view-tab" data-view="branchial">Branchial<span class="tab-badge" id="badge-branchial"></span></button>
-      <button class="view-tab" data-view="bevolution">B-Evolution<span class="tab-badge" id="badge-bevolution"></span></button>
-      <button class="view-tab" data-view="spacetime">Spacetime<span class="tab-badge" id="badge-spacetime"></span></button>
+    <div id="center-topbar">
+      <div id="viz-tools">
+        <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle dark/light mode">
+          <span id="theme-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+        </button>
+        <button class="screenshot-btn" id="screenshot-btn" title="Save screenshot (S)" aria-label="Save screenshot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+        <button class="export-btn" id="export-btn" title="Export graph data (E)" aria-label="Export graph data">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+      </div>
+      <div id="view-switcher">
+        <button class="view-tab active" data-view="multiway">Multiway<span class="tab-badge" id="badge-multiway"></span></button>
+        <button class="view-tab" data-view="causal">Causal<span class="tab-badge" id="badge-causal"></span></button>
+        <button class="view-tab" data-view="branchial">Branchial<span class="tab-badge" id="badge-branchial"></span></button>
+        <button class="view-tab" data-view="bevolution">B-Evolution<span class="tab-badge" id="badge-bevolution"></span></button>
+        <button class="view-tab" data-view="spacetime">Spacetime<span class="tab-badge" id="badge-spacetime"></span></button>
+      </div>
+      <div id="scenes-dropdown-wrap">
+        <button id="scenes-btn">Scenes <span class="chevron">▼</span></button>
+        <div id="scenes-panel"></div>
+      </div>
     </div>
     <div id="controls-hint"></div>
     <div id="status-bar"></div>
@@ -3344,10 +3401,6 @@
       <button id="pb-speed" title="Playback speed">1×</button>
     </div>
 
-    <div id="scenes-dropdown-wrap">
-      <button id="scenes-btn">Scenes <span class="chevron">▼</span></button>
-      <div id="scenes-panel"></div>
-    </div>
   </div>
 
   <!-- RIGHT PANEL: Results -->
@@ -15141,14 +15194,8 @@ window.addEventListener('resize', () => {
     });
   });
 
-  // Auto-open on first visit
-  try {
-    const s = window['local'+'Storage'];
-    if (!s.getItem('wolfram-about-seen')) {
-      setTimeout(openAbout, 1200);
-      s.setItem('wolfram-about-seen', '1');
-    }
-  } catch(e) {}
+  // About stays closed on load — open via the ? button. Keyboard ? / Esc already
+  // toggle the shortcuts overlay.
 })();
 
 
