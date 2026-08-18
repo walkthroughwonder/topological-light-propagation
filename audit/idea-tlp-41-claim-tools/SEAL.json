@@ -1,0 +1,175 @@
+{
+  "idea": "IDEA-TLP-41-CLAIM-TOOLS",
+  "instrument": "GRK extract-and-golden",
+  "evidence": "BOUNDED COMPUTATION / EXPLORATORY",
+  "cite": {
+    "tlp_pr2": "https://github.com/walkthroughwonder/topological-light-propagation/pull/2",
+    "tlp_pr2_state": "OPEN",
+    "tlp_pr2_path": "audit/idea-tlp-29-piskunov/",
+    "note": "Cited, not redone. Golden presets and MultiwaySystem loader reused/adapted."
+  },
+  "audited_commit": "c60aed3eb08ded734dde98d4365a39450acc4904",
+  "audited_commit_short": "c60aed3eb08d",
+  "worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
+  "index_blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
+  "cited_commit": "c60aed3eb08d",
+  "cited_blob": "961def89",
+  "citation_matched": true,
+  "current_head_at_audit": "c60aed3eb08ded734dde98d4365a39450acc4904",
+  "current_worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
+  "current_index_blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
+  "extracted_from": "index.html (claim-tool handlers); MultiwaySystem graph from worker.js",
+  "tunnel_shuffle": "UI Math.random replaced by insertion-order prefix (threshold 1.5 / n=20 / cap 50 unchanged)",
+  "caps": {
+    "maxStateLength": 256,
+    "maxTotalStates": 5000
+  },
+  "observer": "first node at step floor((nSteps-1)/2)",
+  "date_utc": "2026-08-18",
+  "out_of_scope": [
+    "no solvers",
+    "no SAT",
+    "no Ricci / dimension dump (Expt 9)",
+    "Expt 10 not started",
+    "zarankiewicz/712 not touched",
+    "no merge"
+  ],
+  "tools": [
+    {
+      "tool": "toggle-zeno",
+      "title": "Quantum Zeno Effect",
+      "extractable": true,
+      "functions": [
+        {
+          "name": "zenoObserve",
+          "start_line": 10182,
+          "end_line": 10245
+        }
+      ],
+      "helpers": [],
+      "inspect": {
+        "handler_line": 10343,
+        "uses_traceDescendants": true,
+        "uses_state_includes": false,
+        "uses_state_equality_filter": false,
+        "counts_descendants_at_step": true,
+        "frozen_ratio": true,
+        "prunes_graph": false,
+        "mentions_observed_state_string": true
+      }
+    },
+    {
+      "tool": "btn-detect-tunneling",
+      "title": "Tunneling Detector",
+      "extractable": true,
+      "functions": [
+        {
+          "name": "detectTunneling",
+          "start_line": 10381,
+          "end_line": 10460
+        }
+      ],
+      "helpers": [
+        {
+          "name": "findShortestPath",
+          "start_line": 9192,
+          "end_line": 9221
+        }
+      ],
+      "inspect": {
+        "handler_line": 10601,
+        "ratio_threshold": 1.5,
+        "uses_branchial_bfs": true,
+        "uses_findShortestPath": true,
+        "uses_math_random": true,
+        "sample_size": 20,
+        "max_pairs": 50,
+        "uses_causal_event_dag": false
+      }
+    },
+    {
+      "tool": "btn-measure-holographic",
+      "title": "Discrete Holographic Bound",
+      "extractable": true,
+      "functions": [
+        {
+          "name": "measureHolographicBound",
+          "start_line": 10932,
+          "end_line": 11034
+        }
+      ],
+      "helpers": [],
+      "inspect": {
+        "handler_line": 11105,
+        "entropy_is_distinct_states": true,
+        "volume_is_bfs_ball": true,
+        "boundary_is_sphere": true,
+        "bfs_undirected": true,
+        "uses_causal_cone": false,
+        "compares_r2": true
+      }
+    },
+    {
+      "tool": "btn-geodesic-deviation",
+      "title": "Geodesic Deviation",
+      "extractable": true,
+      "functions": [
+        {
+          "name": "measureGeodesicDeviation",
+          "start_line": 11820,
+          "end_line": 11936
+        }
+      ],
+      "helpers": [
+        {
+          "name": "findShortestPath",
+          "start_line": 9192,
+          "end_line": 9221
+        },
+        {
+          "name": "levenshteinLike",
+          "start_line": 11939,
+          "end_line": 11949
+        }
+      ],
+      "inspect": {
+        "handler_line": 12031,
+        "groups_by_first_hop": true,
+        "uses_findShortestPath": true,
+        "uses_prefix_mismatch": true,
+        "deviation_formula": true,
+        "converge_threshold": -0.1,
+        "diverge_threshold": 0.1
+      }
+    },
+    {
+      "tool": "btn-detect-tangles",
+      "title": "Topological Obstruction / tangles",
+      "extractable": true,
+      "functions": [
+        {
+          "name": "detectTopologicalObstructions",
+          "start_line": 12074,
+          "end_line": 12189
+        }
+      ],
+      "helpers": [
+        {
+          "name": "extractCore",
+          "start_line": 12191,
+          "end_line": 12207
+        }
+      ],
+      "inspect": {
+        "handler_line": 12209,
+        "exact_recurrence": true,
+        "substring_core": true,
+        "extract_core_2gram": true,
+        "look_ahead": 3,
+        "node_scan_cap": 200,
+        "top_k": 20,
+        "uses_graph_cycle_detect": false
+      }
+    }
+  ]
+}
