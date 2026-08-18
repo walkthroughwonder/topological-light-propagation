@@ -15,7 +15,7 @@
   "cited_commit": "c60aed3eb08d",
   "cited_blob": "961def89",
   "citation_matched": true,
-  "current_head_at_audit": "c60aed3eb08ded734dde98d4365a39450acc4904",
+  "current_head_at_audit": "2909d24810bd3e4249115923c7d1017aedbfa1b0",
   "current_worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
   "current_index_blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
   "extracted_from": "index.html (claim-tool handlers); MultiwaySystem graph from worker.js",
