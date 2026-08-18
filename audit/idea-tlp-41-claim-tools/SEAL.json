@@ -15,10 +15,26 @@
   "cited_commit": "c60aed3eb08d",
   "cited_blob": "961def89",
   "citation_matched": true,
-  "current_head_at_audit": "2909d24810bd3e4249115923c7d1017aedbfa1b0",
+  "current_head_at_audit": "6ba180cda4221dabecf2b2ea833f65a05af31077",
   "current_worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
   "current_index_blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
   "extracted_from": "index.html (claim-tool handlers); MultiwaySystem graph from worker.js",
+  "idea_pointers": {
+    "blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
+    "zenoObserve": 10182,
+    "detectTunneling": 10381,
+    "measureHolographicBound": 10932,
+    "measureGeodesicDeviation": 11820,
+    "detectTopologicalObstructions": 12074
+  },
+  "ui_noun_match_source": "function comment + handler result innerHTML (not .tool-desc)",
+  "ui_noun_match": {
+    "toggle-zeno": false,
+    "btn-detect-tunneling": true,
+    "btn-measure-holographic": false,
+    "btn-geodesic-deviation": true,
+    "btn-detect-tangles": true
+  },
   "tunnel_shuffle": "UI Math.random replaced by insertion-order prefix (threshold 1.5 / n=20 / cap 50 unchanged)",
   "caps": {
     "maxStateLength": 256,
@@ -29,7 +45,8 @@
   "out_of_scope": [
     "no solvers",
     "no SAT",
-    "no Ricci / dimension dump (Expt 9)",
+    "no Ricci / computeRicciCurvature / dimension dump (Expt 9)",
+    "no measureBranchingAsymmetry (idea 45)",
     "Expt 10 not started",
     "zarankiewicz/712 not touched",
     "no merge"
@@ -37,7 +54,6 @@
   "tools": [
     {
       "tool": "toggle-zeno",
-      "title": "Quantum Zeno Effect",
       "extractable": true,
       "functions": [
         {
@@ -49,18 +65,21 @@
       "helpers": [],
       "inspect": {
         "handler_line": 10343,
+        "code_noun": "function comment: \"Prune branches … that don't contain the observed state\"; result: \"branches survive\" / \"Frozen ratio\" / \"Zeno effect\"",
+        "ui_noun_match": false,
+        "noun_reason": "comment claims prune + state-containment; body counts traceDescendants and does not prune; zenoObserverState stored, unused",
         "uses_traceDescendants": true,
         "uses_state_includes": false,
         "uses_state_equality_filter": false,
         "counts_descendants_at_step": true,
         "frozen_ratio": true,
         "prunes_graph": false,
+        "comment_claims_prune": true,
         "mentions_observed_state_string": true
       }
     },
     {
       "tool": "btn-detect-tunneling",
-      "title": "Tunneling Detector",
       "extractable": true,
       "functions": [
         {
@@ -84,12 +103,15 @@
         "uses_math_random": true,
         "sample_size": 20,
         "max_pairs": 50,
-        "uses_causal_event_dag": false
+        "uses_causal_event_dag": false,
+        "min_finals": 3,
+        "code_noun": "result fields branchial= / causal= / ratio= ; pair kept if causalDist/branchialDist > 1.5",
+        "ui_noun_match": true,
+        "noun_reason": "handler prints the same three fields the kernel computes"
       }
     },
     {
       "tool": "btn-measure-holographic",
-      "title": "Discrete Holographic Bound",
       "extractable": true,
       "functions": [
         {
@@ -106,12 +128,15 @@
         "boundary_is_sphere": true,
         "bfs_undirected": true,
         "uses_causal_cone": false,
-        "compares_r2": true
+        "compares_r2": true,
+        "min_radii": 2,
+        "code_noun": "return isHolographic = boundaryFit.r2 > volumeFit.r2; handler prints AREA LAW (Holographic)",
+        "ui_noun_match": false,
+        "noun_reason": "kernel boolean is an R² bake-off of distinct-string count vs sphere vs ball; handler labels it AREA LAW"
       }
     },
     {
       "tool": "btn-geodesic-deviation",
-      "title": "Geodesic Deviation",
       "extractable": true,
       "functions": [
         {
@@ -139,12 +164,16 @@
         "uses_prefix_mismatch": true,
         "deviation_formula": true,
         "converge_threshold": -0.1,
-        "diverge_threshold": 0.1
+        "diverge_threshold": 0.1,
+        "min_paths_len3": 2,
+        "not_full_levenshtein": false,
+        "code_noun": "return keys converging / diverging / deviation (deviation < −0.1)",
+        "ui_noun_match": true,
+        "noun_reason": "function return names converge/diverge of first-hop bundles; not pulled from .tool-desc"
       }
     },
     {
       "tool": "btn-detect-tangles",
-      "title": "Topological Obstruction / tangles",
       "extractable": true,
       "functions": [
         {
@@ -168,7 +197,11 @@
         "look_ahead": 3,
         "node_scan_cap": 200,
         "top_k": 20,
-        "uses_graph_cycle_detect": false
+        "uses_graph_cycle_detect": false,
+        "min_nodes": 5,
+        "code_noun": "return type 'exact' | 'substring'; handler prints Exact self-regeneration / Substring persistence",
+        "ui_noun_match": true,
+        "noun_reason": "handler counts the same exact/substring objects the kernel returns"
       }
     }
   ]
