@@ -1,0 +1,42 @@
+{
+  "idea": "IDEA-TLP-29-PISKUNOV",
+  "instrument": "GRK instrument-and-seal",
+  "evidence": "BOUNDED COMPUTATION / EXPLORATORY",
+  "audited_commit": "c60aed3eb08ded734dde98d4365a39450acc4904",
+  "audited_commit_short": "c60aed3eb08d",
+  "worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
+  "cited_commit": "c60aed3eb08d",
+  "cited_blob": "961def89",
+  "citation_matched": true,
+  "current_head_at_audit": "80699a2520248340b6349a18dbe569aa7c69434f",
+  "current_worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
+  "extracted_function": "MultiwaySystem.checkCausalInvariance",
+  "source_file": "worker.js (not index.html / Three.js)",
+  "lookahead": 3,
+  "caps": {
+    "maxStateLength": 256,
+    "maxTotalStates": 5000
+  },
+  "function_inspect": {
+    "maxLookahead": 3,
+    "counts_nonoverlap_as_confluent": true,
+    "uses_state_equality": true,
+    "uses_node_intersection": true,
+    "uses_state_intersection": true,
+    "mentions_causal_iso": false,
+    "unresolved_go_to_divergent": true,
+    "return_keys": [
+      "confluent",
+      "divergent",
+      "criticalPairs",
+      "total",
+      "invariance"
+    ]
+  },
+  "date_utc": "2026-08-18",
+  "piskunov": {
+    "source": "https://bulletins.wolframphysics.org/2020/11/confluence-and-causal-invariance/",
+    "setreplace": "https://github.com/maxitg/SetReplace/blob/master/Research/ConfluenceAndCausalInvariance/ConfluenceAndCausalInvariance.md",
+    "published_pairs": "Wolfram-model hypergraphs; not loadable in TLP string engine"
+  }
+}
