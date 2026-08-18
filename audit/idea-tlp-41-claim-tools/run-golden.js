@@ -18,21 +18,18 @@ const {
   assertSealed,
   loadSealedMultiway,
 } = require('./load-sealed-multiway');
-const { extractAll } = require('./extract-from-index');
+const {
+  extractAll,
+  nounTable,
+  assertIdeaPointers,
+  assertZenoMismatchAPriori,
+} = require('./extract-from-index');
 const { runExtracted } = require('./extracted-tools');
 const { verifyIndependent } = require('./independent-check');
 const GOLDEN = require('./presets');
 
 const OUT_JSONL = path.join(__dirname, 'results.jsonl');
 const OUT_SEAL = path.join(__dirname, 'SEAL.json');
-
-const UI_NOUN_MATCH = {
-  'toggle-zeno': false,
-  'btn-detect-tunneling': true,
-  'btn-measure-holographic': false,
-  'btn-geodesic-deviation': true,
-  'btn-detect-tangles': true,
-};
 
 function roundLeaf(v) {
   if (typeof v === 'number') {
@@ -87,6 +84,9 @@ function main() {
       throw new Error(`UNEXTRACTABLE: ${t.tool} missing ${t.missing.join(',')}`);
     }
   }
+  assertIdeaPointers(extractedMeta.tools);
+  assertZenoMismatchAPriori(extractedMeta.tools);
+  const UI_NOUN_MATCH = nounTable(extractedMeta.tools);
 
   const MultiwaySystem = loadSealedMultiway();
   const rows = [];
@@ -110,6 +110,7 @@ function main() {
         formula_one_liner: er.formula_one_liner,
         graph: er.graph,
         cap_hit: er.cap_hit,
+        ui_gate: er.ui_gate,
         ui_noun_match: UI_NOUN_MATCH[er.tool],
         value: roundLeaf(er.value),
         independent_value: roundLeaf(iv),
@@ -144,6 +145,16 @@ function main() {
     current_worker_blob: stamp.current_worker_blob,
     current_index_blob: stamp.current_index_blob,
     extracted_from: stamp.extracted_from,
+    idea_pointers: {
+      blob: stamp.index_blob,
+      zenoObserve: 10182,
+      detectTunneling: 10381,
+      measureHolographicBound: 10932,
+      measureGeodesicDeviation: 11820,
+      detectTopologicalObstructions: 12074,
+    },
+    ui_noun_match_source: 'function comment + handler result innerHTML (not .tool-desc)',
+    ui_noun_match: UI_NOUN_MATCH,
     tunnel_shuffle: 'UI Math.random replaced by insertion-order prefix (threshold 1.5 / n=20 / cap 50 unchanged)',
     caps: { maxStateLength: 256, maxTotalStates: 5000 },
     observer: 'first node at step floor((nSteps-1)/2)',
@@ -151,7 +162,8 @@ function main() {
     out_of_scope: [
       'no solvers',
       'no SAT',
-      'no Ricci / dimension dump (Expt 9)',
+      'no Ricci / computeRicciCurvature / dimension dump (Expt 9)',
+      'no measureBranchingAsymmetry (idea 45)',
       'Expt 10 not started',
       'zarankiewicz/712 not touched',
       'no merge',

@@ -265,7 +265,7 @@ function checkBallScales(snap, adj) {
     boundary_r2: bFit.r2,
     volume_slope: vFit.slope,
     volume_r2: vFit.r2,
-    boundary_r2_gt_volume_r2: bFit.r2 > vFit.r2,
+    r2_boundary_gt_r2_volume: bFit.r2 > vFit.r2,
   };
 }
 

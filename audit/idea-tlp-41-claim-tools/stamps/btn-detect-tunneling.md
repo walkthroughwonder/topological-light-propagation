@@ -1,38 +1,32 @@
-# Stamp: `#btn-detect-tunneling`
+# Stamp: `#btn-detect-tunneling` / `detectTunneling` L10381
 
-**UI title:** Tunneling Detector  
-**Handler:** `index.html:10601` → `detectTunneling` `10381–10460` + `findShortestPath` `9192–9221`  
+**IDEA pointer:** `index.html` blob `36070e4f` — `function detectTunneling` L10381–10460 + `findShortestPath` L9192. Not `worker.js`.  
 **Graph:** `multiway-string`. Extractable.  
 **Evidence:** BOUNDED COMPUTATION / EXPLORATORY  
-**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89` / `index.html` `36070e4f`
+**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89`
 
-## Formula (extracted, not invented)
+## Formula (from the function body)
 
-On the **final** occupied step, for pairs `(u,v)` among the first `min(n,20)` ids:
+Final occupied step. Need `n_final ≥ 3` else `[]`. Sample `min(n, 20)`; keep pairs with
 
-`ratio = dist_undirected_parent-child(u,v) / dist_branchial(u,v)`
+`causalDist / branchialDist > 1.5`
 
-Keep the pair if `ratio > 1.5`. Stop at 50 pairs. Sort by ratio descending.
+`maxPairs = 50`. `causalDist` = undirected parent-child BFS (`findShortestPath`). `branchialDist` = BFS on sibling-share-parent edges. Not the event DAG.
 
-`branchial` = BFS on sibling-share-parent edges (`_buildBranchialGraph`).  
-`findShortestPath` = undirected BFS on rewrite edges. **Not** the causal-event DAG.
+UI shuffles the 20-sample with `Math.random()`. Golden replaces that shuffle with insertion-order prefix (threshold / 20 / 50 unchanged).
 
-UI shuffles the 20-sample with `Math.random()`. Golden replaces that shuffle with insertion-order prefix (threshold / 20 / 50 unchanged). Documented in `SEAL.json`.
+## UI noun match: **YES** (from handler fields, not `.tool-desc`)
 
-## UI noun match: **YES** (with a graph caveat)
-
-Copy: *branchial distance ≪ causal geodesic*.
-
-The number is exactly that comparison at threshold 1.5×. The path the UI labels “causal geodesic” is the undirected multiway shortest path, not an event-DAG geodesic. The inequality noun matches; the word “causal” does not name `causalEvents`.
+L10616 prints `branchial=` `causal=` `ratio=` — the same three fields the kernel pushes. The pair test is exactly `ratio > 1.5`.
 
 ## Golden (`agree` on all rows)
 
-| preset | n_pairs | avg_ratio | n_final | cap_hit |
-|---|---:|---:|---:|---|
-| gorard-fib | 50 | 2 | 610 | true (n>20 and 50-pair cap) |
-| one-way | 0 | 0 | 1 | false (`n_final<3` → empty) |
-| wolfram-1 | 50 | 2 | 18 | true (50-pair cap) |
-| hand-ci-not-conf | 0 | 0 | 2 | false |
-| hand-conf-not-ci | 0 | 0 | 1 | false |
+| preset | n_pairs | avg_ratio | n_final | ui_gate (≥3) | cap_hit |
+|---|---:|---:|---:|---|---|
+| gorard-fib | 50 | 2 | 610 | true | true (n>20 and 50-pair cap) |
+| one-way | 0 | 0 | 1 | false | false |
+| wolfram-1 | 50 | 2 | 18 | true | true (50-pair cap) |
+| hand-ci-not-conf | 0 | 0 | 2 | false | false |
+| hand-conf-not-ci | 0 | 0 | 1 | false | false |
 
-Independent: own BFS on snapshot adjacency + snapshot `branchialEdges`. Do not read `avg_ratio` as a tunneling amplitude.
+Independent: own BFS on snapshot adjacency + `branchialEdges`. Do not read `avg_ratio` as a tunneling amplitude.

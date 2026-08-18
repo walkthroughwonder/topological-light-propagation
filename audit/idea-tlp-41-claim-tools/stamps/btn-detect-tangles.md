@@ -1,33 +1,32 @@
-# Stamp: `#btn-detect-tangles`
+# Stamp: `#btn-detect-tangles` / `detectTopologicalObstructions` L12074
 
-**UI title:** Topological Obstruction Detector  
-**Handler:** `index.html:12209` → `detectTopologicalObstructions` `12074–12189` + `extractCore` `12191–12207`  
+**IDEA pointer:** `index.html` blob `36070e4f` — `function detectTopologicalObstructions` L12074–12189 + `extractCore` L12191. Not `worker.js`.  
 **Graph:** `multiway-string`. Extractable.  
 **Evidence:** BOUNDED COMPUTATION / EXPLORATORY  
-**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89` / `index.html` `36070e4f`
+**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89`
 
-## Formula (extracted, not invented)
+## Formula (from the function body)
 
-1. **Exact:** a state string appears at ≥ 2 distinct steps. `connected` iff some latest-step occurrence is a descendant of some earliest-step occurrence. `strength = connected ? span·occurrences : occurrences·0.5`.
-2. **Substring:** for each of the first 200 nodes, `extractCore` = most frequent 2-gram (else the first two chars). Walk children 3 hops. Count kids whose state `includes(core)`. If that count ≥ 2, emit a hit with `strength = regenerations·2`.
-3. Dedup by key; keep top 20 by strength.
+Need `nodes.length ≥ 5` else `null`.
 
-No SCC / cycle finder. `nodes.length < 5` → empty.
+1. **Exact:** same state string at ≥ 2 distinct steps. `connected` iff a latest occurrence is a descendant of an earliest one.
+2. **Substring:** first 200 nodes; `extractCore` = most frequent 2-char block (else first two chars); 3-hop children; keep if ≥ 2 `includes(core)` hits.
+3. Dedup; top 20 by `strength`.
 
-## UI noun match: **YES** (self-regeneration; not graph cycles)
+No SCC / cycle finder.
 
-Copy: *self-regenerating state cycles*.
+## UI noun match: **YES** (from return `type` + handler counts, not `.tool-desc`)
 
-The count is recurring state strings and 2-gram persistence in a 3-hop out-neighborhood. That is self-regeneration of a pattern. It is not a cycle in the rewrite DAG (`hand-conf-not-ci` has an exact `W` at two steps that is **not** causally linked: `n_connected=0`).
+L12232 prints *“Exact self-regeneration”* and *“Substring persistence”* — the two `type` values the kernel pushes. L12231 prints `N tangles`. Not a cycle count.
 
 ## Golden (`agree` on all rows)
 
-| preset | n | n_exact | n_substr | n_connected | top_strength | cap_hit |
-|---|---:|---:|---:|---:|---:|---|
-| gorard-fib | 20 | 0 | 20 | 20 | 512 | true (scan cap 200) |
-| one-way | 20 | 0 | 20 | 20 | 18 | false |
-| wolfram-1 | 20 | 0 | 20 | 20 | 70 | false |
-| hand-ci-not-conf | 0 | 0 | 0 | 0 | 0 | false (`nodes<5`) |
-| hand-conf-not-ci | 1 | 1 | 0 | 0 | 1 | false |
+| preset | n | n_exact | n_substr | n_connected | top_strength | ui_gate (≥5 nodes) | cap_hit |
+|---|---:|---:|---:|---:|---:|---|---|
+| gorard-fib | 20 | 0 | 20 | 20 | 512 | true | true (scan cap 200) |
+| one-way | 20 | 0 | 20 | 20 | 18 | true | false |
+| wolfram-1 | 20 | 0 | 20 | 20 | 70 | true | false |
+| hand-ci-not-conf | 0 | 0 | 0 | 0 | 0 | false | false |
+| hand-conf-not-ci | 1 | 1 | 0 | 0 | 1 | true | false |
 
 Independent: own state-index + own 2-gram tally + own 3-hop walk. Do not read `n` as a particle count.

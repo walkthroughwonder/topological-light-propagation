@@ -1,39 +1,36 @@
-# Stamp: `#btn-geodesic-deviation`
+# Stamp: `#btn-geodesic-deviation` / `measureGeodesicDeviation` L11820
 
-**UI title:** Geodesic Deviation  
-**Handler:** `index.html:12031` → `measureGeodesicDeviation` `11820–11936` + `findShortestPath` + `levenshteinLike` `11939–11949`  
+**IDEA pointer:** `index.html` blob `36070e4f` — `function measureGeodesicDeviation` L11820–11936 + `levenshteinLike` L11939. Not `worker.js`.  
 **Graph:** `multiway-string`. Extractable.  
 **Evidence:** BOUNDED COMPUTATION / EXPLORATORY  
-**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89` / `index.html` `36070e4f`
+**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89`
 
-## Formula (extracted, not invented)
+## Formula (from the function body)
 
-From the observer, undirected shortest paths to nodes at steps `s ∈ [max(obsStep+2, maxStep−1), maxStep]`. Keep paths of length ≥ 3. Group by first hop. At each depth, pairwise
+Need ≥2 undirected shortest paths of length ≥3 (`geodesics.length < 2 → null`). Bundles share the first hop. Separation = mean pairwise
 
-`sep = |Δstep| + prefix-mismatch(state_i, state_j)`
+`|Δstep| + length-diff + Hamming on the shared prefix`
 
-(`levenshteinLike` is length-gap plus Hamming on the shared prefix — not Levenshtein.)
+(`levenshteinLike` is that proxy, not full Levenshtein.)
 
 `deviation = (sep_last − sep_first) / max(sep_first, 0.01)`
 
-`converging` if `deviation < −0.1`; `diverging` if `deviation > 0.1`.
+`converging` if `deviation < −0.1`. Handler displays if the returned array is non-empty (one bundle is enough to print).
 
-Observer: first node at step `floor((nSteps−1)/2)` (UI falls back to node 0 if none selected).
+`computeRicciCurvature` is not called. The handler’s `ricci-flat` CSS class is display-only.
 
-## UI noun match: **YES**
+## UI noun match: **YES** (from return keys, not `.tool-desc`)
 
-Copy: *nearby geodesic bundles converge/diverge*.
-
-“Nearby” = share the first hop. “Geodesic” = rewrite-graph shortest path. The signed `deviation` is exactly converge/diverge of that bundle’s separation profile. UI prose that names focusing / expansion is not the number.
+The function returns `converging` / `diverging` / `deviation` with the −0.1 / +0.1 cuts. Those names are the kernel. Handler L12057–12059 also writes “(gravity)” / “(expansion)” next to the counts — gloss, not the formula.
 
 ## Golden (`agree` on all rows)
 
-| preset | n_bundles | avg_deviation | n_conv | n_div | cap_hit |
-|---|---:|---:|---:|---:|---|
-| gorard-fib | 4 | 200 | 0 | 4 | false |
-| one-way | 1 | 0 | 0 | 0 | false |
-| wolfram-1 | 1 | 422.22222222 | 0 | 1 | false |
-| hand-ci-not-conf | 0 | 0 | 0 | 0 | false |
-| hand-conf-not-ci | 0 | 0 | 0 | 0 | false |
+| preset | n_bundles | avg_deviation | n_conv | n_div | ui_gate | cap_hit |
+|---|---:|---:|---:|---:|---|---|
+| gorard-fib | 4 | 200 | 0 | 4 | true | false |
+| one-way | 1 | 0 | 0 | 0 | true | false |
+| wolfram-1 | 1 | 422.22222222 | 0 | 1 | true | false |
+| hand-ci-not-conf | 0 | 0 | 0 | 0 | false | false |
+| hand-conf-not-ci | 0 | 0 | 0 | 0 | false | false |
 
-Independent: own children-then-parents BFS (same neighbor order as `findShortestPath`) + own prefix-mismatch. Do not read `avg_deviation` as a curvature or field equation.
+Independent: own children-then-parents BFS + own prefix-mismatch. Do not read `avg_deviation` as a field equation.

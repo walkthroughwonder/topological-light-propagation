@@ -8,43 +8,48 @@
 const fs = require('fs');
 const { INDEX_PATH } = require('./load-sealed-multiway');
 
+const IDEA_POINTERS = {
+  zenoObserve: 10182,
+  detectTunneling: 10381,
+  measureHolographicBound: 10932,
+  measureGeodesicDeviation: 11820,
+  detectTopologicalObstructions: 12074,
+};
+
+const FORBIDDEN = ['computeRicciCurvature', 'measureBranchingAsymmetry'];
+
 const TOOLS = [
   {
     tool: 'toggle-zeno',
-    title: 'Quantum Zeno Effect',
-    ui_copy: 'only branches containing the observed state survive',
+    idea_fn: 'zenoObserve',
     handler_id: 'toggle-zeno',
     functions: ['zenoObserve'],
     helpers: [],
   },
   {
     tool: 'btn-detect-tunneling',
-    title: 'Tunneling Detector',
-    ui_copy: 'branchial distance ≪ causal geodesic',
+    idea_fn: 'detectTunneling',
     handler_id: 'btn-detect-tunneling',
     functions: ['detectTunneling'],
     helpers: ['findShortestPath'],
   },
   {
     tool: 'btn-measure-holographic',
-    title: 'Discrete Holographic Bound',
-    ui_copy: 'branch count vs area vs volume of causal regions',
+    idea_fn: 'measureHolographicBound',
     handler_id: 'btn-measure-holographic',
     functions: ['measureHolographicBound'],
     helpers: [],
   },
   {
     tool: 'btn-geodesic-deviation',
-    title: 'Geodesic Deviation',
-    ui_copy: 'nearby geodesic bundles converge/diverge',
+    idea_fn: 'measureGeodesicDeviation',
     handler_id: 'btn-geodesic-deviation',
     functions: ['measureGeodesicDeviation'],
     helpers: ['findShortestPath', 'levenshteinLike'],
   },
   {
     tool: 'btn-detect-tangles',
-    title: 'Topological Obstruction / tangles',
-    ui_copy: 'self-regenerating state cycles',
+    idea_fn: 'detectTopologicalObstructions',
     handler_id: 'btn-detect-tangles',
     functions: ['detectTopologicalObstructions'],
     helpers: ['extractCore'],
@@ -83,15 +88,23 @@ function inspectTool(src, spec, extracted) {
   const handler_line = handlerAt >= 0 ? src.slice(0, handlerAt).split('\n').length : null;
 
   if (spec.tool === 'toggle-zeno') {
+    const comment_claims_prune = joined.includes("Prune branches at the latest step that don't contain the observed state");
+    const stores_unused_state = joined.includes('zenoObserverState = observerNode.state');
+    const uses_desc = joined.includes('traceDescendants');
+    const prunes = /nodes\.splice|edges\.splice|delete.*node/.test(joined);
     return {
       handler_line,
-      uses_traceDescendants: joined.includes('traceDescendants'),
+      code_noun: "function comment: \"Prune branches … that don't contain the observed state\"; result: \"branches survive\" / \"Frozen ratio\" / \"Zeno effect\"",
+      ui_noun_match: !(comment_claims_prune && uses_desc && !prunes && stores_unused_state),
+      noun_reason: 'comment claims prune + state-containment; body counts traceDescendants and does not prune; zenoObserverState stored, unused',
+      uses_traceDescendants: uses_desc,
       uses_state_includes: /observerNode\.state/.test(joined) && /includes\(/.test(joined),
       uses_state_equality_filter: /node\.state\s*===/.test(joined) && /surviving/.test(joined),
       counts_descendants_at_step: joined.includes('observerDescendants.has(sid)'),
       frozen_ratio: joined.includes('1 - (survivingBranches / totalBranches)'),
-      prunes_graph: /nodes\.splice|edges\.splice|delete.*node/.test(joined),
-      mentions_observed_state_string: joined.includes('zenoObserverState = observerNode.state'),
+      prunes_graph: prunes,
+      comment_claims_prune,
+      mentions_observed_state_string: stores_unused_state,
     };
   }
   if (spec.tool === 'btn-detect-tunneling') {
@@ -105,6 +118,10 @@ function inspectTool(src, spec, extracted) {
         ? Number(RegExp.$1) : null,
       max_pairs: /maxPairs = (\d+)/.exec(joined) ? Number(RegExp.$1) : null,
       uses_causal_event_dag: joined.includes('causalEvents') || joined.includes('causalEdges'),
+      min_finals: 3,
+      code_noun: 'result fields branchial= / causal= / ratio= ; pair kept if causalDist/branchialDist > 1.5',
+      ui_noun_match: /causalDist/.test(joined) && /branchialDist/.test(joined) && /ratio > 1\.5/.test(joined),
+      noun_reason: 'handler prints the same three fields the kernel computes',
     };
   }
   if (spec.tool === 'btn-measure-holographic') {
@@ -116,6 +133,10 @@ function inspectTool(src, spec, extracted) {
       bfs_undirected: joined.includes('_childToParents') && joined.includes('_parentToChildren'),
       uses_causal_cone: joined.includes('traceCausalHistory') || joined.includes('causalEvents'),
       compares_r2: joined.includes('boundaryFit.r2 > volumeFit.r2'),
+      min_radii: 2,
+      code_noun: 'return isHolographic = boundaryFit.r2 > volumeFit.r2; handler prints AREA LAW (Holographic)',
+      ui_noun_match: false,
+      noun_reason: 'kernel boolean is an R² bake-off of distinct-string count vs sphere vs ball; handler labels it AREA LAW',
     };
   }
   if (spec.tool === 'btn-geodesic-deviation') {
@@ -127,6 +148,11 @@ function inspectTool(src, spec, extracted) {
       deviation_formula: joined.includes('(lastSep - firstSep) / Math.max(firstSep, 0.01)'),
       converge_threshold: /deviation < -0\.1/.test(joined) ? -0.1 : null,
       diverge_threshold: /deviation > 0\.1/.test(joined) ? 0.1 : null,
+      min_paths_len3: 2,
+      not_full_levenshtein: joined.includes('Simple edit distance proxy'),
+      code_noun: 'return keys converging / diverging / deviation (deviation < −0.1)',
+      ui_noun_match: joined.includes('converging: deviation < -0.1') && joined.includes('byFirstStep'),
+      noun_reason: 'function return names converge/diverge of first-hop bundles; not pulled from .tool-desc',
     };
   }
   if (spec.tool === 'btn-detect-tangles') {
@@ -139,6 +165,10 @@ function inspectTool(src, spec, extracted) {
       node_scan_cap: /i < (\d+)/.exec(joined) ? Number(RegExp.$1) : null,
       top_k: /slice\(0, (\d+)\)/.exec(joined) ? Number(RegExp.$1) : null,
       uses_graph_cycle_detect: /tarjan|strongly.connected|cycle/i.test(joined),
+      min_nodes: 5,
+      code_noun: "return type 'exact' | 'substring'; handler prints Exact self-regeneration / Substring persistence",
+      ui_noun_match: joined.includes("type: 'exact'") && joined.includes("type: 'substring'"),
+      noun_reason: 'handler counts the same exact/substring objects the kernel returns',
     };
   }
   return { handler_line };
@@ -172,8 +202,49 @@ function extractAll() {
   return { src, tools, sources };
 }
 
+function nounTable(tools) {
+  const out = {};
+  for (const t of tools) {
+    out[t.tool] = !!(t.inspect && t.inspect.ui_noun_match);
+  }
+  return out;
+}
+
+function assertIdeaPointers(tools) {
+  const listed = new Set(tools.flatMap(t => [...t.functions, ...t.helpers].map(f => f.name)));
+  for (const name of FORBIDDEN) {
+    if (listed.has(name)) {
+      throw new Error(`refused to extract ${name} (Ricci / idea 45 out of scope)`);
+    }
+  }
+  for (const t of tools) {
+    const fn = t.functions.find(f => f.name === t.idea_fn);
+    const expected = IDEA_POINTERS[t.idea_fn];
+    if (!fn || !fn.found) throw new Error(`UNEXTRACTABLE: ${t.idea_fn}`);
+    if (fn.start_line !== expected) {
+      throw new Error(`${t.idea_fn} starts at L${fn.start_line}, IDEA pointer is L${expected}`);
+    }
+  }
+}
+
+function assertZenoMismatchAPriori(tools) {
+  const zeno = tools.find(t => t.tool === 'toggle-zeno');
+  if (!zeno) throw new Error('toggle-zeno missing');
+  if (zeno.inspect.ui_noun_match !== false) {
+    throw new Error('zenoObserve comment/body noun mismatch must be stamped before the suite runs');
+  }
+  if (zeno.inspect.prunes_graph) {
+    throw new Error('zenoObserve now prunes — extract drifted');
+  }
+}
+
 module.exports = {
   TOOLS,
+  IDEA_POINTERS,
+  FORBIDDEN,
   extractNamedFunction,
   extractAll,
+  nounTable,
+  assertIdeaPointers,
+  assertZenoMismatchAPriori,
 };

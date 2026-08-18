@@ -112,9 +112,10 @@ function runExtracted(sys) {
   const zeno = {
     tool: 'toggle-zeno',
     formula_one_liner:
-      'frozenRatio = 1 - |{v ∈ step[t] : v forward-reachable from observer node}| / |step[t]|',
+      'frozenRatio = 1 − |{v ∈ step[t] ∩ traceDescendants(observer)}| / |step[t]| (does not prune)',
     graph,
     cap_hit: cap_graph,
+    ui_gate: !!(zenoLast && Number.isFinite(zenoLast.frozenRatio)),
     observer_id: observerId,
     value: zenoLast ? {
       step: zenoLast.step,
@@ -134,9 +135,10 @@ function runExtracted(sys) {
   const tunnel = {
     tool: 'btn-detect-tunneling',
     formula_one_liner:
-      'final-step pairs with undirected_parent-child_BFS(u,v) / branchial_BFS(u,v) > 1.5 (prefix 20, cap 50)',
+      'final-step pairs with causalDist/branchialDist > 1.5 (sample min(n,20), max 50, need ≥3 finals)',
     graph,
     cap_hit: cap_graph || nFinal > 20 || pairs.length >= 50,
+    ui_gate: nFinal >= 3,
     value: {
       n_pairs: pairs.length,
       avg_ratio: avgRatio,
@@ -153,14 +155,15 @@ function runExtracted(sys) {
     boundary_r2: holo.boundaryScaling.r2,
     volume_slope: holo.volumeScaling.slope,
     volume_r2: holo.volumeScaling.r2,
-    boundary_r2_gt_volume_r2: holo.boundaryScaling.r2 > holo.volumeScaling.r2,
+    r2_boundary_gt_r2_volume: holo.boundaryScaling.r2 > holo.volumeScaling.r2,
   };
   const holoRow = {
     tool: 'btn-measure-holographic',
     formula_one_liner:
-      'log-log OLS of |unique states in undirected BFS-ball(r)| vs |sphere(r)| and |ball(r)|; compare R²',
+      'S(r)=#distinct state strings in undirected BFS-ball(r); r2_boundary_gt_r2_volume := R²_boundary > R²_volume (need observer, ≥2 radii)',
     graph,
     cap_hit: cap_graph,
+    ui_gate: !!(holo && holo.radiusData.length >= 2),
     observer_id: observerId,
     value: holoVal,
   };
@@ -174,9 +177,10 @@ function runExtracted(sys) {
   const geoRow = {
     tool: 'btn-geodesic-deviation',
     formula_one_liner:
-      'shortest-path bundles sharing first hop; deviation=(sep_last-sep_first)/max(sep_first,0.01); sep=|Δstep|+prefix-mismatch',
+      'bundles share first hop; sep=mean pairwise |Δstep|+len-diff+prefix-Hamming; converging if deviation < −0.1 (need ≥2 paths of length ≥3)',
     graph,
     cap_hit: cap_graph,
+    ui_gate: geoList.length >= 1,
     observer_id: observerId,
     value: {
       n_bundles: geoList.length,
@@ -191,9 +195,10 @@ function runExtracted(sys) {
   const tangleRow = {
     tool: 'btn-detect-tangles',
     formula_one_liner:
-      'exact: same state at ≥2 steps (+ descendant link); substring: most-common 2-gram in 3-hop children, ≥2 hits; top 20 by strength',
+      'exact: same state string at ≥2 steps; substring: first 200 nodes, 2-char extractCore, 3-hop ≥2 hits; top 20 (need ≥5 nodes)',
     graph,
     cap_hit: cap_graph || sys.nodes.length > 200,
+    ui_gate: sys.nodes.length >= 5,
     value: {
       n: tangles.length,
       n_exact: tangles.filter(t => t.type === 'exact').length,

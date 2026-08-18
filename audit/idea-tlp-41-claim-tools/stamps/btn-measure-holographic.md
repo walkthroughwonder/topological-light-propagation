@@ -1,39 +1,36 @@
-# Stamp: `#btn-measure-holographic`
+# Stamp: `#btn-measure-holographic` / `measureHolographicBound` L10932
 
-**UI title:** Discrete Holographic Bound  
-**Handler:** `index.html:11105` → `measureHolographicBound` `10932–11034`  
+**IDEA pointer:** `index.html` blob `36070e4f` — `function measureHolographicBound` L10932–11034. Not `worker.js`.  
 **Graph:** `multiway-string`. Extractable.  
 **Evidence:** BOUNDED COMPUTATION / EXPLORATORY  
-**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89` / `index.html` `36070e4f`
+**Seal:** commit `c60aed3eb08d` / `worker.js` `961def89`
 
-## Formula (extracted, not invented)
+## Formula (from the function body)
 
-Undirected BFS from the observer on parent-child edges. For radius `r = 1…maxDist`:
+Needs an observer. Undirected BFS on parent-child edges. For radius `r`:
 
-- `volume` = `|{v : dist(v) ≤ r}|`
-- `boundary` = `|{v : dist(v) = r}|`
-- `entropy` = `|{state(v) : dist(v) ≤ r}|`  (distinct strings)
+`S(r) = #distinct state strings with dist ≤ r`
 
-Then log-log OLS (`log(max(x,1))`) of entropy vs boundary and vs volume. The UI boolean is `boundary.r2 > volume.r2`. This audit reports that boolean as `boundary_r2_gt_volume_r2` only.
+`volume` = ball size; `boundary` = sphere size. Log-log OLS. Code boolean:
 
-Observer: first node at step `floor((nSteps−1)/2)`.
+`isHolographic = R²_boundary > R²_volume`
 
-## UI noun match: **NO**
+This audit emits that boolean as `r2_boundary_gt_r2_volume`. Handler UI gate: `radiusData.length ≥ 2` (else “Not enough data”).
 
-Copy: *branch count vs area vs volume of causal regions*.
+Ricci / `computeRicciCurvature` not pulled. `measureBranchingAsymmetry` not pulled.
 
-- “Branch count” is distinct state strings, not branchial components. When states do not collide, `volume_slope=1` and `volume_r2=1` — the series is just ball size.
-- “Area” is the BFS sphere, not a spatial cut.
-- The region is an **undirected** rewrite-graph ball, not a causal cone (`traceCausalHistory` unused; `causalEvents` unused).
+## UI noun match: **NO** (from return key + handler innerHTML, not `.tool-desc`)
+
+L11032 names the boolean `isHolographic`. L11133 prints `AREA LAW (Holographic)` vs `VOLUME LAW`. The number is an R² bake-off of distinct strings vs an undirected BFS sphere/ball — not an area-law test.
 
 ## Golden (`agree` on all rows)
 
-| preset | n_radii | bound. r² | vol. r² | bound.r²>vol.r² | cap_hit |
-|---|---:|---:|---:|---|---|
-| gorard-fib | 13 | 0.00404265 | 1 | false | false |
-| one-way | 11 | 0.0093894 | 1 | false | false |
-| wolfram-1 | 7 | 0.89805468 | 1 | false | false |
-| hand-ci-not-conf | 1 | 0 | 0 | false | false |
-| hand-conf-not-ci | 4 | 0.81145231 | 0.9306684 | false | false |
+| preset | n_radii | bound. r² | vol. r² | r²b>r²v | ui_gate (≥2 radii) | cap_hit |
+|---|---:|---:|---:|---|---|---|
+| gorard-fib | 13 | 0.00404265 | 1 | false | true | false |
+| one-way | 11 | 0.0093894 | 1 | false | true | false |
+| wolfram-1 | 7 | 0.89805468 | 1 | false | true | false |
+| hand-ci-not-conf | 1 | 0 | 0 | false | false | false |
+| hand-conf-not-ci | 4 | 0.81145231 | 0.9306684 | false | true | false |
 
-Independent: own BFS + own log-log OLS on the snapshot. Do not read the R² bake-off as an area-law test.
+Independent: own BFS + own log-log OLS. Do not read the R² bake-off as an area-law test.
