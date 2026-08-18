@@ -1,0 +1,5 @@
+{"preset":"gorard-fib","lookahead":3,"confluent":40213,"divergent":0,"invariance":1,"state_joinable":true,"causal_graph_iso":false,"piskunov_cell":"confluent ∧ ¬CI (bounded traces)","cap_hit":true}
+{"preset":"one-way","lookahead":3,"confluent":63,"divergent":0,"invariance":1,"state_joinable":true,"causal_graph_iso":false,"piskunov_cell":"confluent ∧ ¬CI","cap_hit":false}
+{"preset":"wolfram-1","lookahead":3,"confluent":381,"divergent":19,"invariance":0.9525,"state_joinable":null,"causal_graph_iso":false,"piskunov_cell":"joinability undecided ∧ ¬CI (bounded traces)","cap_hit":true}
+{"preset":"hand-ci-not-conf","lookahead":3,"confluent":0,"divergent":1,"invariance":0,"state_joinable":false,"causal_graph_iso":true,"piskunov_cell":"CI ∧ ¬confluent","cap_hit":false}
+{"preset":"hand-conf-not-ci","lookahead":3,"confluent":1,"divergent":0,"invariance":1,"state_joinable":true,"causal_graph_iso":false,"piskunov_cell":"confluent ∧ ¬CI","cap_hit":false}

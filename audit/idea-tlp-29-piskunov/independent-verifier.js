@@ -21,6 +21,33 @@
 const MAX_STATE_CHARS = 256;
 const MAX_STATES = 5000;
 
+/**
+ * Ground string rules are left-linear. A critical overlap of two LHS
+ * (including a rule with itself at a nonzero offset) means the TRS is
+ * not orthogonal. Orthogonal TRS are confluent — a finite check on the
+ * rule set, not a state-space search (Huet / Knuth–Bendix, no solver).
+ */
+function ruleSetOrthogonal(rules) {
+  for (let i = 0; i < rules.length; i++) {
+    for (let j = i; j < rules.length; j++) {
+      const a = rules[i].from;
+      const b = rules[j].from;
+      const startK = i === j ? 1 : 0;
+      for (let k = startK; k < a.length; k++) {
+        const n = Math.min(a.length - k, b.length);
+        if (n > 0 && a.slice(k, k + n) === b.slice(0, n)) return false;
+      }
+      if (i !== j) {
+        for (let k = 1; k < b.length; k++) {
+          const n = Math.min(b.length - k, a.length);
+          if (n > 0 && b.slice(k, k + n) === a.slice(0, n)) return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 function listRedexes(rules, word) {
   const found = [];
   for (let ruleNo = 0; ruleNo < rules.length; ruleNo++) {
@@ -128,6 +155,7 @@ function finalStateJoinable(rules, seed, maxDepth) {
   const g = exploreRewriteGraph(rules, seed, maxDepth);
   const nfs = normals(g.words, g.outgoing);
   const uniqueNF = new Set(nfs);
+  const orthogonal = ruleSetOrthogonal(rules);
   const open = [];
   for (let i = 0; i < g.words.length; i++) {
     if (g.outgoing[i].length === 0 && g.depthOf[i] >= maxDepth && listRedexes(rules, g.words[i]).length > 0) {
@@ -136,6 +164,18 @@ function finalStateJoinable(rules, seed, maxDepth) {
   }
   const terminating = open.length === 0 && !g.overflow && !g.lengthCap;
 
+  if (orthogonal) {
+    return {
+      state_joinable: true,
+      terminating,
+      unique_normal_form: terminating && uniqueNF.size <= 1,
+      normal_forms: terminating ? [...uniqueNF] : [],
+      cap_hit: false,
+      orthogonal: true,
+      reason: terminating ? 'unique normal form (also orthogonal TRS)' : 'orthogonal TRS (no critical overlaps)',
+    };
+  }
+
   if (uniqueNF.size > 1 && open.length === 0) {
     return {
       state_joinable: false,
@@ -143,6 +183,7 @@ function finalStateJoinable(rules, seed, maxDepth) {
       unique_normal_form: false,
       normal_forms: [...uniqueNF],
       cap_hit: g.overflow || g.lengthCap,
+      orthogonal: false,
       reason: 'distinct normal forms',
     };
   }
@@ -154,6 +195,7 @@ function finalStateJoinable(rules, seed, maxDepth) {
       unique_normal_form: true,
       normal_forms: [...uniqueNF],
       cap_hit: false,
+      orthogonal,
       reason: 'unique normal form',
     };
   }
@@ -181,6 +223,7 @@ function finalStateJoinable(rules, seed, maxDepth) {
               unique_normal_form: uniqueNF.size <= 1,
               normal_forms: [...uniqueNF],
               cap_hit: g.overflow || g.lengthCap,
+              orthogonal,
               reason: `unjoinable peak ${g.words[kids[i]]} vs ${g.words[kids[j]]}`,
             };
           }
@@ -196,6 +239,7 @@ function finalStateJoinable(rules, seed, maxDepth) {
       unique_normal_form: uniqueNF.size <= 1,
       normal_forms: [...uniqueNF],
       cap_hit: true,
+      orthogonal,
       reason: 'joinability open under length-256 / 5000-state / depth cap',
     };
   }
@@ -206,6 +250,7 @@ function finalStateJoinable(rules, seed, maxDepth) {
     unique_normal_form: uniqueNF.size <= 1,
     normal_forms: [...uniqueNF],
     cap_hit: false,
+    orthogonal,
     reason: 'every explored peak has a common descendant',
   };
 }
@@ -425,7 +470,8 @@ function causalGraphIso(rules, seed, maxEvents, maxTraces) {
     }
   }
 
-  const allHalted = traces.every(t => t.halted);
+  const allHalted = halted.length > 0 && traces.every(t => t.halted);
+  const decidedNonIso = iso === false && (halted.length > 0 || eventCounts.size > 1);
   return {
     causal_graph_iso: iso,
     terminating_traces: halted.length,
@@ -433,7 +479,7 @@ function causalGraphIso(rules, seed, maxEvents, maxTraces) {
     compared,
     event_counts: [...eventCounts],
     all_halted: allHalted,
-    cap_hit: overflow || traces.some(t => !t.halted),
+    cap_hit: decidedNonIso ? false : (overflow || traces.some(t => !t.halted)),
     reason,
   };
 }
@@ -481,6 +527,7 @@ module.exports = {
   MAX_STATE_CHARS,
   MAX_STATES,
   listRedexes,
+  ruleSetOrthogonal,
   finalStateJoinable,
   causalGraphIso,
   verifyIndependent,

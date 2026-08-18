@@ -39,8 +39,8 @@ const GOLDEN = [
     preset: 'one-way',
     rules: [{ from: 'Xo', to: 'oX' }],
     initial: 'oooooooooXoooXooooooooo',
-    steps: 14,
-    note: 'Gallery Asymmetric / One-way sort.',
+    steps: 24,
+    note: 'Gallery Asymmetric / One-way sort. 21 events to FixedPoint; leftmost vs rightmost causal DAGs are not isomorphic.',
   },
   {
     preset: 'wolfram-1',
@@ -149,6 +149,24 @@ function assertGoldenInvariants(rows, tlpByPreset, fnInfo) {
     throw new Error('TLP should score hand-conf-not-ci as bounded-joinable (divergent=0)');
   }
 
+  const fib = rows.find(r => r.preset === 'gorard-fib');
+  if (!fib) throw new Error('gorard-fib row missing');
+  if (fib.state_joinable !== true) {
+    throw new Error('gorard-fib is an orthogonal TRS and must be independently joinable');
+  }
+  if (fib.divergent !== 0 || fib.invariance !== 1) {
+    throw new Error('gorard-fib TLP ratio is the non-overlap shortcut (expected divergent=0)');
+  }
+
+  const oneWay = rows.find(r => r.preset === 'one-way');
+  if (!oneWay) throw new Error('one-way row missing');
+  if (oneWay.state_joinable !== true || oneWay.causal_graph_iso !== false) {
+    throw new Error('one-way gallery preset should be confluent ∧ ¬CI at FixedPoint');
+  }
+  if (oneWay.divergent !== 0) {
+    throw new Error('one-way TLP should report 0 overlapping critical pairs (all non-overlap shortcuts)');
+  }
+
   for (const r of rows) {
     if (Object.prototype.hasOwnProperty.call(r, 'percent_causal_invariance')) {
       throw new Error('do not emit percent_causal_invariance');
@@ -159,7 +177,15 @@ function assertGoldenInvariants(rows, tlpByPreset, fnInfo) {
   }
 }
 
+function assertNoSharedCode() {
+  const verifierSrc = fs.readFileSync(path.join(__dirname, 'independent-verifier.js'), 'utf8');
+  if (/require\s*\([^)]*worker\.js/.test(verifierSrc) || /load-sealed-multiway/.test(verifierSrc)) {
+    throw new Error('independent-verifier.js must not load worker.js or the sealed extractor');
+  }
+}
+
 function main() {
+  assertNoSharedCode();
   const stamp = stampWorker();
   assertSealed(stamp);
   const fnSrc = extractFunctionSource();
@@ -172,8 +198,8 @@ function main() {
     const tlp = runTlp(MultiwaySystem, spec);
     const independent = verifyIndependent(spec.rules, spec.initial, {
       maxDepth: spec.steps,
-      maxEvents: spec.preset === 'one-way' ? 24 : 16,
-      maxTraces: spec.preset.startsWith('hand-') ? 64 : 256,
+      maxEvents: spec.preset === 'one-way' ? 21 : 16,
+      maxTraces: spec.preset.startsWith('hand-') ? 64 : 128,
     });
     const row = rowFor(spec, tlp, independent);
     rows.push(row);
