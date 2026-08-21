@@ -87,7 +87,7 @@ function assertPreregisterLocked() {
   const text = fs.readFileSync(PREREGISTER_PATH, 'utf8');
   const needed = [
     'Einstein-like sign would be',
-    'corr<0',
+    '\\mathrm{corr}<0',
     'We do **not** require that sign on these three rules',
     'Adopted converging threshold:',
     'dev < -0.1',
