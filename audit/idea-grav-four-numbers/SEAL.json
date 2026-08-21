@@ -1,0 +1,62 @@
+{
+  "idea": "IDEA-GRAV-FOUR-NUMBERS",
+  "instrument": "GRK instrument-and-seal",
+  "evidence": "BOUNDED COMPUTATION / EXPLORATORY",
+  "name_freeze": "IDEA-GRAV-FOUR-NUMBERS",
+  "mathman_3plus1": "HOLD",
+  "cite": {
+    "tlp_pr2": "https://github.com/walkthroughwonder/topological-light-propagation/pull/2",
+    "tlp_pr3": "https://github.com/walkthroughwonder/topological-light-propagation/pull/3",
+    "note": "Same instrumentation-seal surface. Not a redo of Piskunov or the 41 claim tools."
+  },
+  "audited_commit": "c60aed3eb08ded734dde98d4365a39450acc4904",
+  "audited_commit_short": "c60aed3eb08d",
+  "index_blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
+  "worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
+  "cited_commit": "c60aed3eb08d",
+  "citation_matched": true,
+  "current_head_at_audit": "c5f96dae634dd7e77592658a75becf33177f5b75",
+  "current_index_blob": "36070e4f18a7e9c92e5e2f4b8bff6a5320577689",
+  "current_worker_blob": "961def89f04c3688272e540414d172c70d196fa0",
+  "extracted_from": "index.html HypergraphRewriter (not worker.js / not Three.js)",
+  "hypergraph_rewriter": {
+    "start_line": 12430,
+    "end_line": 12683,
+    "seal_pointer": 12430,
+    "inspect": {
+      "has_maxEdges_8000": true,
+      "has_truncated": true,
+      "has_events": true,
+      "has_causalEdges": true,
+      "mentions_worker_ci": false,
+      "forbidden_hits": []
+    }
+  },
+  "preregister": {
+    "path": "audit/idea-grav-four-numbers/PREREGISTER.md",
+    "first_add_commit": "557498a4698e30abfb59d3ac1ee84b19667f16e5",
+    "blob": "b80dbb8c011437704b78ced4bbeb41d0576d91dc",
+    "einstein_like_sign": "corr < 0",
+    "einstein_like_required_on_these_rules": false,
+    "converging_threshold": -0.1,
+    "dim27_role": "2.7 CONTROL, not a pass target"
+  },
+  "caps": {
+    "maxEdges": 8000
+  },
+  "date_utc": "2026-08-21",
+  "out_of_scope": [
+    "no solvers",
+    "no SAT",
+    "no worker.js checkCausalInvariance",
+    "no IDEA-TLP-41 string-Hamming kernel as this measurement",
+    "no Ricci / computeRicciCurvature / Expt 9",
+    "no Expt 10",
+    "no 712",
+    "no IDEA-DJ-33",
+    "no growers",
+    "MathMan 3+1 HOLD",
+    "no merge",
+    "no fleet-mail"
+  ]
+}
