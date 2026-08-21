@@ -24,12 +24,23 @@ function loadRows() {
   return fs.readFileSync(JSONL, 'utf8').trim().split('\n').filter(Boolean).map(l => JSON.parse(l));
 }
 
+function roundLeaf(v) {
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) return v;
+    return Math.round(v * 1e8) / 1e8;
+  }
+  if (Array.isArray(v)) return v.map(roundLeaf);
+  return v;
+}
+
 function valuesAgree(a, b) {
+  a = roundLeaf(a);
+  b = roundLeaf(b);
   if (a === b) return true;
   if (a == null && b == null) return true;
   if (typeof a === 'number' && typeof b === 'number') {
     if (!Number.isFinite(a) && !Number.isFinite(b)) return true;
-    return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+    return Math.abs(a - b) <= 1e-8;
   }
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
