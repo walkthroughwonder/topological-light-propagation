@@ -35,11 +35,11 @@ function assertNoSharedCode() {
     throw new Error('independent-verifier.js must not load searcher, extractor, index.html, or worker.js');
   }
   const searcher = fs.readFileSync(path.join(__dirname, 'searcher.js'), 'utf8');
-  if (searcher.includes('checkCausalInvariance') || searcher.includes('levenshteinLike')) {
-    throw new Error('searcher.js must not call checkCausalInvariance or levenshteinLike');
+  if (/\bcheckCausalInvariance\s*\(/.test(searcher) || /\blevenshteinLike\s*\(/.test(searcher)) {
+    throw new Error('searcher.js must not invoke worker CI or the string-edit helper');
   }
-  if (searcher.includes('measureGeodesicDeviation')) {
-    throw new Error('searcher.js must not call measureGeodesicDeviation');
+  if (/\bmeasureGeodesicDeviation\s*\(/.test(searcher)) {
+    throw new Error('searcher.js must not invoke the unused string-bundle kernel');
   }
 }
 

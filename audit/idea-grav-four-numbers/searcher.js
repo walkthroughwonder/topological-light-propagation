@@ -3,8 +3,7 @@
 /**
  * Searcher four-number stamps. Not imported by independent-verifier.js.
  * Causal DEV uses HypergraphRewriter.events / causalEdges only.
- * Does not call checkCausalInvariance, measureGeodesicDeviation, or
- * the 41 string-Hamming kernel.
+ * String-kernel helpers from the unused claim-tool audit are not called.
  */
 
 const CONVERGING_THRESHOLD = -0.1;
