@@ -24,13 +24,18 @@ class MultiwaySystem {
 
     // Causal graph: events and their causal relationships
     this.causalEvents = [];  // { id, parentNodeId, childNodeId, ruleIdx, position, inputRange, outputRange, step }
-    this.causalEdges = [];   // { from: eventId, to: eventId }
+    this.causalEdges = [];   // { from: eventId, to: eventId } — the edges that get drawn (see _buildCausalEdges)
+    this.causalCauseStart = new Int32Array(1); // complete relation: direct causes of event e are
+    this.causalCauseList = new Int32Array(0);  //   causalCauseList[causalCauseStart[e] .. causalCauseStart[e+1])
+    this.causalDirectCount = 0;
+    this.causalCompleteThroughStep = 0;
   }
 
   applyRules(state) {
     const results = [];
     for (let ri = 0; ri < this.rules.length; ri++) {
       const rule = this.rules[ri];
+      if (!rule.from) continue; // an empty left side would match at every position, forever
       let pos = 0;
       while (true) {
         const idx = state.indexOf(rule.from, pos);
@@ -381,69 +386,195 @@ class MultiwaySystem {
   }
 
   /**
-   * Build causal edges between events.
-   * Event A causally precedes event B when:
-   *   - A's output state (childNodeId) is B's input state (parentNodeId)
-   *   - A's output character range overlaps B's input character range
-   * This captures: "the characters A produced were consumed by B."
+   * Build the causal relation between events.
+   *
+   * Event A is a direct cause of event B when B consumes a character that A wrote and
+   * that nothing rewrote in between. That can be many steps later: characters an event
+   * does not touch are carried through unchanged. A state can be reached along several
+   * paths, so each character of a state has a SET of last writers, one or more per path.
+   * This is the multiway causal graph; projected onto (rule, position, state) events it
+   * is edge-for-edge the graph Wolfram's MultiwaySystem returns (see tests/).
+   *
+   * The complete relation is dense (an event often has dozens of alternative causes on
+   * different branches), so it is stored compactly:
+   *   causalCauseStart / causalCauseList   every direct cause of every event (CSR)
+   *   causalDirectCount                    how many direct-cause pairs there are
+   * Light cones are computed from that complete relation.
+   *
+   *   causalEdges                          the edges to draw: for each event, its most
+   *                                        recent direct causes (at most 4)
+   * Pass keepAll = true to put the complete relation in causalEdges instead.
+   *
+   * Writer sets are kept as a shared join structure (a leaf is one event id, a join is
+   * the union of two entries) and only flattened for characters an event consumes.
+   * If the bookkeeping exceeds `causalBudget`, the remaining steps fall back to
+   * immediate causes only and causalCompleteThroughStep says where that happened.
    */
-  _buildCausalEdges() {
+  _buildCausalEdges(keepAll = false) {
+    const events = this.causalEvents;
+    const n = events.length;
     this.causalEdges = [];
-    if (this.causalEvents.length === 0) return;
+    this.causalDirectCount = 0;
+    this._effectCSR = null;
+    const lastStep = this.stepStates.length - 1;
+    this.causalCompleteThroughStep = lastStep;
+    const start = new Int32Array(n + 1);
+    if (n === 0) { this.causalCauseStart = start; this.causalCauseList = new Int32Array(0); return; }
 
-    // Group events by their parent node (the state they read from)
-    const eventsByParentNode = new Map();
-    for (const ev of this.causalEvents) {
-      if (!eventsByParentNode.has(ev.parentNodeId)) eventsByParentNode.set(ev.parentNodeId, []);
-      eventsByParentNode.get(ev.parentNodeId).push(ev);
-    }
+    let list = new Int32Array(Math.max(1024, n * 4)), used = 0;
+    const push = (v) => {
+      if (used === list.length) { const g = new Int32Array(list.length * 2); g.set(list); list = g; }
+      list[used++] = v;
+    };
 
-    // For each event A, find events B where B reads from A's output node
-    // and B's input range overlaps A's output range
-    for (const evA of this.causalEvents) {
-      const childNode = evA.childNodeId;
-      const consumers = eventsByParentNode.get(childNode) || [];
-      for (const evB of consumers) {
-        // Check character range overlap
-        const aOut = evA.outputRange;
-        const bIn = evB.inputRange;
-        if (aOut[0] <= bIn[1] && bIn[0] <= aOut[1]) {
-          this.causalEdges.push({ from: evA.id, to: evB.id });
+    // writers.get(nodeId)[i] : null (initial condition) | event id | { a, b, flat, seen }
+    const writers = new Map();
+    const mark = new Int32Array(n).fill(-1);
+    const stack = [];
+    let work = 0;
+    const budget = this.causalBudget || 40e6;
+    let fallbackFromStep = -1;
+
+    // Flatten entry `x` into the cause list of event `id` (deduplicated through `mark`).
+    const collect = (x, id) => {
+      stack.length = 0; stack.push(x);
+      const from = used;
+      while (stack.length > 0) {
+        const e = stack.pop();
+        work++;
+        if (typeof e === 'number') { if (mark[e] !== id) { mark[e] = id; push(e); } }
+        else if (e.seen !== id) {
+          e.seen = id;
+          if (e.flat !== null) { const f = e.flat; work += f.length; for (let k = 0; k < f.length; k++) { const v = f[k]; if (mark[v] !== id) { mark[v] = id; push(v); } } }
+          else { stack.push(e.a); stack.push(e.b); }
         }
+      }
+      return from;
+    };
+
+    const intoNode = new Map(); // only filled once the budget is exhausted
+
+    for (const ev of events) {
+      const id = ev.id;
+      start[id] = used;
+      const i0 = ev.inputRange[0], i1 = ev.inputRange[1];
+      const o0 = ev.outputRange[0], o1 = ev.outputRange[1];
+
+      if (fallbackFromStep === -1 && work > budget && ev.step > 0) {
+        // Finish cleanly at a step boundary: this event starts a new step.
+        const prev = events[id - 1];
+        if (prev && prev.step < ev.step) {
+          fallbackFromStep = ev.step;
+          this.causalCompleteThroughStep = ev.step; // events out of states at steps < ev.step are complete
+          for (let k = 0; k < id; k++) {
+            const p = events[k];
+            if (p.step !== ev.step - 1) continue;
+            if (!intoNode.has(p.childNodeId)) intoNode.set(p.childNodeId, []);
+            intoNode.get(p.childNodeId).push(p);
+          }
+          writers.clear();
+        }
+      }
+
+      if (fallbackFromStep !== -1) {
+        // Immediate causes only: events into the parent whose output overlaps this input.
+        for (const p of (intoNode.get(ev.parentNodeId) || [])) {
+          if (p.outputRange[0] <= i1 && i0 <= p.outputRange[1]) push(p.id);
+        }
+        if (!intoNode.has(ev.childNodeId)) intoNode.set(ev.childNodeId, []);
+        intoNode.get(ev.childNodeId).push(ev);
+        continue;
+      }
+
+      // 1. Direct causes: the last writers of every character this event consumes.
+      const parent = writers.get(ev.parentNodeId);
+      if (parent) {
+        let prevEntry = null;
+        for (let i = i0; i <= i1; i++) {
+          const x = parent[i];
+          if (x === null || x === prevEntry) continue;
+          prevEntry = x;
+          const from = collect(x, id);
+          // Remember the flat form of a join that was consumed whole, for the next reader.
+          if (typeof x !== 'number' && x.flat === null && from === start[id]) x.flat = list.slice(from, used);
+        }
+      }
+
+      // 2. Who wrote each character of the child state, along this event.
+      const childLen = this.nodes[ev.childNodeId].state.length;
+      let child = writers.get(ev.childNodeId);
+      if (!child) { child = new Array(childLen).fill(null); writers.set(ev.childNodeId, child); }
+      const shift = (i1 - i0) - (o1 - o0); // input length minus output length
+      let lastCur = null, lastSrc = null, lastJoin = null;
+      for (let j = 0; j < childLen; j++) {
+        const src = (j >= o0 && j <= o1) ? id : (parent ? parent[j < o0 ? j : j + shift] : null);
+        if (src === null || src === undefined) continue;
+        const cur = child[j];
+        if (cur === null) child[j] = src;
+        else if (cur !== src) {
+          // A run of characters carried together shares one join.
+          if (cur !== lastCur || src !== lastSrc) { lastCur = cur; lastSrc = src; lastJoin = { a: cur, b: src, flat: null, seen: -1 }; work++; }
+          child[j] = lastJoin;
+        }
+      }
+      work += childLen;
+    }
+    start[n] = used;
+
+    this.causalCauseStart = start;
+    this.causalCauseList = list.slice(0, used);
+    this.causalDirectCount = used;
+
+    // Edges to draw.
+    const L = this.causalCauseList;
+    for (let id = 0; id < n; id++) {
+      const s = start[id], e = start[id + 1];
+      if (keepAll) { for (let k = s; k < e; k++) this.causalEdges.push({ from: L[k], to: id }); continue; }
+      let latest = -1;
+      for (let k = s; k < e; k++) { const st = events[L[k]].step; if (st > latest) latest = st; }
+      let drawn = 0;
+      for (let k = s; k < e && drawn < 4; k++) {
+        if (events[L[k]].step === latest) { this.causalEdges.push({ from: L[k], to: id }); drawn++; }
       }
     }
   }
 
+  /** Effects of each event (the complete relation, reversed), built on first use. */
+  _ensureEffectCSR() {
+    if (this._effectCSR && this._effectCSR.of === this.causalCauseList) return this._effectCSR;
+    const n = this.causalEvents.length, S = this.causalCauseStart, L = this.causalCauseList;
+    const start = new Int32Array(n + 1);
+    for (let k = 0; k < L.length; k++) start[L[k] + 1]++;
+    for (let i = 0; i < n; i++) start[i + 1] += start[i];
+    const fill = start.slice(0, n), list = new Int32Array(L.length);
+    for (let id = 0; id < n; id++) for (let k = S[id]; k < S[id + 1]; k++) list[fill[L[k]]++] = id;
+    this._effectCSR = { of: L, start, list };
+    return this._effectCSR;
+  }
+
   /**
-   * Trace causal ancestors/descendants in the EVENT graph (not state graph).
+   * Past and future light cones of an event in the EVENT graph (not the state graph),
+   * from the complete causal relation.
    */
   traceCausalEventCone(eventId) {
-    // Build adjacency
-    const childToParents = new Map();
-    const parentToChildren = new Map();
-    for (const e of this.causalEdges) {
-      if (!childToParents.has(e.to)) childToParents.set(e.to, []);
-      childToParents.get(e.to).push(e.from);
-      if (!parentToChildren.has(e.from)) parentToChildren.set(e.from, []);
-      parentToChildren.get(e.from).push(e.to);
-    }
-
-    // BFS backward (past light cone)
+    const S = this.causalCauseStart, L = this.causalCauseList;
     const pastCone = new Set([eventId]);
     let queue = [eventId];
-    while (queue.length > 0) {
-      const cur = queue.shift();
-      for (const p of (childToParents.get(cur) || [])) {
+    for (let qi = 0; qi < queue.length; qi++) {
+      const cur = queue[qi];
+      for (let k = S[cur]; k < S[cur + 1]; k++) {
+        const p = L[k];
         if (!pastCone.has(p)) { pastCone.add(p); queue.push(p); }
       }
     }
 
-    // BFS forward (future light cone)
+    const fx = this._ensureEffectCSR();
     const futureCone = new Set([eventId]);
     queue = [eventId];
-    while (queue.length > 0) {
-      const cur = queue.shift();
-      for (const c of (parentToChildren.get(cur) || [])) {
+    for (let qi = 0; qi < queue.length; qi++) {
+      const cur = queue[qi];
+      for (let k = fx.start[cur]; k < fx.start[cur + 1]; k++) {
+        const c = fx.list[k];
         if (!futureCone.has(c)) { futureCone.add(c); queue.push(c); }
       }
     }
@@ -460,16 +591,25 @@ class MultiwaySystem {
   }
 
   /**
-   * Check causal invariance via critical pair convergence (Gorard-correct).
-   * A critical pair is two events from the same parent with overlapping
-   * input ranges. Causal invariance requires ALL critical pairs converge:
-   * the divergent branches must reach the same state within bounded steps.
+   * Local confluence test on critical pairs.
+   *
+   * A critical pair is two events from the same state whose inputs overlap. It converges
+   * if the two results reach a common state within `maxLookahead` further steps.
+   *  - Pairs with disjoint inputs always commute. They are counted in `commuting` and do
+   *    not enter the score.
+   *  - A pair that has not converged but sits too close to the last computed step to have
+   *    `maxLookahead` steps of future is `untested`, not a failure.
+   * invariance = converged / tested. It is 1 when no critical pair exists at all, and
+   * null when critical pairs exist but none could be tested.
+   *
+   * This is evidence about the computed part of the graph, not a proof of causal invariance.
    */
   checkCausalInvariance() {
     this._ensureAdjacencyMaps();
-    let confluent = 0, divergent = 0;
+    const maxLookahead = 3;
+    const lastStep = this.stepStates.length - 1;
+    let converged = 0, divergent = 0, untested = 0, commuting = 0;
 
-    // Find critical pairs: events from same parent with overlapping input
     const eventsByParent = new Map();
     for (const ev of this.causalEvents) {
       if (!eventsByParent.has(ev.parentNodeId)) eventsByParent.set(ev.parentNodeId, []);
@@ -484,32 +624,32 @@ class MultiwaySystem {
           const aIn = evs[i].inputRange;
           const bIn = evs[j].inputRange;
           if (aIn[0] <= bIn[1] && bIn[0] <= aIn[1]) {
-            criticalPairs.push({
-              childA: evs[i].childNodeId,
-              childB: evs[j].childNodeId
-            });
+            criticalPairs.push({ parent: parentId, childA: evs[i].childNodeId, childB: evs[j].childNodeId, step: evs[i].step });
           } else {
-            confluent++; // Non-overlapping inputs always commute
+            commuting++;
           }
         }
       }
     }
 
-    // For each critical pair, check convergence via lookahead
-    const maxLookahead = 3;
-    for (const cp of criticalPairs) {
-      if (cp.childA === cp.childB) { confluent++; continue; }
-      const sA = this.nodes[cp.childA]?.state;
-      const sB = this.nodes[cp.childB]?.state;
-      if (sA && sB && sA === sB) { confluent++; continue; }
+    // Per state: what happened to the critical pairs that start there
+    const byState = new Map(); // nodeId -> { converged, divergent, untested }
+    const tally = (cp, key) => {
+      let t = byState.get(cp.parent);
+      if (!t) { t = { converged: 0, divergent: 0, untested: 0 }; byState.set(cp.parent, t); }
+      t[key]++;
+    };
 
-      let converged = false;
+    for (const cp of criticalPairs) {
+      if (cp.childA === cp.childB) { converged++; tally(cp, 'converged'); continue; }
+
+      let done = false;
       let frontierA = new Set([cp.childA]);
       let frontierB = new Set([cp.childB]);
-      let reachedA = new Set([cp.childA]);
-      let reachedB = new Set([cp.childB]);
+      const reachedA = new Set([cp.childA]);
+      const reachedB = new Set([cp.childB]);
 
-      for (let d = 0; d < maxLookahead && !converged; d++) {
+      for (let d = 0; d < maxLookahead && !done; d++) {
         const nextA = new Set(), nextB = new Set();
         for (const n of frontierA) {
           for (const c of (this._parentToChildren.get(n) || [])) {
@@ -521,101 +661,81 @@ class MultiwaySystem {
             if (!reachedB.has(c)) { reachedB.add(c); nextB.add(c); }
           }
         }
-        // Check node-level intersection
-        for (const n of reachedA) {
-          if (reachedB.has(n)) { converged = true; break; }
-        }
-        if (!converged) {
-          // Check state-level convergence
-          const statesA = new Set();
-          for (const n of reachedA) { const s = this.nodes[n]?.state; if (s) statesA.add(s); }
-          for (const n of reachedB) {
-            const s = this.nodes[n]?.state;
-            if (s && statesA.has(s)) { converged = true; break; }
-          }
+        // Same state reached on both sides (possibly at different steps)
+        const statesA = new Set();
+        for (const n of reachedA) statesA.add(this.nodes[n].state);
+        for (const n of reachedB) {
+          if (statesA.has(this.nodes[n].state)) { done = true; break; }
         }
         frontierA = nextA;
         frontierB = nextB;
         if (frontierA.size === 0 && frontierB.size === 0) break;
       }
 
-      if (converged) confluent++; else divergent++;
+      if (done) { converged++; tally(cp, 'converged'); }
+      else if (cp.step + 1 + maxLookahead > lastStep) { untested++; tally(cp, 'untested'); }
+      else { divergent++; tally(cp, 'divergent'); }
     }
 
+    const tested = converged + divergent;
     return {
-      confluent, divergent, criticalPairs: criticalPairs.length,
-      total: confluent + divergent,
-      invariance: (confluent + divergent) > 0 ? confluent / (confluent + divergent) : 1.0
+      confluent: converged, divergent, untested, commuting, tested,
+      criticalPairs: criticalPairs.length,
+      lookahead: maxLookahead,
+      byState,
+      total: tested,
+      invariance: tested > 0 ? converged / tested : (criticalPairs.length === 0 ? 1.0 : null)
     };
   }
 
-  _buildBranchialGraph(maxSteps) {
-    this.branchialEdges = [];
-    const finalStep = maxSteps;
-    const finalMap = this.stateMap.get(finalStep);
-    if (!finalMap) return;
+  // Branchial edges of one step: two states are joined when they share a parent one
+  // step back. States are kept separate per step, so this is Wolfram's
+  // "EvolutionBranchialGraph". (Wolfram's default "BranchialGraph" merges a state that
+  // recurs at several steps and keeps only the pairs never seen at an earlier step.)
+  // Edges come out ordered by first state, then second, in stepStates order.
+  _branchialEdgesAt(step) {
+    const ids = this.stepStates[step];
+    if (!ids || ids.length < 2) return [];
+    const index = new Map();
+    for (let i = 0; i < ids.length; i++) index.set(ids[i], i);
 
-    const parentMap = new Map();
+    const kids = new Map(); // parent id -> its children at this step, as positions in ids
     for (const edge of this.edges) {
-      const child = this.nodes[edge.to];
-      if (child && child.step === finalStep) {
-        if (!parentMap.has(edge.to)) parentMap.set(edge.to, new Set());
-        parentMap.get(edge.to).add(edge.from);
-      }
+      const i = index.get(edge.to);
+      if (i === undefined) continue;
+      const list = kids.get(edge.from);
+      if (list) list.push(i); else kids.set(edge.from, [i]);
     }
 
-    const finalIds = this.stepStates[finalStep] || [];
-    for (let i = 0; i < finalIds.length; i++) {
-      for (let j = i + 1; j < finalIds.length; j++) {
-        const pi = parentMap.get(finalIds[i]);
-        const pj = parentMap.get(finalIds[j]);
-        if (pi && pj) {
-          for (const p of pi) {
-            if (pj.has(p)) {
-              this.branchialEdges.push({ from: finalIds[i], to: finalIds[j] });
-              break;
-            }
-          }
+    const n = ids.length, pairs = new Set();
+    for (const list of kids.values()) {
+      const own = [...new Set(list)]; // several events can lead to the same child
+      for (let a = 0; a < own.length; a++) {
+        for (let b = a + 1; b < own.length; b++) {
+          pairs.add(own[a] < own[b] ? own[a] * n + own[b] : own[b] * n + own[a]);
         }
       }
     }
+    const keys = Float64Array.from(pairs).sort();
+    const edges = new Array(keys.length);
+    for (let k = 0; k < keys.length; k++) edges[k] = { from: ids[Math.floor(keys[k] / n)], to: ids[keys[k] % n] };
+    return edges;
   }
 
+  _buildBranchialGraph(maxSteps) {
+    this.branchialEdges = this._branchialEdgesAt(maxSteps);
+  }
 
   // Build branchial graph for a specific step (not just the final step)
   buildBranchialForStep(targetStep) {
     const stepIds = this.stepStates[targetStep];
     if (!stepIds || stepIds.length === 0) return { nodes: [], edges: [], step: targetStep };
 
-    // Build parent map: for each node at targetStep, find its parents (at step-1)
-    const parentMap = new Map();
-    for (const edge of this.edges) {
-      const child = this.nodes[edge.to];
-      if (child && child.step === targetStep) {
-        if (!parentMap.has(edge.to)) parentMap.set(edge.to, new Set());
-        parentMap.get(edge.to).add(edge.from);
-      }
-    }
-
-    // Build branchial edges: connect states at targetStep that share a parent
-    const edges = [];
-    for (let i = 0; i < stepIds.length; i++) {
-      for (let j = i + 1; j < stepIds.length; j++) {
-        const pi = parentMap.get(stepIds[i]);
-        const pj = parentMap.get(stepIds[j]);
-        if (pi && pj) {
-          for (const p of pi) {
-            if (pj.has(p)) {
-              edges.push({ from: stepIds[i], to: stepIds[j] });
-              break;
-            }
-          }
-        }
-      }
-    }
+    const edges = this._branchialEdgesAt(targetStep);
 
     // Return node data with weights
-    const maxWeight = Math.max(1, ...stepIds.map(id => this.nodes[id].weight));
+    let maxWeight = 1;
+    for (const id of stepIds) if (this.nodes[id].weight > maxWeight) maxWeight = this.nodes[id].weight;
     const nodes = stepIds.map(id => ({
       id,
       state: this.nodes[id].state,
@@ -651,8 +771,9 @@ class MultiwaySystem {
       adj.get(e.to)?.push(e.from);
     }
 
-    // BFS from each node to get all pairwise distances
-    const distances = [];
+    // BFS from each node; pairs are tallied straight into the histogram
+    const histogram = [];
+    let maxDist = 0, sum = 0, totalPairs = 0;
     const nodeIds = data.nodes.map(n => n.id);
     for (let i = 0; i < nodeIds.length; i++) {
       const dist = new Map();
@@ -672,18 +793,17 @@ class MultiwaySystem {
       // Only count pairs (i,j) where j > i to avoid duplicates
       for (let j = i + 1; j < nodeIds.length; j++) {
         const d = dist.get(nodeIds[j]);
-        if (d !== undefined) distances.push(d);
+        if (d === undefined) continue;
+        histogram[d] = (histogram[d] || 0) + 1;
+        sum += d; totalPairs++;
+        if (d > maxDist) maxDist = d;
       }
     }
 
-    if (distances.length === 0) return { histogram: [], maxDist: 0, meanDist: 0, diameter: 0 };
+    if (totalPairs === 0) return { histogram: [], maxDist: 0, meanDist: 0, diameter: 0 };
+    for (let d = 0; d <= maxDist; d++) if (histogram[d] === undefined) histogram[d] = 0;
 
-    const maxDist = Math.max(...distances);
-    const histogram = new Array(maxDist + 1).fill(0);
-    for (const d of distances) histogram[d]++;
-    const meanDist = distances.reduce((a, b) => a + b, 0) / distances.length;
-
-    return { histogram, maxDist, meanDist, diameter: maxDist, totalPairs: distances.length };
+    return { histogram, maxDist, meanDist: sum / totalPairs, diameter: maxDist, totalPairs };
   }
 
 
@@ -703,6 +823,17 @@ class MultiwaySystem {
     }
   }
 
+  /**
+   * Distribution over the final step, from path counts only.
+   *
+   *  mode 'occupancy': every final state has the same length and contains the marker 'X'.
+   *    Bar i is the number of paths in which cell i holds an X, so the horizontal axis is
+   *    a real position along the string.
+   *  mode 'states': anything else. One bar per final state in alphabetical order, with
+   *    height equal to that state's path count. The horizontal axis is not a position.
+   *
+   * Path counts are positive, so contributions only ever add. Nothing here can cancel.
+   */
   getIntensityPattern(filterNodeIds) {
     let finalStep = 0;
     for (let s = this.stepStates.length - 1; s >= 0; s--) {
@@ -713,102 +844,93 @@ class MultiwaySystem {
     }
 
     const finalIds = this.stepStates[finalStep] || [];
-    if (finalIds.length === 0) return { positions: [], weights: [], normalized: [] };
+    if (finalIds.length === 0) {
+      return { positions: [], weights: [], normalized: [], labels: [], mode: 'states', totalStates: 0, totalWeight: 0, finalStep };
+    }
 
-    // If filterNodeIds is provided, only include those final states
+    // If filterNodeIds is provided, only those final states contribute
     const filterSet = filterNodeIds ? new Set(filterNodeIds) : null;
 
-    const statesAndWeights = finalIds.map(id => ({
-      state: this.nodes[id].state,
-      weight: (filterSet && !filterSet.has(id)) ? 0 : this.nodes[id].weight
-    }));
-    statesAndWeights.sort((a, b) => a.state.localeCompare(b.state));
+    let totalWeight = 0;
+    const entries = finalIds.map(id => {
+      const n = this.nodes[id];
+      totalWeight += n.weight;
+      return { state: n.state, weight: (filterSet && !filterSet.has(id)) ? 0 : n.weight };
+    });
 
-    const rawWeights = statesAndWeights.map(sw => sw.weight);
+    const len = entries[0].state.length;
+    const occupancy = len > 1 && entries.every(e => e.state.length === len && e.state.indexOf('X') !== -1);
 
-    const halfIdx = Math.ceil(rawWeights.length / 2);
-    const rightHalf = rawWeights.slice(halfIdx);
-    const leftHalf = [...rightHalf].reverse();
+    let weights, labels;
+    if (occupancy) {
+      weights = new Array(len).fill(0);
+      for (const e of entries) {
+        if (e.weight === 0) continue;
+        for (let i = 0; i < len; i++) if (e.state[i] === 'X') weights[i] += e.weight;
+      }
+      labels = weights.map((_, i) => String(i));
+    } else {
+      entries.sort((a, b) => a.state.localeCompare(b.state));
+      weights = entries.map(e => e.weight);
+      labels = entries.map(e => e.state);
+    }
 
-    const fullPattern = [...leftHalf, ...rightHalf];
-
-    const maxW = Math.max(...fullPattern, 1);
-    const normalized = fullPattern.map(w => w / maxW);
-
-    const positions = fullPattern.map((_, i) =>
-      fullPattern.length === 1 ? 0 : (i / (fullPattern.length - 1)) * 2 - 1
+    let maxW = 1;
+    for (let i = 0; i < weights.length; i++) if (weights[i] > maxW) maxW = weights[i];
+    const normalized = weights.map(v => v / maxW);
+    const positions = weights.map((_, i) =>
+      weights.length === 1 ? 0 : (i / (weights.length - 1)) * 2 - 1
     );
 
-    return { positions, weights: fullPattern, normalized, totalStates: finalIds.length, finalStep };
+    return {
+      positions, weights, normalized, labels,
+      mode: occupancy ? 'occupancy' : 'states',
+      totalStates: finalIds.length, totalWeight, finalStep
+    };
   }
 
+  /** Plain summary of the final step. Every line is computed from the graph. */
   analyzeCompletion() {
     const pattern = this.getIntensityPattern();
     const log = [];
+    const finalStep = pattern.finalStep;
+    const total = pattern.totalWeight;
+    const pct = (v) => total > 0 ? (100 * v / total).toFixed(1) + '%' : '0%';
+    const sep = () => log.push({ type: 'neutral', text: `─────────────────────────` });
 
-    let totalWeight = 0;
-    let finalStep = 0;
-    for (let s = this.stepStates.length - 1; s >= 0; s--) {
-      if (this.stepStates[s] && this.stepStates[s].length > 0) {
-        finalStep = s;
-        break;
-      }
-    }
-    const finalIds = this.stepStates[finalStep] || [];
+    log.push({ type: 'neutral', text: `Step ${finalStep}: ${pattern.totalStates} distinct states, ${total} total paths` });
+    sep();
 
-    for (const id of finalIds) totalWeight += this.nodes[id].weight;
-
-    log.push({ type: 'neutral', text: `Step ${finalStep}: ${finalIds.length} distinct states, ${totalWeight} total paths` });
-    log.push({ type: 'neutral', text: `─────────────────────────` });
-
-    if (pattern.normalized.length > 2) {
-      const n = pattern.normalized;
-      let maxima = [], minima = [];
-
-      for (let i = 1; i < n.length - 1; i++) {
-        if (n[i] > n[i-1] && n[i] > n[i+1] && n[i] > 0.1) {
-          maxima.push({ idx: i, val: n[i], pos: pattern.positions[i] });
-        }
-        if (n[i] < n[i-1] && n[i] < n[i+1] && n[i] < 0.3) {
-          minima.push({ idx: i, val: n[i], pos: pattern.positions[i] });
+    const w = pattern.weights;
+    if (pattern.mode === 'occupancy') {
+      log.push({ type: 'neutral', text: `Where the X's are, over ${w.length} cells (share of paths):` });
+      const peaks = [];
+      for (let i = 0; i < w.length; i++) {
+        const left = i > 0 ? w[i - 1] : -1, right = i < w.length - 1 ? w[i + 1] : -1;
+        if (w[i] > 0 && w[i] >= left && w[i] > right && w[i] > left - 1e-9 && (w[i] > left || i === 0 || w[i - 1] > (i > 1 ? w[i - 2] : -1))) {
+          peaks.push({ i, v: w[i] });
         }
       }
-
-      const centerIdx = Math.floor(n.length / 2);
-      log.push({ type: 'constructive',
-        text: `CONSTRUCTIVE: Central maximum at x≈${pattern.positions[centerIdx]?.toFixed(2) || '0.00'}` });
-      log.push({ type: 'constructive',
-        text: `  → Branches close in branchial space — observer can merge them` });
-      log.push({ type: 'constructive',
-        text: `  → Weights ADD: small branchial distance allows coherent merging` });
-
-      for (const m of maxima.slice(0, 3)) {
-        if (Math.abs(m.pos) > 0.05) {
-          log.push({ type: 'constructive',
-            text: `CONSTRUCTIVE: Fringe maximum at x≈${m.pos.toFixed(2)} (intensity ${(m.val * 100).toFixed(0)}%)` });
-        }
+      peaks.sort((a, b) => b.v - a.v);
+      for (const p of peaks.slice(0, 4)) {
+        log.push({ type: 'constructive', text: `Peak at cell ${p.i}: an X is there in ${pct(p.v)} of paths` });
       }
-
-      log.push({ type: 'neutral', text: `─────────────────────────` });
-
-      for (const m of minima.slice(0, 3)) {
-        log.push({ type: 'destructive',
-          text: `DESTRUCTIVE: Minimum at x≈${m.pos.toFixed(2)} (intensity ${(m.val * 100).toFixed(0)}%)` });
-        log.push({ type: 'destructive',
-          text: `  → Branches far apart in branchial space (large branchial distance)` });
-        log.push({ type: 'destructive',
-          text: `  → Observer's coarse-graining cannot identify these branches — they decohere` });
-      }
-
-      if (minima.length === 0 && pattern.normalized.length < 10) {
-        log.push({ type: 'neutral',
-          text: `No clear minima yet — increase evolution steps for finer resolution` });
+    } else {
+      log.push({ type: 'neutral', text: `Most likely final states (share of paths):` });
+      const order = w.map((v, i) => i).sort((a, b) => w[b] - w[a]);
+      for (const i of order.slice(0, 4)) {
+        const s = pattern.labels[i];
+        log.push({ type: 'constructive', text: `${s.length > 24 ? s.slice(0, 24) + '…' : s}  ${pct(w[i])}` });
       }
     }
 
-    log.push({ type: 'neutral', text: `─────────────────────────` });
+    sep();
+    log.push({ type: 'neutral', text: `Path counts are positive, so branches only add.` });
+    log.push({ type: 'neutral', text: `This model has no phases: nothing can cancel.` });
+    sep();
+    const dim = this._estimateBranchialDim();
     log.push({ type: 'neutral',
-      text: `Branchial dimension: ${this._estimateBranchialDim()}D` });
+      text: dim === null ? `Branchial dimension: not enough branchial edges to estimate` : `Branchial dimension: ${dim}D` });
     log.push({ type: 'neutral',
       text: `(ball-growth estimate on branchial graph)` });
 
@@ -818,14 +940,10 @@ class MultiwaySystem {
   /**
    * Estimate branchial dimension via BFS ball-growth on the
    * branchial graph. V(r) ~ r^d gives the effective dimension.
-   * This is the correct graph-theoretic estimate, not the X-count.
+   * Returns null when the graph is too small to measure.
    */
   _estimateBranchialDim() {
-    if (this.branchialEdges.length < 3) {
-      const root = this.nodes[0];
-      if (!root) return 1;
-      return Math.max(1, (root.state.match(/X/g) || []).length);
-    }
+    if (this.branchialEdges.length < 3) return null; // too little graph to measure
     const adj = new Map();
     for (const e of this.branchialEdges) {
       if (!adj.has(e.from)) adj.set(e.from, []);
@@ -835,10 +953,11 @@ class MultiwaySystem {
     }
     const nodes = [...new Set([...adj.keys()])];
     const n = nodes.length;
-    if (n < 4) return 1;
+    if (n < 4) return null;
     const sampleSize = Math.min(n, 20);
+    // Evenly spaced sample, so the same graph always gives the same estimate
     const sampleNodes = n <= sampleSize ? nodes :
-      nodes.sort(() => Math.random() - 0.5).slice(0, sampleSize);
+      Array.from({ length: sampleSize }, (_, k) => nodes[Math.floor(k * n / sampleSize)]);
     const maxR = Math.min(10, Math.floor(Math.sqrt(n)));
     const volumeProfiles = [];
     for (const start of sampleNodes) {
@@ -875,7 +994,7 @@ class MultiwaySystem {
         if (isFinite(d) && d > 0) dimEsts.push(d);
       }
     }
-    if (dimEsts.length === 0) return 1;
+    if (dimEsts.length === 0) return null;
     const start = Math.floor(dimEsts.length * 0.2);
     const end = Math.ceil(dimEsts.length * 0.8);
     const mid = dimEsts.slice(start, end);
@@ -995,7 +1114,7 @@ class MultiwaySystem {
         mergedNodeMap: new Map(), // nodeId -> canonicalId (identity)
         stats: { totalNodes: this.nodes.length, mergedNodes: 0, completionRulesCount: 0, branchesCollapsed: 0 },
         causalInvarianceBefore: this.checkCausalInvariance().invariance,
-        causalInvarianceAfter: this.checkCausalInvariance().invariance
+        causalInvarianceAfter: null
       };
     }
 
@@ -1091,14 +1210,8 @@ class MultiwaySystem {
     const mergedNodes = this.nodes.length - equivalenceClasses.size -
       (this.nodes.length - [...mergedNodeMap.values()].length);
 
-    // Estimate causal invariance after coarse-graining
-    // Each completion rule resolves at most one critical pair divergence
+    // Invariance of the merged graph is not computed: that needs the quotient graph rebuilt.
     const ciBefore = this.checkCausalInvariance();
-    const resolvedPairs = Math.min(branchesCollapsed, ciBefore.divergent);
-    const adjustedConfluent = ciBefore.confluent + resolvedPairs;
-    const adjustedDivergent = Math.max(0, ciBefore.divergent - resolvedPairs);
-    const adjustedTotal = adjustedConfluent + adjustedDivergent;
-    const ciAfter = adjustedTotal > 0 ? adjustedConfluent / adjustedTotal : 1.0;
 
     return {
       equivalenceClasses,
@@ -1111,7 +1224,7 @@ class MultiwaySystem {
         branchesCollapsed
       },
       causalInvarianceBefore: ciBefore.invariance,
-      causalInvarianceAfter: Math.min(ciAfter, 1.0)
+      causalInvarianceAfter: null
     };
   }
 
@@ -1458,6 +1571,10 @@ self.onmessage = function(e) {
       branchialEdges: sys.branchialEdges,
       causalEvents: sys.causalEvents,
       causalEdges: sys.causalEdges,
+      causalCauseStart: sys.causalCauseStart,
+      causalCauseList: sys.causalCauseList,
+      causalDirectCount: sys.causalDirectCount,
+      causalCompleteThroughStep: sys.causalCompleteThroughStep,
       truncated: sys.truncated,
       _currentStep: sys._currentStep,
       _initialState: sys._initialState,
