@@ -239,6 +239,76 @@ test('a rule with an empty left side is ignored instead of looping forever', () 
   assert.strictEqual(s.nodes.length, 5);
 });
 
+// ── Branchial graph against Wolfram Language ────────────────────────────────────────────
+// Reference: ResourceFunction["MultiwaySystem"][rules, init, t, "NewEvolutionBranchPairsList"]
+// for t = 1..steps, keeping the pairs whose two states are both at step t, as unordered pairs.
+// (For some rules that list also repeats a few pairs from earlier steps in the opposite
+// orientation; those are not part of step t and are dropped.)
+// Stored: edges per step, and the sum over edges of strHash("t:a|b") + strHash("t:b|a").
+// Last number: edges in Wolfram's default "BranchialGraph" at the final step, which merges
+// states that recur at several steps and keeps only pairs not seen at an earlier step.
+const branchialCases = [
+  [[['Xo', 'oX'], ['oX', 'Xo']], 'oXooXo', 4, [6, 14, 10, 18], 2063496696n, 4],
+  [[['AB', 'BA'], ['A', 'AA']], 'ABA', 4, [3, 6, 12, 18], 456411713n, 12],
+  [[['BA', 'AAB'], ['A', 'B']], 'BABA', 4, [6, 14, 32, 69], 327392041n, 69],
+  [[['A', 'AB'], ['B', 'A']], 'AABB', 5, [6, 27, 80, 204, 472], 3253085519n, 472],
+  [[['Xo', 'oX'], ['oX', 'Xo']], 'ooXoooXoo', 6, [6, 20, 36, 35, 48, 39], 3667060574n, 4],
+  [[['A', 'BBB'], ['BB', 'A']], 'A', 6, [0, 1, 0, 3, 1, 6], 1343082859n, 6],
+  [[['ABA', 'B'], ['B', 'AB']], 'ABAB', 5, [3, 7, 11, 17, 24], 3915935071n, 17],
+  [[['XY', 'YX'], ['XX', 'X']], 'oXYXXYo', 5, [3, 3, 3, 1, 0], 1404701049n, 0],
+  [[['A', 'AAB'], ['B', 'BA']], 'AB', 4, [1, 9, 64, 395], 3995311301n, 395],
+  [[['AB', ''], ['A', 'AAB']], 'AAB', 4, [3, 11, 54, 245], 4021457625n, 234],
+];
+// Wolfram's default "BranchialGraph", computed from the engine's graph: a pair of states with a
+// common parent counts at the first step where it appears.
+function firstTimePairs(s, step) {
+  const pairsAt = (t) => new Set(s.buildBranchialForStep(t).edges.map((e) => [s.nodes[e.from].state, s.nodes[e.to].state].sort().join('|')));
+  const earlier = new Set();
+  for (let t = 1; t < step; t++) for (const p of pairsAt(t)) earlier.add(p);
+  return [...pairsAt(step)].filter((p) => !earlier.has(p)).length;
+}
+for (const [pairs, init, steps, counts, hash, firstTime] of branchialCases) {
+  test(`branchial graph equals Wolfram at every step: ${pairs.map((p) => p.join('→')).join(', ')} from ${init}`, () => {
+    const s = run(pairs, init, steps);
+    let h = 0n; const got = [];
+    for (let t = 1; t <= steps; t++) {
+      const g = s.buildBranchialForStep(t);
+      got.push(g.edges.length);
+      for (const e of g.edges) {
+        const a = s.nodes[e.from].state, b = s.nodes[e.to].state;
+        h = (h + strHash(`${t}:${a}|${b}`) + strHash(`${t}:${b}|${a}`)) % M;
+      }
+    }
+    assert.deepStrictEqual(got, counts);
+    assert.strictEqual(h, hash);
+    assert.strictEqual(s.branchialEdges.length, counts[counts.length - 1], 'final-step graph is the last per-step graph');
+    assert.strictEqual(firstTimePairs(s, steps), firstTime, 'pairs not seen at an earlier step match Wolfram\'s default BranchialGraph');
+  });
+}
+
+test('branchial edges: shared parent one step back, each pair once, in a stable order', () => {
+  const s = run([['A', 'AB'], ['B', 'BA']], 'AB', 9);
+  for (let t = 0; t < s.stepStates.length; t++) {
+    const ids = s.stepStates[t];
+    const parents = new Map(ids.map((id) => [id, new Set()]));
+    for (const e of s.edges) if (parents.has(e.to)) parents.get(e.to).add(e.from);
+    const expected = [];
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+      if ([...parents.get(ids[i])].some((p) => parents.get(ids[j]).has(p))) expected.push(ids[i] + '-' + ids[j]);
+    }
+    assert.deepStrictEqual(s.buildBranchialForStep(t).edges.map((e) => e.from + '-' + e.to), expected, 'step ' + t);
+  }
+});
+
+test('branchial graphs for every step stay fast at the 20,000-state cap', () => {
+  const s = run([['A', 'BC'], ['B', 'AB'], ['C', 'BA']], 'AA', 14, 20000);
+  const t0 = Date.now();
+  const all = s.buildAllBranchialGraphs();
+  const ms = Date.now() - t0;
+  assert.ok(all.reduce((n, g) => n + g.edges.length, 0) > 100000);
+  assert.ok(ms < 3000, `took ${ms} ms`); // the pairwise version took about 8 s
+});
+
 test('distance histogram works on a step with thousands of states', () => {
   const s = run([['A', 'AB'], ['B', 'BA']], 'AB', 14, 5000);
   const sizes = s.stepStates.map((x) => x.length), big = sizes.indexOf(Math.max(...sizes));

@@ -688,73 +688,54 @@ class MultiwaySystem {
     };
   }
 
-  _buildBranchialGraph(maxSteps) {
-    this.branchialEdges = [];
-    const finalStep = maxSteps;
-    const finalMap = this.stateMap.get(finalStep);
-    if (!finalMap) return;
+  // Branchial edges of one step: two states are joined when they share a parent one
+  // step back. States are kept separate per step, so this is Wolfram's
+  // "EvolutionBranchialGraph". (Wolfram's default "BranchialGraph" merges a state that
+  // recurs at several steps and keeps only the pairs never seen at an earlier step.)
+  // Edges come out ordered by first state, then second, in stepStates order.
+  _branchialEdgesAt(step) {
+    const ids = this.stepStates[step];
+    if (!ids || ids.length < 2) return [];
+    const index = new Map();
+    for (let i = 0; i < ids.length; i++) index.set(ids[i], i);
 
-    const parentMap = new Map();
+    const kids = new Map(); // parent id -> its children at this step, as positions in ids
     for (const edge of this.edges) {
-      const child = this.nodes[edge.to];
-      if (child && child.step === finalStep) {
-        if (!parentMap.has(edge.to)) parentMap.set(edge.to, new Set());
-        parentMap.get(edge.to).add(edge.from);
-      }
+      const i = index.get(edge.to);
+      if (i === undefined) continue;
+      const list = kids.get(edge.from);
+      if (list) list.push(i); else kids.set(edge.from, [i]);
     }
 
-    const finalIds = this.stepStates[finalStep] || [];
-    for (let i = 0; i < finalIds.length; i++) {
-      for (let j = i + 1; j < finalIds.length; j++) {
-        const pi = parentMap.get(finalIds[i]);
-        const pj = parentMap.get(finalIds[j]);
-        if (pi && pj) {
-          for (const p of pi) {
-            if (pj.has(p)) {
-              this.branchialEdges.push({ from: finalIds[i], to: finalIds[j] });
-              break;
-            }
-          }
+    const n = ids.length, pairs = new Set();
+    for (const list of kids.values()) {
+      const own = [...new Set(list)]; // several events can lead to the same child
+      for (let a = 0; a < own.length; a++) {
+        for (let b = a + 1; b < own.length; b++) {
+          pairs.add(own[a] < own[b] ? own[a] * n + own[b] : own[b] * n + own[a]);
         }
       }
     }
+    const keys = Float64Array.from(pairs).sort();
+    const edges = new Array(keys.length);
+    for (let k = 0; k < keys.length; k++) edges[k] = { from: ids[Math.floor(keys[k] / n)], to: ids[keys[k] % n] };
+    return edges;
   }
 
+  _buildBranchialGraph(maxSteps) {
+    this.branchialEdges = this._branchialEdgesAt(maxSteps);
+  }
 
   // Build branchial graph for a specific step (not just the final step)
   buildBranchialForStep(targetStep) {
     const stepIds = this.stepStates[targetStep];
     if (!stepIds || stepIds.length === 0) return { nodes: [], edges: [], step: targetStep };
 
-    // Build parent map: for each node at targetStep, find its parents (at step-1)
-    const parentMap = new Map();
-    for (const edge of this.edges) {
-      const child = this.nodes[edge.to];
-      if (child && child.step === targetStep) {
-        if (!parentMap.has(edge.to)) parentMap.set(edge.to, new Set());
-        parentMap.get(edge.to).add(edge.from);
-      }
-    }
-
-    // Build branchial edges: connect states at targetStep that share a parent
-    const edges = [];
-    for (let i = 0; i < stepIds.length; i++) {
-      for (let j = i + 1; j < stepIds.length; j++) {
-        const pi = parentMap.get(stepIds[i]);
-        const pj = parentMap.get(stepIds[j]);
-        if (pi && pj) {
-          for (const p of pi) {
-            if (pj.has(p)) {
-              edges.push({ from: stepIds[i], to: stepIds[j] });
-              break;
-            }
-          }
-        }
-      }
-    }
+    const edges = this._branchialEdgesAt(targetStep);
 
     // Return node data with weights
-    const maxWeight = Math.max(1, ...stepIds.map(id => this.nodes[id].weight));
+    let maxWeight = 1;
+    for (const id of stepIds) if (this.nodes[id].weight > maxWeight) maxWeight = this.nodes[id].weight;
     const nodes = stepIds.map(id => ({
       id,
       state: this.nodes[id].state,

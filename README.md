@@ -4,14 +4,14 @@ Interactive explorer for [Wolfram Physics](https://www.wolframphysics.org/) mult
 
 **[Live demo →](https://edwinrosero.com/viz/)**
 
-![Multiway graph](https://img.shields.io/badge/views-5-blue) ![Presets](https://img.shields.io/badge/presets-21-orange) ![Analysis tools](https://img.shields.io/badge/analysis%20tools-13-green) ![Engine tests](https://img.shields.io/badge/engine%20tests-32-brightgreen)
+![Multiway graph](https://img.shields.io/badge/views-5-blue) ![Presets](https://img.shields.io/badge/presets-21-orange) ![Analysis tools](https://img.shields.io/badge/analysis%20tools-13-green) ![Engine tests](https://img.shields.io/badge/engine%20tests-44-brightgreen)
 
 ## Features
 
 ### Five views of the same system
 - **Multiway** — full evolution graph, nodes colored by path weight
 - **Causal** — event graph with causal edges and light cone highlighting. The causal relation is computed by tracking which event last wrote each character, and matches Wolfram's `MultiwaySystem` edge for edge on the test cases
-- **Branchial** — final-step states connected by shared ancestry
+- **Branchial** — final-step states joined when they share a parent one step back. Matches Wolfram's `EvolutionBranchialGraph` edge for edge on the test cases
 - **B-Evolution** — animated branchial graph step-by-step with distance histogram
 - **Spacetime** — Wolfram-style hypergraph rewriting with spatial geometry and curvature
 
@@ -90,16 +90,18 @@ The engine counts paths. Every path has weight +1, so branches only add: there a
 
 Causal invariance is reported as a measurement: the share of critical pairs that rejoin within 3 steps, with pairs too close to the last step counted as untested. A full score is evidence on the computed graph, not a proof.
 
+The branchial graph keeps states separate per step, which is Wolfram's `EvolutionBranchialGraph`. Wolfram's default `BranchialGraph` is a different graph: it merges a state that recurs at several steps and keeps only the pairs not seen at an earlier step, so on the sorting rules (where states recur every two steps) it is nearly empty. The tests check both readings against Wolfram.
+
 The causal graph is complete up to a work budget. When a run exceeds it, the Statistics panel says through which step the graph is complete.
 
 ## Tests
 
 ```bash
-node tests/engine.test.js     # 32 engine tests, no install needed
+node tests/engine.test.js     # 44 engine tests, no install needed
 node tests/page.test.js       # drives the page in headless Chromium; needs Playwright
 ```
 
-The engine tests compare the evolution graph (five cases) and the causal graph (ten cases) against results from Wolfram Language's `ResourceFunction["MultiwaySystem"]`. State counts, event counts, edge counts and an order-independent hash of each causal edge set are stored in the test file.
+The engine tests compare the evolution graph (five cases), the causal graph (ten cases) and the branchial graph at every step (ten cases) against results from Wolfram Language's `ResourceFunction["MultiwaySystem"]`. State counts, event counts, edge counts and an order-independent hash of each edge set are stored in the test file.
 
 ## Credits
 
